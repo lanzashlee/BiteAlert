@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bite Alert - Staff Management</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/staff_management.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <button class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
+            <ul class="menu">
+                <li><a href="admin_dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="active"><a href="staff_management.html"><i class="fa-solid fa-users"></i> Staff Management</a></li>
+                <li><a href="admin_center.html"><i class="fa-solid fa-building"></i> Center Data Management</a></li>
+                <li><a href="prescriptive_analytics.html"><i class="fa-solid fa-chart-line"></i> Prescriptive Analytics</a></li>
+                <li><a href="generate_report.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
+                <li><a href="admin_stock.html"><i class="fa-solid fa-boxes-stacked"></i> Stock & Inventory</a></li>
+                <li><a href="admin_profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+            </ul>
+            <button class="sign-out" id="signOutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-header">
+            <h2>Staff Management</h2>
+                        </div>
+
+            <div class="content-body">
+                <div class="staff-filters">
+                    <div class="search-box">
+                        <label for="staff-search" class="sr-only">Search staff</label>
+                        <i class="fa-solid fa-search"></i>
+                        <input id="staff-search" type="text" placeholder="Search staff...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="role-filter" class="sr-only">Role</label>
+                        <select id="role-filter">
+                            <option value="">All Roles</option>
+                            <option value="staff">Staff</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="status-filter" class="sr-only">Status</label>
+                        <select id="status-filter">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="staff-table-container">
+                    <div class="table-container">
+                        <table class="staff-table">
+                            <thead>
+                                <tr>
+                                    <th>Staff ID</th>
+                                    <th>First Name</th>
+                                    <th>Middle Name</th>
+                                    <th>Last Name</th>
+                                    <th>Role</th>
+                                    <th>Contact</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Staff rows will be dynamically inserted here by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Confirmation Modal (matching admin-management) -->
+    <div id="confirmModal" class="modal">
+      <div class="modal-content">
+        <h3 id="confirmModalTitle">Confirm Action</h3>
+        <p id="confirmModalMessage">Are you sure you want to perform this action?</p>
+        <div class="modal-buttons">
+          <button id="confirmModalCancel" class="btn-cancel">Cancel</button>
+          <button id="confirmModalOk" class="btn-confirm">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="js/staff_management.js"></script>
+</body>
+</html>

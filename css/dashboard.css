@@ -1,0 +1,547 @@
+/* General Styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: #f5f6fa;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Dashboard Layout */
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    background: #800000;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.logo {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo span {
+    color: #ffd700;
+}
+
+.menu {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.menu li {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.menu li a {
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    width: 100%;
+    font-weight: 500;
+}
+
+.menu li i {
+    margin-right: 1rem;
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+}
+
+.menu li:hover,
+.menu li.active {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.menu li:hover a,
+.menu li.active a {
+    color: white;
+}
+
+.sign-out {
+    margin-top: auto;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.sign-out:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Menu Toggle Button */
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1001;
+    background: #800000;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.menu-toggle:hover {
+    background: #600000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    margin-left: 280px;
+    background: #f5f6fa;
+    min-height: 100vh;
+    transition: all 0.3s ease;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.content-header h2 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.date-filter {
+    width: 200px;
+}
+
+.date-filter select {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+    color: #2c3e50;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.date-filter select:focus {
+    outline: none;
+    border-color: #800000;
+    box-shadow: 0 0 0 3px rgba(128, 0, 0, 0.1);
+}
+
+/* Dashboard Cards */
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-info {
+    flex: 1;
+}
+
+.card-title {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.card-value {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* Chart Panels */
+.panel {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    height: 100%;
+}
+
+.panel-heading {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #eee;
+    background: transparent;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.panel-title {
+    color: #2c3e50;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.panel-body {
+    padding: 1.5rem;
+    height: 300px;
+}
+
+/* Charts */
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    background: white;
+    color: #666;
+    margin-top: 1rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .dashboard-cards {
+        gap: 1rem;
+    }
+    
+    .main-content {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .card {
+        padding: 1.2rem;
+    }
+    
+    .card-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .card-value {
+        font-size: 1.2rem;
+    }
+    
+    .panel-body {
+        height: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .content-header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .date-filter {
+        width: 100%;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+    
+    .menu-toggle {
+        display: block;
+    }
+    
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .panel-heading {
+        padding: 1rem;
+    }
+    
+    .panel-body {
+        padding: 1rem;
+        height: 200px;
+    }
+}
+
+@media (max-width: 576px) {
+    .content-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .card {
+        padding: 1rem;
+    }
+    
+    .card-icon {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .card-title {
+        font-size: 0.9rem;
+    }
+    
+    .card-value {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .card {
+        padding: 1rem;
+    }
+    
+    .card-value {
+        font-size: 1.2rem;
+    }
+}
+
+/* Profile Card Styles */
+.profile-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(128,0,0,0.07), 0 1.5px 4px rgba(0,0,0,0.04);
+    padding: 1.5rem 2.5rem;
+    margin-bottom: 2.2rem;
+    margin-top: 0.5rem;
+    border-left: 6px solid #800000;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+.profile-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #800000 0%, #f8f7f5 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.2rem;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(128,0,0,0.08);
+}
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+.profile-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #800000;
+}
+.profile-email {
+    font-size: 1.05rem;
+    color: #555;
+    font-weight: 500;
+}
+.profile-role {
+    font-size: 1.05rem;
+    color: #ffd700;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(128,0,0,0.08);
+}
+
+/* Admin/Staff Card Highlight */
+.card .fa-user-shield {
+    font-size: 2.1rem;
+    color: #800000;
+}
+.card-info .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+.card-info .card-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #800000;
+}
+
+@media (max-width: 700px) {
+    .profile-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.2rem 1rem;
+        font-size: 1rem;
+    }
+    .profile-avatar {
+        width: 55px;
+        height: 55px;
+        font-size: 2.1rem;
+    }
+}
+
+/* Sidebar Profile Card Styles - Clean Circle Only */
+.sidebar-profile-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 1.2rem 1rem 1.1rem 1rem;
+    margin-bottom: 1.5rem;
+    margin-top: 0.2rem;
+    border: none;
+}
+.sidebar-profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #efeeea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.7rem;
+    color: #800000;
+    margin-bottom: 0.7rem;
+    border: 3px solid #fff;
+    box-shadow: none;
+}
+.sidebar-profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+}
+.sidebar-profile-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e8e7e5;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.1rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.10);
+}
+.sidebar-profile-email {
+    font-size: 0.95rem;
+    color: #fffbe6;
+    font-weight: 400;
+    text-align: center;
+    opacity: 0.95;
+}
+.sidebar-profile-role {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+@media (max-width: 700px) {
+    .sidebar-profile-card {
+        padding: 0.75rem;
+    }
+    .sidebar-profile-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+    }
+    .sidebar-profile-name {
+        font-size: 0.9rem;
+    }
+    .sidebar-profile-email {
+        font-size: 0.7rem;
+    }
+    .sidebar-profile-role {
+        font-size: 0.7rem;
+    }
+}
+
+/* Remove main-content profile card styles if needed */
+.profile-card, .profile-avatar, .profile-info, .profile-name, .profile-email, .profile-role {
+    display: none !important;
+}

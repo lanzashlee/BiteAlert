@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bite Alert - Login</title>
+    <link rel="stylesheet" href="css/login.css">
+    <!-- Bootstrap 3 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <!-- Font Awesome for spinner icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Google Fonts for modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fa-solid fa-dog"></i>
+            <div class="loading-text">Signing in...</div>
+        </div>
+    </div>
+
+    <div class="login-container">
+        <!-- Left Panel (Logo & Info) -->
+        <div class="left-panel-modern">
+            <div class="wave-bg"></div>
+            <div class="brand-content">
+                <!-- Logo moved to right panel -->
+                <h2 class="tagline">Track Bites, Save Lives</h2>
+                <p class="desc">Effortless data recording, seamless vaccination tracking—<br>keeping our community safe, one record at a time!</p>
+            </div>
+        </div>
+
+        <!-- Right Panel (Login Form) -->
+        <div class="right-panel-modern">
+            <div class="right-panel-content">
+                <form class="login-form-modern" id="loginForm">
+                    <div id="errorMessage" class="error-message" style="display: none;"></div>
+                    <label for="email">Email</label>
+                    <div class="email-input-container">
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required maxlength="254" oninput="validateEmail(this)">
+                        <i class="fas fa-envelope"></i>
+                        <div id="validationPopup" class="validation-popup">
+                            <div class="popup-header">Email Requirements</div>
+                            <ul>
+                                <li id="lengthCheck" data-label=" Be between 5-254 characters"><i class="fas fa-circle"></i> Be between 5-254 characters</li>
+                                <li id="formatCheck" data-label="Include @ symbol"><i class="fas fa-circle"></i> Include @ symbol(like: yourname@gmail.com)</li>
+                                <li id="domainCheck" data-label="Have a valid domain extension(like: .com, .org, .in, etc.)"><i class="fas fa-circle"></i> Have a valid domain extension(like: .com, .org, .in, etc.)</li>
+                                <li id="specialCheck" data-label="Allowed: letters, numbers, ._-+"><i class="fas fa-circle"></i> Use only letters, numbers, and special characters(like: ._-+)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <label for="password">Password</label>
+                    <div class="password-container">
+                        <input type="password" id="password" placeholder="Enter your password" required oninput="validatePassword(this)">
+                        <i class="fa-solid fa-eye-slash toggle-password" onclick="togglePassword()"></i>
+                        <div id="passwordValidationPopup" class="password-validation-popup">
+                            <div class="popup-header">Password Requirements</div>
+                            <ul>
+                                <li id="passLengthCheck" data-label="At least 8 characters"><i class="fas fa-circle"></i> At least 8 characters</li>
+                                <li id="passUpperCheck" data-label="One uppercase letter"><i class="fas fa-circle"></i> One uppercase letter</li>
+                                <li id="passLowerCheck" data-label="One lowercase letter"><i class="fas fa-circle"></i> One lowercase letter</li>
+                                <li id="passNumberCheck" data-label="One number"><i class="fas fa-circle"></i> One number</li>
+                                <li id="passSpecialCheck" data-label="One special character"><i class="fas fa-circle"></i> One special character</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                    <button type="submit" class="sign-in-btn-modern">Sign In</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);z-index:2000;justify-content:center;align-items:center;">
+        <div id="forgotPasswordModal" style="background:#fff;border-radius:16px;max-width:350px;width:90vw;padding:28px 22px 22px 22px;box-shadow:0 8px 32px rgba(128,0,0,0.13);position:relative;">
+            <h3 style="color:#800000;font-weight:700;margin-bottom:12px;">Forgot Password</h3>
+            <p style="font-size:1em;color:#333;margin-bottom:18px;">Enter your email, new password, and the OTP sent to your email.</p>
+            <input type="email" id="forgotPasswordEmail" placeholder="Enter your email" style="width:100%;padding:12px 10px;border-radius:8px;border:1.5px solid #e0e0e0;font-size:1em;margin-bottom:14px;">
+            <input type="password" id="forgotPasswordNewPass" placeholder="New password" style="width:100%;padding:12px 10px;border-radius:8px;border:1.5px solid #e0e0e0;font-size:1em;margin-bottom:14px;">
+            <input type="password" id="forgotPasswordConfirmPass" placeholder="Confirm new password" style="width:100%;padding:12px 10px;border-radius:8px;border:1.5px solid #e0e0e0;font-size:1em;margin-bottom:14px;">
+            <input type="text" id="forgotPasswordOTP" placeholder="Enter OTP" maxlength="6" style="width:100%;padding:12px 10px;border-radius:8px;border:1.5px solid #e0e0e0;font-size:1em;margin-bottom:14px;">
+            <div id="forgotPasswordMsg" style="font-size:0.98em;color:#dc3545;margin-bottom:10px;display:none;"></div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+                <button type="button" id="forgotPasswordCancel" style="background:#eee;color:#800000;border:none;padding:8px 16px;border-radius:8px;font-weight:600;">Cancel</button>
+                <button type="button" id="forgotPasswordSendOtp" style="background:#ffd700;color:#800000;border:none;padding:8px 16px;border-radius:8px;font-weight:600;">Send OTP</button>
+                <button type="button" id="forgotPasswordReset" style="background:#800000;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;">Reset Password</button>
+            </div>
+        </div>
+    </div>
+    <script src="js/check-mongo.js"></script>
+    <script src="js/login.js"></script>
+    <script>
+        function validateEmail(input) {
+            const email = input.value.trim();
+            const validationPopup = document.getElementById('validationPopup');
+            const envelopeIcon = input.nextElementSibling;
+            // Reset validation states
+            const rules = {
+                length: { element: document.getElementById('lengthCheck'), valid: false },
+                format: { element: document.getElementById('formatCheck'), valid: false },
+                domain: { element: document.getElementById('domainCheck'), valid: false },
+                special: { element: document.getElementById('specialCheck'), valid: false }
+            };
+            // Show popup when user starts typing
+            if (email.length > 0) {
+                validationPopup.classList.add('show');
+                envelopeIcon.style.color = '#4CAF50';
+            } else {
+                validationPopup.classList.remove('show');
+                envelopeIcon.style.color = '#666';
+                input.setCustomValidity('');
+                return;
+            }
+            // Length validation (5-254 characters)
+            rules.length.valid = email.length >= 5 && email.length <= 254;
+            updateRuleUI(rules.length);
+            // Format validation
+            const hasAtSymbol = email.includes('@');
+            const hasDomain = email.split('@')[1]?.includes('.');
+            rules.format.valid = hasAtSymbol && hasDomain;
+            updateRuleUI(rules.format);
+            // Domain validation
+            const domainRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            rules.domain.valid = domainRegex.test(email);
+            updateRuleUI(rules.domain);
+            // Special characters validation
+            const specialCharRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            rules.special.valid = specialCharRegex.test(email);
+            updateRuleUI(rules.special);
+            // Overall validation
+            const isValid = Object.values(rules).every(rule => rule.valid);
+            input.setCustomValidity(isValid ? '' : 'Please enter a valid email address');
+        }
+        function updateRuleUI(rule) {
+            const label = rule.element.getAttribute('data-label') || rule.element.textContent;
+            if (rule.valid) {
+                rule.element.className = 'valid';
+                rule.element.innerHTML = `<span class='validation-icon'>&#10003;</span> ${label}`;
+            } else {
+                rule.element.className = 'invalid';
+                rule.element.innerHTML = `<span class='validation-icon'>&#10007;</span> ${label}`;
+            }
+        }
+        // Show popup on focus
+        document.getElementById('email').addEventListener('focus', function() {
+            if (this.value.trim().length > 0) {
+                document.getElementById('validationPopup').classList.add('show');
+            }
+        });
+        // Hide popup on blur
+        document.getElementById('email').addEventListener('blur', function() {
+            setTimeout(() => {
+                document.getElementById('validationPopup').classList.remove('show');
+            }, 150);
+        });
+
+        function validatePassword(input) {
+            const password = input.value;
+            const popup = document.getElementById('passwordValidationPopup');
+            // Show popup when user types
+            if (password.length > 0) {
+                popup.classList.add('show');
+            } else {
+                popup.classList.remove('show');
+                input.setCustomValidity('');
+                return;
+            }
+            // Validation rules
+            const rules = {
+                length: { element: document.getElementById('passLengthCheck'), valid: password.length >= 8 },
+                upper: { element: document.getElementById('passUpperCheck'), valid: /[A-Z]/.test(password) },
+                lower: { element: document.getElementById('passLowerCheck'), valid: /[a-z]/.test(password) },
+                number: { element: document.getElementById('passNumberCheck'), valid: /[0-9]/.test(password) },
+                special: { element: document.getElementById('passSpecialCheck'), valid: /[^A-Za-z0-9]/.test(password) }
+            };
+            // Update UI
+            for (const key in rules) {
+                const label = rules[key].element.getAttribute('data-label') || rules[key].element.textContent;
+                if (rules[key].valid) {
+                    rules[key].element.className = 'valid';
+                    rules[key].element.innerHTML = `<span class='validation-icon'>&#10003;</span> ${label}`;
+                } else {
+                    rules[key].element.className = 'invalid';
+                    rules[key].element.innerHTML = `<span class='validation-icon'>&#10007;</span> ${label}`;
+                }
+            }
+            // Set input validity
+            const isValid = Object.values(rules).every(rule => rule.valid);
+            input.setCustomValidity(isValid ? '' : 'Password does not meet requirements');
+        }
+        // Show popup on focus
+        document.getElementById('password').addEventListener('focus', function() {
+            if (this.value.length > 0) {
+                document.getElementById('passwordValidationPopup').classList.add('show');
+            }
+        });
+        // Hide popup on blur
+        document.getElementById('password').addEventListener('blur', function() {
+            setTimeout(() => {
+                document.getElementById('passwordValidationPopup').classList.remove('show');
+            }, 150);
+        });
+
+        // Forgot Password OTP Flow (all fields visible)
+        document.querySelector('.forgot-password').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('forgotPasswordOverlay').style.display = 'flex';
+            document.getElementById('forgotPasswordEmail').value = '';
+            document.getElementById('forgotPasswordNewPass').value = '';
+            document.getElementById('forgotPasswordConfirmPass').value = '';
+            document.getElementById('forgotPasswordOTP').value = '';
+            document.getElementById('forgotPasswordMsg').style.display = 'none';
+        });
+        document.getElementById('forgotPasswordCancel').addEventListener('click', function() {
+            document.getElementById('forgotPasswordOverlay').style.display = 'none';
+        });
+        document.getElementById('forgotPasswordSendOtp').addEventListener('click', async function() {
+            const email = document.getElementById('forgotPasswordEmail').value.trim();
+            const msg = document.getElementById('forgotPasswordMsg');
+            msg.style.display = 'none';
+            msg.style.color = '#dc3545';
+            // Validate email
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(email)) {
+                msg.textContent = 'Please enter a valid email address.';
+                msg.style.display = 'block';
+                return;
+            }
+            // Send OTP request
+            try {
+                msg.textContent = 'Sending OTP...';
+                msg.style.color = '#800000';
+                msg.style.display = 'block';
+                const res = await fetch('/api/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    msg.textContent = 'OTP sent to your email.';
+                    msg.style.color = '#43b66c';
+                    msg.style.display = 'block';
+                } else {
+                    msg.textContent = data.message || 'Failed to send OTP.';
+                    msg.style.color = '#dc3545';
+                    msg.style.display = 'block';
+                }
+            } catch (err) {
+                msg.textContent = 'Error sending OTP. Please try again.';
+                msg.style.color = '#dc3545';
+                msg.style.display = 'block';
+            }
+        });
+        document.getElementById('forgotPasswordReset').addEventListener('click', async function() {
+            const email = document.getElementById('forgotPasswordEmail').value.trim();
+            const newPass = document.getElementById('forgotPasswordNewPass').value;
+            const confirmPass = document.getElementById('forgotPasswordConfirmPass').value;
+            const otp = document.getElementById('forgotPasswordOTP').value.trim();
+            const msg = document.getElementById('forgotPasswordMsg');
+            msg.style.display = 'none';
+            msg.style.color = '#dc3545';
+            // Validate all fields
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(email)) {
+                msg.textContent = 'Please enter a valid email address.';
+                msg.style.display = 'block';
+                return;
+            }
+            if (newPass.length < 8) {
+                msg.textContent = 'Password must be at least 8 characters.';
+                msg.style.display = 'block';
+                return;
+            }
+            if (newPass !== confirmPass) {
+                msg.textContent = 'Passwords do not match.';
+                msg.style.display = 'block';
+                return;
+            }
+            if (!otp) {
+                msg.textContent = 'Please enter the OTP.';
+                msg.style.display = 'block';
+                return;
+            }
+            // Reset password with OTP
+            try {
+                msg.textContent = 'Resetting password...';
+                msg.style.color = '#800000';
+                msg.style.display = 'block';
+                const res = await fetch('/api/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, otp, newPassword: newPass })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    msg.textContent = 'Password reset successful! You can now log in.';
+                    msg.style.color = '#43b66c';
+                    msg.style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('forgotPasswordOverlay').style.display = 'none';
+                    }, 2000);
+                } else {
+                    msg.textContent = data.message || 'Invalid OTP or error.';
+                    msg.style.color = '#dc3545';
+                    msg.style.display = 'block';
+                }
+            } catch (err) {
+                msg.textContent = 'Error resetting password. Please try again.';
+                msg.style.color = '#dc3545';
+                msg.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Profile</title>
+    <link rel="stylesheet" href="css/superadmin_profile.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Menu Toggle Button -->
+  <button class="menu-toggle">
+    <i class="fa-solid fa-bars"></i>
+</button>
+<!-- Sidebar Overlay for mobile -->
+<div class="sidebar-overlay"></div>
+
+    
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
+            <ul class="menu">
+                <li><a href="dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="admin-management.html"><i class="fa-solid fa-user-gear"></i> Admin Management</a></li>
+                <li><a href="audit-trail.html"><i class="fa-solid fa-file-lines"></i> Audit Logs</a></li>
+                <li><a href="create_account.html"><i class="fa-solid fa-user-plus"></i> Create Account</a></li>
+                <li class="active"><a href="superadmin_profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+            </ul>
+            <button class="sign-out" id="signOutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
+        </aside>
+        
+        <main class="main-content">
+            <div class="content-header">
+                <h2>Admin Profile</h2>
+                </div>
+
+            <div class="profile-container">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="profile-title">
+                            <h3 id="userFullName">Loading...</h3>
+                            <span id="userRole" class="role-badge">Loading...</span>
+                        </div>
+                    </div>
+
+                    <form id="profileForm" class="profile-form">
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-user"></i>
+                                First Name
+                            </label>
+                            <input type="text" id="firstName" name="firstName" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-user"></i>
+                                Middle Name
+                            </label>
+                            <input type="text" id="middleName" name="middleName">
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-user"></i>
+                                Last Name
+                            </label>
+                            <input type="text" id="lastName" name="lastName" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-envelope"></i>
+                                Email Address
+                            </label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-phone"></i>
+                                Phone Number
+                            </label>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-calendar"></i>
+                                Birthdate
+                            </label>
+                            <input type="date" id="birthdate" name="birthdate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-lock"></i>
+                                Current Password
+                            </label>
+                            <div class="password-input">
+                                <input type="password" id="currentPassword" name="currentPassword">
+                                <i class="fas fa-eye toggle-password"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-key"></i>
+                                New Password
+                            </label>
+                            <div class="password-input">
+                                <input type="password" id="newPassword" name="newPassword">
+                                <i class="fas fa-eye toggle-password"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-check"></i>
+                                Confirm New Password
+                            </label>
+                            <div class="password-input">
+                                <input type="password" id="confirmPassword" name="confirmPassword">
+                                <i class="fas fa-eye toggle-password"></i>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i>
+                            Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <span>Saving changes...</span>
+    </div>
+
+    <!-- Toast Messages -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle success-icon"></i>
+        <i class="fas fa-exclamation-circle error-icon"></i>
+        <span class="toast-message"></span>
+    </div>
+
+    <script src="js/superadmin_profile.js"></script>
+</body>
+</html>

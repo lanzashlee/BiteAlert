@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bite Alert - Create Account</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/create_account.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <button class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
+            </div>
+            <ul class="menu">
+                <li><a href="dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="admin-management.html"><i class="fa-solid fa-user-gear"></i> Admin Management</a></li>
+                <li><a href="audit-trail.html"><i class="fa-solid fa-file-lines"></i> Audit Logs</a></li>
+                <li class="active"><a href="create_account.html"><i class="fa-solid fa-user-plus"></i> Create Account</a></li>
+                <li><a href="superadmin_profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+            </ul>
+            <button class="sign-out" id="signOutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-header">
+                <h2>Create Account</h2>
+            </div>
+            <div class="admin-panel">
+                <form id="createAccountForm" novalidate>
+                    <div class="form-group has-validation">
+                        <label for="firstName">First Name</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="firstName" name="firstName" class="form-control" required>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group has-validation">
+                        <label for="middleName">Middle Name</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="middleName" name="middleName" class="form-control">
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group has-validation">
+                        <label for="lastName">Last Name</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="lastName" name="lastName" class="form-control" required>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group has-validation">
+                        <label for="email">Email</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="email" name="email" class="form-control" required>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group has-validation">
+                        <label for="phoneNumber">Phone Number</label>
+                        <div class="input-wrapper">
+                            <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control" placeholder="09XXXXXXXXX" required>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group has-validation">
+                        <label for="birthdate">Birthdate</label>
+                        <div class="input-wrapper">
+                            <input type="date" id="birthdate" name="birthdate" class="form-control" required>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group has-validation">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <div class="password-input-container">
+                                <input type="password" id="password" name="password" class="form-control" required>
+                                <i class="fas fa-eye toggle-password"></i>
+                            </div>
+                            <div class="password-strength"></div>
+                            <div class="password-requirements">
+                                <ul>
+                                    <li id="length-req">At least 8 characters long</li>
+                                    <li id="uppercase-req">Contains at least one uppercase letter</li>
+                                    <li id="special-req">Contains at least one special character</li>
+                                </ul>
+                            </div>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group has-validation">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <div class="input-wrapper">
+                            <div class="password-input-container">
+                                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                                <i class="fas fa-eye-slash toggle-password"></i>
+                            </div>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group has-validation">
+                        <label for="role">Role</label>
+                        <div class="input-wrapper">
+                            <select id="role" name="role" class="form-control" required>
+                                <option value="">Select Role</option>
+                                <option value="admin">Admin</option>
+                                <option value="superadmin">Super Admin</option>
+                            </select>
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-user-plus"></i>
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/create_account.js"></script>
+</body>
+</html> 

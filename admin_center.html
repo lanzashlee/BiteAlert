@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bite Alert - Center Data Management</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/admin_dashboard.css">
+    <link rel="stylesheet" href="css/admin_center.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
+            <ul class="menu">
+                <li><a href="admin_dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="staff_management.html"><i class="fa-solid fa-users"></i> Staff Management</a></li>
+                <li class="active"><a href="admin_center.html"><i class="fa-solid fa-building"></i> Center Data Management</a></li>
+                <li><a href="prescriptive_analytics.html"><i class="fa-solid fa-chart-line"></i> Prescriptive Analytics</a></li>
+                <li><a href="generate_report.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
+                <li><a href="admin_stock.html"><i class="fa-solid fa-boxes-stacked"></i> Stock & Inventory</a></li>
+                <li><a href="admin_profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+
+            </ul>
+            <button class="sign-out" id="signOutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
+        </aside>
+        <main class="main-content">
+            <div class="barangay-section">
+                <div class="barangay-header">
+                    <h2><i class="fa-solid fa-building"></i> Center Data Management</h2>
+                </div>
+                <div class="barangay-description">
+                    Administrators can input, update, and manage center information for tracking cases and vaccine distribution.
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-success" data-toggle="modal" data-target="#addModal"><i class="fa fa-plus"></i> Add Center</button>
+                </div>
+                <div class="table-responsive" style="margin-top: 20px;">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Center Name</th>
+                                <th>Address</th>
+                                <th>Contact Person</th>
+                                <th>Contact Number</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="barangayTableBody">
+                            <!-- Mock data rows will be inserted by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <form id="barangayForm">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="addModalLabel">Add Center</h4>
+            </div>
+            <div class="modal-body">
+              <div id="formErrorMsg" style="color:#dc3545;display:none;margin-bottom:10px;"></div>
+              <div class="form-group">
+                <label for="centerName">Center Name</label>
+                <select class="form-control" id="centerName" required>
+                    <option value="">Select Center</option>
+                    <option value="Addition Hills">Addition Hills</option>
+                    <option value="Balong-Bato">Balong-Bato</option>
+                    <option value="Batis">Batis</option>
+                    <option value="Corazon De Jesus">Corazon De Jesus</option>
+                    <option value="Ermitaño">Ermitaño</option>
+                    <option value="Halo-halo">Halo-halo</option>
+                    <option value="Isabelita">Isabelita</option>
+                    <option value="Kabayanan">Kabayanan</option>
+                    <option value="Little Baguio">Little Baguio</option>
+                    <option value="Maytunas">Maytunas</option>
+                    <option value="Onse">Onse</option>
+                    <option value="Pasadeña">Pasadeña</option>
+                    <option value="Pedro Cruz">Pedro Cruz</option>
+                    <option value="Progreso">Progreso</option>
+                    <option value="Rivera">Rivera</option>
+                    <option value="Salapan">Salapan</option>
+                    <option value="San Perfecto">San Perfecto</option>
+                    <option value="Santa Lucia">Santa Lucia</option>
+                    <option value="Tibagan">Tibagan</option>
+                    <option value="West Crame">West Crame</option>
+                    <option value="Greenhills">Greenhills</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="centerAddress">Address</label>
+                <input type="text" class="form-control" id="centerAddress" required>
+              </div>
+              <div class="form-group">
+                <label for="contactPerson">Contact Person</label>
+                <input type="text" class="form-control" id="contactPerson" required>
+              </div>
+              <div class="form-group">
+                <label for="contactNumber">Contact Number</label>
+                <input type="text" class="form-control" id="contactNumber" required>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="js/admin_center.js"></script>
+</body>
+</html> 

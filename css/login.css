@@ -1,0 +1,467 @@
+/* --- CLEANED UP: Only modern, responsive login styles remain --- */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+
+body {
+    min-height: 100vh;
+    background: #fdf2dc;
+    overflow-x: hidden;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+}
+
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    text-align: center;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    width: 150px;
+}
+
+.loading-spinner i {
+    font-size: 40px;
+    color: #800000;
+    animation: run 0.5s infinite;
+    display: inline-block;
+}
+
+@keyframes run {
+    0% { transform: translateX(0) scaleX(1); }
+    25% { transform: translateX(10px) scaleX(1); }
+    50% { transform: translateX(0) scaleX(1); }
+    75% { transform: translateX(-10px) scaleX(1); }
+    100% { transform: translateX(0) scaleX(1); }
+}
+
+.loading-text {
+    margin-top: 15px;
+    font-size: 16px;
+    color: #800000;
+    font-weight: bold;
+}
+
+.login-container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+}
+
+.left-panel-modern {
+    flex: 1.2;
+    background: linear-gradient(135deg, #800000 0%, #a83232 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    background-image: url('../img/SANJUAN.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.left-panel-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(40, 0, 0, 0.55);
+    z-index: 1;
+}
+
+.brand-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: #ffd700;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.logo-modern {
+    font-family: 'Montserrat', 'Poppins', sans-serif;
+    font-size: clamp(2.1rem, 4vw, 2.9rem);
+    font-weight: 800;
+    color: #ffd700;
+    margin-bottom: 1rem;
+    letter-spacing: 1.5px;
+    text-shadow: 2px 2px 24px #800000cc, 0 2px 12px #fffbe6cc, 0 0 2px #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: rgba(40, 0, 0, 0.55);
+    padding: 0.5em 1.2em;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px 0 #80000033;
+    backdrop-filter: blur(2px);
+}
+.logo-bite {
+    color: #ffd700;
+    background: linear-gradient(90deg, #ffd700 60%, #fffbe6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+}
+.logo-alert {
+    color: #fffbe6;
+    background: linear-gradient(90deg, #fffbe6 60%, #ffd700 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+}
+.logo-modern .paw {
+    font-size: 1.3em;
+    color: #ffd700;
+    margin-left: 0.3em;
+    filter: drop-shadow(0 2px 4px #80000055);
+    display: inline-flex;
+    align-items: center;
+}
+
+.logo-img {
+    display: block;
+    margin: 0 0 1.2rem 0;
+    max-width: 100px;
+    width: 100%;
+    min-width: 150px;
+    height: auto;
+    filter: drop-shadow(0 4px 16px #80000055) drop-shadow(0 1px 2px #fffbe6cc);
+    padding: 0.5rem 0;
+}
+
+.tagline {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #fffbe6;
+    text-shadow: 1px 1px 8px #80000088;
+}
+
+.desc {
+    font-size: clamp(0.9rem, 1.8vw, 1.08rem);
+    color: #fffbe6;
+    text-shadow: 0 1px 4px #80000055;
+    line-height: 1.6;
+}
+
+.right-panel-modern {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #fffbe6;
+    padding: 2rem 1rem;
+    position: relative;
+    min-width: 320px;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.right-panel-content {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-form-modern {
+    width: 100%;
+    max-width: 370px;
+    padding: 2rem 1.5rem;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 2px 12px 0 rgba(128,0,0,0.04);
+    border: 1px solid #f3e7c9;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    backdrop-filter: none;
+}
+
+.login-form-modern label {
+    font-size: 1rem;
+    color: #a83232;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    margin-bottom: 0.3rem;
+}
+
+.login-form-modern input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    background: #faf9f6;
+    color: #333;
+    transition: border-color 0.2s;
+    box-shadow: none;
+}
+.login-form-modern input:focus {
+    border-color: #ffd700;
+    outline: none;
+    background: #fff;
+}
+
+.email-input-container, .password-container {
+    position: relative;
+    width: 100%;
+}
+
+.email-input-container i,
+.password-container i.toggle-password {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #bdbdbd;
+    font-size: 1.1em;
+    transition: color 0.2s;
+    z-index: 2;
+    cursor: pointer;
+}
+
+.toggle-password:hover {
+    color: #a83232;
+}
+
+.forgot-password {
+    color: #a83232;
+    font-weight: 400;
+    font-size: 0.98em;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.forgot-password:hover {
+    color: #ffd700;
+}
+
+.sign-in-btn-modern {
+    width: 100%;
+    padding: 13px;
+    background: #a83232;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.08em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: none;
+    letter-spacing: 0.2px;
+}
+.sign-in-btn-modern:hover {
+    background: #ffd700;
+    color: #a83232;
+}
+
+.error-message {
+    background: #fff3f3;
+    color: #dc3545;
+    padding: 10px 14px;
+    border-radius: 7px;
+    margin-bottom: 0;
+    text-align: center;
+    border-left: 3px solid #dc3545;
+    font-size: 1em;
+}
+
+.validation-popup, .password-validation-popup {
+    position: absolute;
+    left: 0;
+    top: 110%;
+    width: 100%;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(128,0,0,0.08);
+    border: 1.5px solid #eee;
+    padding: 12px 16px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    font-size: 0.98em;
+    color: #800000;
+}
+.validation-popup.show, .password-validation-popup.show {
+    opacity: 1;
+    visibility: visible;
+}
+.validation-popup .popup-header, .password-validation-popup .popup-header {
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1.5px solid #eee;
+    font-weight: 600;
+    color: #800000;
+    font-size: 1.13em;
+    letter-spacing: 0.2px;
+}
+.validation-popup ul, .password-validation-popup ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.validation-popup li, .password-validation-popup li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 1.08em;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    transition: color 0.2s;
+}
+.validation-popup li:last-child, .password-validation-popup li:last-child {
+    margin-bottom: 0;
+}
+.validation-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #fff;
+    margin-right: 2px;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+.valid .validation-icon {
+    background: #43b66c;
+}
+.invalid .validation-icon {
+    background: #dc3545;
+}
+.valid {
+    color: #43b66c;
+}
+.invalid {
+    color: #dc3545;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .login-container {
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    .left-panel-modern, .right-panel-modern {
+        width: 100%;
+        min-width: unset;
+        min-height: unset;
+        padding: 2rem 1rem;
+        box-sizing: border-box;
+    }
+    .left-panel-modern {
+        order: 1;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        border-top-left-radius: 22px;
+        border-top-right-radius: 22px;
+        margin-bottom: 1.5rem;
+    }
+    .right-panel-modern {
+        order: 2;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        border-bottom-left-radius: 22px;
+        border-bottom-right-radius: 22px;
+    }
+    .login-form-modern {
+        max-width: 95vw;
+        margin: 0 auto;
+    }
+}
+@media (max-width: 768px) {
+    .brand-content {
+        max-width: 90%;
+    }
+    .login-form-modern {
+        padding: 1.2rem 0.7rem;
+    }
+}
+@media (max-width: 480px) {
+    .left-panel-modern {
+        padding: 2rem 1rem;
+    }
+    .right-panel-modern {
+        padding: 1rem 0.2rem;
+    }
+    .login-form-modern {
+        padding: 0.7rem 0.2rem;
+        border-radius: 10px;
+    }
+    .login-form-modern input {
+        padding: 0.7rem 0.7rem;
+        font-size: 0.95rem;
+    }
+    #forgotPasswordModal {
+        width: 95%;
+        padding: 1.2rem;
+        margin: 1rem;
+    }
+    #forgotPasswordModal input {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+    #forgotPasswordModal button {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+    .validation-popup, .password-validation-popup {
+        width: 90%;
+        left: 5%;
+        font-size: 0.9rem;
+        padding: 0.8rem;
+    }
+    .loading-spinner {
+        width: 120px;
+        padding: 15px;
+    }
+    .loading-spinner i {
+        font-size: 30px;
+    }
+    .loading-text {
+        font-size: 14px;
+    }
+    .email-input-container i,
+    .password-container i.toggle-password {
+        right: 12px;
+        font-size: 1em;
+    }
+    .email-input-container input,
+    .password-container input {
+        padding-right: 38px;
+    }
+}
+
+
+
+

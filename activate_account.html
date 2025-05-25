@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bite Alert - Account Activation</title>
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/activate_account.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <!-- Menu Toggle Button -->
+    <button class="menu-toggle">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
+            <ul class="menu">
+                <li><a href="dashboard.html"><i class="fa-solid fa-chart-bar"></i> Dashboard</a></li>
+                <li><a href="admin-management.html"><i class="fa-solid fa-user-gear"></i> Admin Management</a></li>
+                <li><a href="audit-trail.html"><i class="fa-solid fa-file-lines"></i> Audit Trail</a></li>
+            </ul>
+            <button class="sign-out"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h2>Admin Accounts</h2>
+                <a href="admin-management.html" class="btn btn-secondary back-button">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Back to Admin Management
+                </a>
+            </div>
+            <div class="accounts-container">
+                <div class="search-container">
+                    <div class="search-box">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search by username...">
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="accounts-table">
+                        <thead>
+                            <tr>
+                                <th>Admin ID</th>
+                                <th>Username</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accountsTableBody">
+                            <!-- Table rows will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmationModal">
+        <div class="modal-content">
+            <h3>Confirm Action</h3>
+            <p id="modalMessage">Are you sure you want to proceed with this action?</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-confirm" id="confirmButton">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 BiteAlert. All Rights Reserved.</p>
+    </footer>
+
+    <script src="js/activate_account.js"></script>
+</body>
+</html> 

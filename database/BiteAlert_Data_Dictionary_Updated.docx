@@ -1,0 +1,161 @@
+BiteAlert Data Dictionary
+
+Table of Contents
+1. Admin Accounts
+2. Staff Accounts
+3. Patient Accounts
+4. Account Management
+5. Barangay Management
+6. Barangay Data
+7. Dashboard & Reports
+8. Case Data
+9. Prescriptive Analytics
+10. Vaccination Schedules
+11. Vaccine Inventory
+12. Audit Trail Logs
+13. Audit Logs
+14. Super Admin Accounts
+
+1. Admin Accounts
+Field Name	Data Type	Constraints	Description
+admin_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for admin
+user_id	INT	FOREIGN KEY REFERENCES users(user_id)	Reference to user account
+username	VARCHAR(50)	NOT NULL, UNIQUE	Admin's username
+last_login	TIMESTAMP	NULL	Timestamp of last login
+login_attempts	INT	DEFAULT 0	Number of failed login attempts
+is_locked	BOOLEAN	DEFAULT FALSE	Account lock status
+
+2. Staff Accounts
+Field Name	Data Type	Constraints	Description
+staff_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for staff member
+user_id	INT	FOREIGN KEY REFERENCES users(user_id)	Reference to user account
+position	VARCHAR(50)	NOT NULL	Staff member's position
+department	VARCHAR(50)	NOT NULL	Department assigned to
+specialization	VARCHAR(100)	NULL	Specialization or expertise
+license_number	VARCHAR(50)	NULL	Professional license number
+hire_date	DATE	NOT NULL	Date of employment
+employment_status	ENUM('active', 'on_leave', 'terminated')	NOT NULL, DEFAULT 'active'	Current employment status
+emergency_contact	VARCHAR(15)	NOT NULL	Emergency contact number
+emergency_contact_name	VARCHAR(100)	NOT NULL	Emergency contact person
+
+3. Patient Accounts
+Field Name	Data Type	Constraints	Description
+patient_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for patient
+first_name	VARCHAR(50)	NOT NULL	Patient's first name
+middle_name	VARCHAR(50)	NULL	Patient's middle name
+last_name	VARCHAR(50)	NOT NULL	Patient's last name
+birthdate	DATE	NOT NULL	Patient's date of birth
+gender	ENUM('male', 'female', 'other')	NOT NULL	Patient's gender
+blood_type	ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-')	NULL	Patient's blood type
+contact_number	VARCHAR(15)	NOT NULL	Patient's contact number
+address	VARCHAR(255)	NOT NULL	Patient's address
+medical_history	TEXT	NULL	Patient's medical history
+allergies	TEXT	NULL	Patient's allergies
+insurance_info	VARCHAR(100)	NULL	Insurance information
+primary_physician	INT	FOREIGN KEY REFERENCES staff(staff_id)	Assigned primary physician
+status	ENUM('active', 'inactive', 'deceased')	NOT NULL, DEFAULT 'active'	Patient's status
+
+4. Account Management
+Description: Manages Admin, Staff, and Patient Accounts
+
+5. Barangay Management
+Field Name	Data Type	Constraints	Description
+barangay_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for barangay
+name	VARCHAR(100)	NOT NULL	Barangay name
+location	VARCHAR(255)	NOT NULL	Barangay location
+contact_info	VARCHAR(100)	NULL	Contact information
+
+6. Barangay Data
+Field Name	Data Type	Constraints	Description
+data_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for barangay data
+barangay_id	INT	FOREIGN KEY REFERENCES barangay_management(barangay_id)	Reference to barangay
+population	INT	NOT NULL	Population of the barangay
+health_facilities	INT	NULL	Number of health facilities
+risk_level	ENUM('low', 'medium', 'high')	NOT NULL	Risk level of the barangay
+
+7. Dashboard & Reports
+Field Name	Data Type	Constraints	Description
+report_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for report
+report_type	ENUM('incident', 'vaccination', 'analytics')	NOT NULL	Type of report
+report_period	VARCHAR(50)	NOT NULL	Time period covered by report
+generated_by	INT	FOREIGN KEY REFERENCES users(user_id)	User who generated the report
+report_data	JSON	NOT NULL	Report data in JSON format
+
+8. Case Data
+Field Name	Data Type	Constraints	Description
+case_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for case
+barangay_id	INT	FOREIGN KEY REFERENCES barangay_data(barangay_id)	Reference to barangay
+incident_date	DATETIME	NOT NULL	Date and time of incident
+description	TEXT	NULL	Detailed description of case
+status	ENUM('open', 'closed', 'under_review')	NOT NULL	Current status of case
+
+9. Prescriptive Analytics
+Field Name	Data Type	Constraints	Description
+analytics_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for analytics
+analysis_type	VARCHAR(50)	NOT NULL	Type of analysis
+recommendations	TEXT	NULL	Recommendations based on analysis
+
+10. Vaccination Schedules
+Field Name	Data Type	Constraints	Description
+schedule_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for schedule
+vaccine_type	VARCHAR(50)	NOT NULL	Type of vaccine
+schedule_date	DATE	NOT NULL	Scheduled date for vaccination
+location	VARCHAR(255)	NOT NULL	Location of vaccination
+
+11. Vaccine Inventory
+Field Name	Data Type	Constraints	Description
+inventory_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for inventory
+vaccine_type	VARCHAR(50)	NOT NULL	Type of vaccine
+quantity	INT	NOT NULL	Quantity available
+expiration_date	DATE	NOT NULL	Expiration date of vaccine
+
+12. Audit Trail Logs
+Field Name	Data Type	Constraints	Description
+audit_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for audit log
+user_id	INT	FOREIGN KEY REFERENCES users(user_id)	User who performed the action
+action	VARCHAR(50)	NOT NULL	Type of action performed
+table_name	VARCHAR(50)	NOT NULL	Table affected by the action
+record_id	INT	NOT NULL	ID of the affected record
+old_values	JSON	NULL	Previous values before change
+new_values	JSON	NULL	New values after change
+ip_address	VARCHAR(45)	NULL	IP address of the user
+created_at	TIMESTAMP	NOT NULL, DEFAULT CURRENT_TIMESTAMP	Timestamp of the action
+
+13. Audit Logs
+Field Name	Data Type	Constraints	Description
+log_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for log
+audit_id	INT	FOREIGN KEY REFERENCES audit_trail_logs(audit_id)	Reference to audit log
+details	TEXT	NULL	Details of the log entry
+
+14. Super Admin Accounts
+Field Name	Data Type	Constraints	Description
+super_admin_id	INT	PRIMARY KEY, AUTO_INCREMENT	Unique identifier for super admin
+user_id	INT	FOREIGN KEY REFERENCES users(user_id)	Reference to user account
+username	VARCHAR(50)	NOT NULL, UNIQUE	Super admin's username
+last_login	TIMESTAMP	NULL	Timestamp of last login
+permissions	TEXT	NOT NULL	Permissions assigned to super admin
+
+Relationships
+- Super Admin manages Account Management and Audit Trail Logs
+- Admin manages Barangay Management, Dashboard & Reports, Prescriptive Analytics
+
+Indexes
+- Admin Accounts: username
+- Staff Accounts: position, department, license_number
+- Patient Accounts: contact_number, primary_physician, status
+- Barangay Data: barangay_id
+- Case Data: incident_date, status
+- Vaccination Schedules: schedule_date, location
+- Vaccine Inventory: vaccine_type, expiration_date
+- Audit Trail Logs: user_id, action, created_at
+- Super Admin Accounts: username
+
+Client Table
+Field Name	Data Type	Field Length	Constraint	Description
+Client_id	INT	10	Primary key	Client id, Auto generated
+Client_name	VARCHAR	20	Not null	Name of client
+Password	VARCHAR	30	Not null	Login Password for client
+Contact_no	INT	15	Not null	Landline or mobile number
+Email_id	VARCHAR	30	Not null	Any email id
+Max_Users	INT	10	Not null	Maximum number of users
+Current_users	INT	10	Not null	Currently present user 

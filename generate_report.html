@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Report</title>
+    <link rel="stylesheet" href="css/generate_report.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <button class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
+            <ul class="menu">
+                <li><a href="admin_dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="staff_management.html"><i class="fa-solid fa-users"></i> Staff Management</a></li>
+                <li><a href="admin_center.html"><i class="fa-solid fa-building"></i> Center Data Management</a></li>
+                <li><a href="prescriptive_analytics.html"><i class="fa-solid fa-chart-line"></i> Prescriptive Analytics</a></li>
+                <li class="active"><a href="generate_report.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
+                <li><a href="admin_stock.html"><i class="fa-solid fa-boxes-stacked"></i> Stock & Inventory</a></li>
+                <li><a href="admin_profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+            </ul>
+            <button class="sign-out" id="signOutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
+        </aside>
+        
+        <main class="main-content">
+            <div class="content-header">
+                <h2>Generate Reports</h2>
+                <p class="subtitle">Generate and download detailed reports in PDF format</p>
+            </div>
+
+            <div class="reports-container">
+                <!-- Rabies Utilization Report -->
+                <div class="report-card">
+                    <div class="report-header">
+                        <i class="fas fa-syringe"></i>
+                        <h3>Rabies Utilization Report</h3>
+                    </div>
+                    <div class="report-body">
+                        <form id="rabiesUtilizationReportForm">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Generate PDF
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <!-- Animal Bite Exposure Report -->
+                <div class="report-card">
+                    <div class="report-header">
+                        <i class="fas fa-file-medical-alt"></i>
+                        <h3>Animal Bite Exposure Report</h3>
+                    </div>
+                    <div class="report-body">
+                        <form id="animalBiteExposureReportForm">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Generate PDF
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <!-- Rabies Exposure Registry -->
+                <div class="report-card">
+                    <div class="report-header">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>Rabies Exposure Registry</h3>
+                    </div>
+                    <div class="report-body">
+                        <form id="rabiesRegistryReportForm">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Generate PDF
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            <span>Generating Report...</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="js/generate_report.js"></script>
+</body>
+</html>

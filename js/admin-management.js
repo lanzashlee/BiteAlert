@@ -1,0 +1,384 @@
+let adminAccounts = [];
+
+// Fetch Admin Accounts
+async function fetchAdminAccounts() {
+    try {
+        // Show loading state
+        const tableBody = document.getElementById('accountsTableBody');
+        tableBody.innerHTML = '<tr><td colspan="3" class="loading-state">Loading accounts...</td></tr>';
+        
+        const response = await fetch('/api/admin-accounts');
+        if (!response.ok) {
+            throw new Error('Failed to fetch admin accounts');
+        }
+        adminAccounts = await response.json();
+        
+        // Check if we have data
+        if (adminAccounts.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="3" class="no-data">No admin accounts found</td></tr>';
+            return;
+        }
+        
+        populateAccountsTable(adminAccounts);
+    } catch (error) {
+        console.error('Error:', error);
+        const tableBody = document.getElementById('accountsTableBody');
+        tableBody.innerHTML = '<tr><td colspan="3" class="error-state">Failed to load admin accounts</td></tr>';
+    }
+}
+
+// DOM Content Loaded Event Handler
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch and initialize the table
+    fetchAdminAccounts();
+    
+    // Debounced search
+    document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 200));
+    document.getElementById('roleFilter').addEventListener('change', applyFilters);
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    
+    // Add Admin button
+    document.getElementById('addAdminBtn').addEventListener('click', function() {
+        window.location.href = 'create_account.html';
+    });
+    
+    // Setup menu functionality
+    setupMenuFunctionality();
+    
+    // Add focus events for search box animation
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+    });
+    
+    searchInput.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+    });
+});
+
+// Debounce utility
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+// Render the accounts table with modern UI
+function populateAccountsTable(accounts) {
+    const tableBody = document.getElementById('accountsTableBody');
+    tableBody.innerHTML = '';
+
+    accounts.forEach(account => {
+        account.isActive = typeof account.isActive === 'boolean' ? account.isActive : account.isActive === true;
+        const fullName = [account.firstName, account.middleName, account.lastName].filter(Boolean).join(' ');
+        const initials = (account.firstName?.[0] || '') + (account.lastName?.[0] || '');
+        const avatar = `<div class="user-avatar">${initials.toUpperCase()}</div>`;
+        const userInfo = `
+            <div class="user-info-modern">
+                ${avatar}
+                <div class="user-details">
+                    <span class="fullname">${fullName}</span>
+                    <span class="username">${account.username || account.email}</span>
+                </div>
+            </div>
+        `;
+        const status = account.role.toLowerCase() === 'superadmin'
+            ? '<span class="status-badge">Always Active</span>'
+            : `<span class="status-indicator ${account.isActive ? 'active' : 'inactive'}">${account.isActive ? 'Active' : 'Inactive'}</span>`;
+        // Use data attributes, no inline onclick
+        const actions = account.role.toLowerCase() === 'superadmin'
+            ? '<span class="status-badge">Always Active</span>'
+            : `<div class="action-buttons">
+                <button class="btn-activate" data-account-id="${account.id}" data-action="activate" ${account.isActive ? 'style="display:none;"' : ''}><i class="fa-solid fa-check-circle"></i> Activate</button>
+                <button class="btn-deactivate" data-account-id="${account.id}" data-action="deactivate" ${!account.isActive ? 'style="display:none;"' : ''}><i class="fa-solid fa-ban"></i> Deactivate</button>
+            </div>`;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${account.id}</td>
+            <td>${userInfo}</td>
+            <td><span class="role ${account.role.toLowerCase()}">${account.role}</span></td>
+            <td>${status}</td>
+            <td>${actions}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Add event delegation for action buttons (only once)
+(function setupActionButtonDelegation() {
+    document.addEventListener('DOMContentLoaded', function() {
+        const tableBody = document.getElementById('accountsTableBody');
+        tableBody.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-activate, .btn-deactivate');
+            if (btn) {
+                const accountId = btn.getAttribute('data-account-id');
+                const action = btn.getAttribute('data-action');
+                if (accountId && action) {
+                    handleActivation(accountId, action === 'activate');
+                }
+            }
+        });
+    });
+})();
+
+// Filtering and search
+function applyFilters() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const role = document.getElementById('roleFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    let filtered = adminAccounts;
+    if (role !== 'all') {
+        filtered = filtered.filter(acc => acc.role.toLowerCase() === role);
+    }
+    if (status !== 'all') {
+        filtered = filtered.filter(acc => {
+            if (acc.role.toLowerCase() === 'superadmin') return status === 'active';
+            return status === 'active' ? acc.isActive : !acc.isActive;
+        });
+    }
+    if (searchTerm) {
+        filtered = filtered.filter(acc => {
+            const fullName = [acc.firstName, acc.middleName, acc.lastName].filter(Boolean).join(' ');
+            return (
+                (acc.username && acc.username.toLowerCase().includes(searchTerm)) ||
+                (acc.email && acc.email.toLowerCase().includes(searchTerm)) ||
+                (fullName && fullName.toLowerCase().includes(searchTerm)) ||
+                (acc.id && acc.id.toLowerCase().includes(searchTerm))
+            );
+        });
+    }
+    populateAccountsTable(filtered);
+    // Show message if no results
+    if (filtered.length === 0) {
+        const tableBody = document.getElementById('accountsTableBody');
+        tableBody.innerHTML = '<tr><td colspan="6" class="no-data">No matching accounts found</td></tr>';
+    }
+}
+
+// Account Activation Handler
+function handleActivation(accountId, activate) {
+    const modal = document.getElementById('confirmationModal');
+    const confirmButton = document.getElementById('confirmButton');
+    const modalMessage = document.getElementById('modalMessage');
+    
+    modalMessage.textContent = `Are you sure you want to ${activate ? 'activate' : 'deactivate'} this account?`;
+    modal.classList.add('active');
+
+    // Remove any existing event listeners
+    const newConfirmButton = confirmButton.cloneNode(true);
+    confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+
+    // Add new event listener
+    newConfirmButton.addEventListener('click', async () => {
+        // Optimistic UI update
+        const tableBody = document.getElementById('accountsTableBody');
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
+        let affectedRow = null;
+        for (const row of rows) {
+            if (row.innerHTML.includes(accountId)) {
+                affectedRow = row;
+                // Update status badge
+                const statusCell = row.querySelector('.status-indicator');
+                if (statusCell) {
+                    statusCell.textContent = activate ? 'Active' : 'Inactive';
+                    statusCell.className = `status-indicator ${activate ? 'active' : 'inactive'}`;
+                }
+                // Update buttons
+                const btnActivate = row.querySelector('.btn-activate');
+                const btnDeactivate = row.querySelector('.btn-deactivate');
+                if (btnActivate) btnActivate.style.display = activate ? 'none' : '';
+                if (btnDeactivate) btnDeactivate.style.display = activate ? '' : 'none';
+            }
+        }
+        // Update the local data for filters/search
+        const idx = adminAccounts.findIndex(acc => acc.id === accountId);
+        let prevActive = null;
+        if (idx !== -1) {
+            prevActive = adminAccounts[idx].isActive;
+            adminAccounts[idx].isActive = activate;
+        }
+        // Close modal immediately
+        closeModal();
+        // Now do the API call
+        try {
+            const updateResponse = await fetch('/api/update-account-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accountId, isActive: activate })
+            });
+            const data = await updateResponse.json();
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to update account status');
+            }
+            showToast(`Account successfully ${activate ? 'activated' : 'deactivated'}`, 'success');
+        } catch (error) {
+            // Revert UI if failed
+            if (affectedRow) {
+                const statusCell = affectedRow.querySelector('.status-indicator');
+                if (statusCell) {
+                    statusCell.textContent = prevActive ? 'Active' : 'Inactive';
+                    statusCell.className = `status-indicator ${prevActive ? 'active' : 'inactive'}`;
+                }
+                const btnActivate = affectedRow.querySelector('.btn-activate');
+                const btnDeactivate = affectedRow.querySelector('.btn-deactivate');
+                if (btnActivate) btnActivate.style.display = prevActive ? 'none' : '';
+                if (btnDeactivate) btnDeactivate.style.display = prevActive ? '' : 'none';
+            }
+            if (idx !== -1) {
+                adminAccounts[idx].isActive = prevActive;
+            }
+            showToast(error.message || 'Error updating account status', 'error');
+        }
+    });
+}
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    // Add appropriate icon
+    let icon = 'info-circle';
+    if (type === 'success') icon = 'check-circle';
+    if (type === 'error') icon = 'exclamation-circle';
+    
+    toast.innerHTML = `
+        <i class="fa-solid fa-${icon}"></i>
+        <span>${message}</span>
+    `;
+    
+    // Add to container
+    toastContainer.appendChild(toast);
+    
+    // Show with animation
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
+}
+
+// API Functions
+async function updateAccountStatus(accountId, isActive) {
+    try {
+        console.log(`Updating account ${accountId} to isActive=${isActive}`);
+        const response = await fetch('/api/update-account-status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                accountId,
+                isActive
+            })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            console.error('Update account status failed:', data);
+            throw new Error(data.message || 'Failed to update account status');
+        }
+
+        console.log('Update account status successful:', data);
+        return data;
+    } catch (error) {
+        console.error('Error in updateAccountStatus:', error);
+        throw error;
+    }
+}
+
+// Optimize: Improve logAuditTrail function
+async function logAuditTrail(accountId, action) {
+    try {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        
+        // Don't wait for audit trail response
+        fetch('/api/audit-trail', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUser?.id || accountId,
+                role: currentUser?.role || 'system',
+                fullName: currentUser?.fullName || 'System',
+                action,
+                timestamp: new Date().toISOString()
+            })
+        }).catch(error => console.error('Error logging audit trail:', error));
+        
+        return { success: true }; // Return immediately
+    } catch (error) {
+        console.error('Error in logAuditTrail:', error);
+        return { success: false };
+    }
+}
+
+// Modal Functions
+function closeModal() {
+    const modal = document.getElementById('confirmationModal');
+    modal.classList.remove('active');
+}
+
+// Menu Functionality
+function setupMenuFunctionality() {
+    // Menu toggle for mobile
+    document.querySelector('.menu-toggle').addEventListener('click', function() {
+        document.querySelector('.sidebar').classList.toggle('active');
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+        const sidebar = document.querySelector('.sidebar');
+        const menuToggle = document.querySelector('.menu-toggle');
+        
+        if (window.innerWidth <= 768 && 
+            !sidebar.contains(event.target) && 
+            !menuToggle.contains(event.target) && 
+            sidebar.classList.contains('active')) {
+            sidebar.classList.remove('active');
+        }
+    });
+
+    // Sign-out functionality
+    document.querySelector('.sign-out').addEventListener('click', async () => {
+        try {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || localStorage.getItem('userData'));
+            if (currentUser) {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: currentUser.id,
+                        role: currentUser.role,
+                        firstName: currentUser.firstName,
+                        middleName: currentUser.middleName || '',
+                        lastName: currentUser.lastName
+                    })
+                });
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('userData');
+                localStorage.removeItem('token');
+            }
+            window.location.replace('login.html');
+        } catch (error) {
+            console.error('Error during sign out:', error);
+            showToast('Error signing out. Please try again.', 'error');
+        }
+    });
+}

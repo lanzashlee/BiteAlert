@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bite Alert - Super Administrator Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    
+    <button class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
+            </div>
+            <ul class="menu">
+                <li class="active"><a href="dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="admin-management.html"><i class="fa-solid fa-user-gear"></i> Admin Management</a></li>
+                <li><a href="audit-trail.html"><i class="fa-solid fa-file-lines"></i> Audit Logs</a></li>
+                <li><a href="create_account.html"><i class="fa-solid fa-user-plus"></i> Create Account</a></li>
+                <li><a href="superadmin_profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+            </ul>
+            <button class="sign-out" id="signOutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-header">
+                <h2>Super Administrator Dashboard</h2>
+                <div class="date-filter">
+                    <select id="timeRange" class="form-control">
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month" selected>This Month</option>
+                        <option value="year">This Year</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(128, 0, 0, 0.1);">
+                        <i class="fa-solid fa-users" style="color: #800000;"></i>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">Total Patients</div>
+                        <div class="card-value" id="totalPatients">
+                            <span class="spinner" id="spinner-totalPatients" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
+                            <span class="value-text">1</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(46, 213, 115, 0.1);">
+                        <i class="fa-solid fa-syringe" style="color: #2ed573;"></i>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">Vaccine Stocks</div>
+                        <div class="card-value" id="vaccineStocks">
+                            <span class="spinner" id="spinner-vaccineStocks" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
+                            <span class="value-text">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(255, 71, 87, 0.1);">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: #ff4757;"></i>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">Active Cases</div>
+                        <div class="card-value" id="activeCases">
+                            <span class="spinner" id="spinner-activeCases" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
+                            <span class="value-text">1</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(255, 171, 67, 0.1);">
+                        <i class="fa-solid fa-hospital" style="color: #ffab43;"></i>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">Health Centers</div>
+                        <div class="card-value" id="healthCenters">
+                            <span class="spinner" id="spinner-healthCenters" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
+                            <span class="value-text">1</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Admins Card -->
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(0, 123, 255, 0.1);">
+                        <i class="fa-solid fa-user-shield" style="color: #007bff;"></i>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">Admins</div>
+                        <div class="card-value" id="adminCount">
+                            <span class="spinner" id="spinner-adminCount" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
+                            <span class="value-text">1</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Staffs Card -->
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(40, 167, 69, 0.1);">
+                        <i class="fa-solid fa-user-nurse" style="color: #28a745;"></i>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">Staff</div>
+                        <div class="card-value" id="staffCount">
+                            <span class="spinner" id="spinner-staffCount" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
+                            <span class="value-text">2</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Patient Growth</h3>
+                        </div>
+                        <div class="panel-body">
+                            <canvas id="patientsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Age Distribution</h3>
+                        </div>
+                        <div class="panel-body">
+                            <canvas id="casesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Vaccine Stock Trends</h3>
+                        </div>
+                        <div class="panel-body">
+                            <canvas id="vaccinesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Case Severity</h3>
+                        </div>
+                        <div class="panel-body">
+                            <canvas id="severityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Scripts -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

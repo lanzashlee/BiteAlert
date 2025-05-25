@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescriptive Analytics - Vaccination Management</title>
+    <link rel="stylesheet" href="css/prescriptive_analytics.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <button class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
+            <ul class="menu">
+                <li><a href="admin_dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="staff_management.html"><i class="fa-solid fa-users"></i> Staff Management</a></li>
+                <li><a href="admin_center.html"><i class="fa-solid fa-building"></i> Center Data Management</a></li>
+                <li class="active"><a href="prescriptive_analytics.html"><i class="fa-solid fa-chart-line"></i> Prescriptive Analytics</a></li>
+                <li><a href="generate_report.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
+                <li><a href="admin_stock.html"><i class="fa-solid fa-boxes-stacked"></i> Stock & Inventory</a></li>
+                <li><a href="admin_profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+            </ul>
+            <button class="sign-out" id="signOutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
+        </aside>
+        
+        <main class="main-content">
+            <div class="content-header">
+                <h2>Vaccine Prescription Recommendations</h2>
+                <p class="subtitle">Actionable vaccine allocation based on real case data</p>
+            </div>
+
+            <!-- Search and Filter Section for Analytics -->
+            <div class="search-filter-section" style="margin-bottom: 1.5rem;">
+                <div class="search-box">
+                    <input type="text" id="analyticsSearchInput" placeholder="Search center or vaccine...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="filter-box">
+                    <select id="analyticsVaccineFilter">
+                        <option value="">All Vaccine Types</option>
+                        <option value="ARV">ARV</option>
+                        <option value="TCV">TCV</option>
+                        <option value="ERIG">ERIG</option>
+                        <option value="Booster">Booster</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Severity Cards -->
+            <div class="severity-cards">
+                <div class="severity-card emergency">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <div class="severity-info">
+                        <h3>Emergency</h3>
+                        <p class="count">0</p>
+                        <p class="description">Immediate action required</p>
+                    </div>
+                </div>
+                <div class="severity-card high">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <div class="severity-info">
+                        <h3>High Priority</h3>
+                        <p class="count">0</p>
+                        <p class="description">Action needed within 24 hours</p>
+                    </div>
+                </div>
+                <div class="severity-card medium">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <div class="severity-info">
+                        <h3>Medium Priority</h3>
+                        <p class="count">0</p>
+                        <p class="description">Action needed within 48 hours</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Barangay Table -->
+            <div class="analytics-card full-width">
+                    <h3><i class="fa-solid fa-table"></i> Barangay Case Analysis & Recommendations</h3>
+                    <div class="table-responsive">
+                        <table class="barangay-analysis-table">
+                        <thead>
+                            <tr>
+                                <th>Center</th>
+                                <th>Total Cases</th>
+                                <th>Vaccine Type</th>
+                                <th>Current Stock</th>
+                                <th>Required Stock</th>
+                                <th>Priority Level</th>
+                                <th>Recommended Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="barangayAnalysisTable">
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Full Prescriptive Analytics Transfer Plan -->
+            <div class="analytics-card full-width" style="margin-top: 2rem;">
+                <h3><i class="fa-solid fa-truck"></i> Vaccine Transfer Plan (Prescriptive Analytics)</h3>
+                <div id="transferPlanList">
+                    <!-- Transfer plan will be populated by JavaScript -->
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner">
+            <i class="fas fa-circle-notch fa-spin"></i>
+        </div>
+    </div>
+
+    <script src="js/prescriptive_analytics.js"></script>
+</body>
+</html>

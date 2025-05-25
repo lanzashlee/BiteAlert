@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Management - BiteAlert</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="images/logo.png" alt="BiteAlert Logo">
+                <span>BiteAlert</span>
+            </div>
+            <div class="menu-items">
+                <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="admin-management.html"><i class="fas fa-users-cog"></i> Admin Management</a>
+                <a href="generate_report.html"><i class="fas fa-file-alt"></i> Generate Report</a>
+                <a href="prescriptive_analytics.html"><i class="fas fa-chart-line"></i> Analytics</a>
+                <a href="profile.html" class="active"><i class="fas fa-user-circle"></i> Profile</a>
+                <a href="#" id="signOutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <div class="user-info">
+                    <span id="userFullName"></span>
+                    <span id="userRole"></span>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="profile-container">
+                <h1>Profile Management</h1>
+                
+                <!-- Profile Picture Section -->
+                <div class="profile-section">
+                    <div class="profile-picture-container">
+                        <img id="profilePicture" src="images/default-profile.png" alt="Profile Picture">
+                        <div class="picture-upload">
+                            <label for="profilePictureInput" class="upload-btn">
+                                <i class="fas fa-camera"></i> Change Picture
+                            </label>
+                            <input type="file" id="profilePictureInput" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information Section -->
+                <div class="profile-section">
+                    <h2>Personal Information</h2>
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phoneNumber">Phone Number</label>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="birthdate">Birthdate</label>
+                            <input type="date" id="birthdate" name="birthdate" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Save Changes</button>
+                    </form>
+                </div>
+
+                <!-- Change Password Section -->
+                <div class="profile-section">
+                    <h2>Change Password</h2>
+                    <form id="passwordForm">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <div class="password-input">
+                                <input type="password" id="currentPassword" name="currentPassword" required>
+                                <i class="fas fa-eye toggle-password"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <div class="password-input">
+                                <input type="password" id="newPassword" name="newPassword" required>
+                                <i class="fas fa-eye toggle-password"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <div class="password-input">
+                                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                                <i class="fas fa-eye toggle-password"></i>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">Change Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Saving changes...</div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="message success-message">
+        <i class="fas fa-check-circle"></i>
+        <span class="message-text"></span>
+    </div>
+
+    <!-- Error Message -->
+    <div id="errorMessage" class="message error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        <span class="message-text"></span>
+    </div>
+
+    <script src="js/profile.js"></script>
+</body>
+</html> 
