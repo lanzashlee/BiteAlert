@@ -121,7 +121,6 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-fill-color: transparent;
 }
 .logo-alert {
     color: #fffbe6;
@@ -129,7 +128,6 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-fill-color: transparent;
 }
 .logo-modern .paw {
     font-size: 1.3em;
@@ -170,10 +168,10 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
     background: #fffbe6;
-    padding: 2rem 1rem;
+    padding: 2rem;
     position: relative;
     min-width: 320px;
     min-height: 100vh;
@@ -191,41 +189,42 @@ body {
 
 .login-form-modern {
     width: 100%;
-    max-width: 370px;
-    padding: 2rem 1.5rem;
+    max-width: 400px;
+    padding: 2.2rem 1.5rem;
     background: #fff;
     border-radius: 18px;
-    box-shadow: 0 2px 12px 0 rgba(128,0,0,0.04);
-    border: 1px solid #f3e7c9;
+    box-shadow: 0 8px 32px 0 rgba(128,0,0,0.10), 0 2px 8px 0 #a8323233;
+    border: 1.5px solid #e5d6d6;
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
-    backdrop-filter: none;
+    gap: 1.5rem;
 }
 
 .login-form-modern label {
-    font-size: 1rem;
+    font-size: 1.08rem;
     color: #a83232;
-    font-weight: 500;
-    letter-spacing: 0.1px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
     margin-bottom: 0.3rem;
 }
 
 .login-form-modern input {
     width: 100%;
-    padding: 0.9rem 1rem;
-    font-size: 1rem;
-    border-radius: 10px;
-    border: 1px solid #e0e0e0;
+    padding: clamp(0.8rem, 2vw, 1rem);
+    font-size: clamp(0.9rem, 1.5vw, 1.08rem);
+    border-radius: 12px;
+    border: 1.5px solid #e0e0e0;
     background: #faf9f6;
     color: #333;
-    transition: border-color 0.2s;
-    box-shadow: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1.5px 6px 0 rgba(128,0,0,0.03);
 }
+
 .login-form-modern input:focus {
-    border-color: #ffd700;
+    border-color: #800000;
     outline: none;
     background: #fff;
+    box-shadow: 0 0 0 2px #ffd70044;
 }
 
 .email-input-container, .password-container {
@@ -237,47 +236,70 @@ body {
 .password-container i.toggle-password {
     position: absolute;
     right: 16px;
+    left: auto;
     top: 50%;
     transform: translateY(-50%);
     color: #bdbdbd;
-    font-size: 1.1em;
+    font-size: 1.15em;
     transition: color 0.2s;
     z-index: 2;
     cursor: pointer;
 }
 
+.email-input-container input,
+.password-container input {
+    padding-right: 44px;
+    padding-left: 16px;
+}
+
+.email-input-container input:focus ~ i,
+.password-container input:focus ~ .toggle-password {
+    color: #800000;
+}
+
+.toggle-password {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 1.15em;
+    transition: color 0.2s;
+    cursor: pointer;
+}
 .toggle-password:hover {
-    color: #a83232;
+    color: #800000;
 }
 
 .forgot-password {
     color: #a83232;
-    font-weight: 400;
+    font-weight: 500;
     font-size: 0.98em;
     text-decoration: none;
     transition: color 0.2s;
 }
 .forgot-password:hover {
-    color: #ffd700;
+    color: #c94c4c;
 }
 
 .sign-in-btn-modern {
     width: 100%;
-    padding: 13px;
+    padding: 15px;
     background: #a83232;
     color: #fff;
     border: none;
-    border-radius: 10px;
-    font-size: 1.08em;
-    font-weight: 600;
+    border-radius: 12px;
+    font-size: 1.15em;
+    font-weight: 700;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    box-shadow: none;
-    letter-spacing: 0.2px;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px #a8323233;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
 }
 .sign-in-btn-modern:hover {
-    background: #ffd700;
-    color: #a83232;
+    background: #c94c4c;
+    color: #fff;
+    box-shadow: 0 4px 16px #a8323255;
 }
 
 .error-message {
@@ -395,7 +417,7 @@ body {
         border-bottom-right-radius: 22px;
     }
     .login-form-modern {
-        max-width: 95vw;
+        max-width: 100%;
         margin: 0 auto;
     }
 }
@@ -404,7 +426,7 @@ body {
         max-width: 90%;
     }
     .login-form-modern {
-        padding: 1.2rem 0.7rem;
+        padding: 1.5rem;
     }
 }
 @media (max-width: 480px) {
@@ -412,15 +434,14 @@ body {
         padding: 2rem 1rem;
     }
     .right-panel-modern {
-        padding: 1rem 0.2rem;
+        padding: 1.5rem 1rem;
     }
     .login-form-modern {
-        padding: 0.7rem 0.2rem;
-        border-radius: 10px;
+        padding: 1.2rem;
+        border-radius: 15px;
     }
     .login-form-modern input {
-        padding: 0.7rem 0.7rem;
-        font-size: 0.95rem;
+        padding: 0.8rem;
     }
     #forgotPasswordModal {
         width: 95%;
