@@ -178,13 +178,22 @@ document.addEventListener("DOMContentLoaded", function () {
     setInterval(updateCasesPerBarangay, 300000);
 
     // Vaccine Stocks Chart
-    new Chart(document.getElementById("vaccinesChart"), {
+    let vaccinesChart = null;
+
+    function createOrUpdateVaccinesChart(labels, data) {
+        const ctx = document.getElementById("vaccinesChart").getContext("2d");
+        if (vaccinesChart) {
+            vaccinesChart.data.labels = labels;
+            vaccinesChart.data.datasets[0].data = data;
+            vaccinesChart.update();
+        } else {
+            vaccinesChart = new Chart(ctx, {
         type: "line",
         data: {
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                    labels: labels,
             datasets: [{
                 label: "Available Stocks",
-                data: [100, 90, 80, 95, 85, 75],
+                        data: data,
                 borderColor: "#800000",
                 backgroundColor: "rgba(128, 0, 0, 0.1)",
                 borderWidth: 2,
@@ -240,6 +249,23 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     });
+        }
+    }
+
+    async function updateVaccineStockTrends() {
+        try {
+            const response = await fetch('/api/vaccine-stock-trends');
+            const result = await response.json();
+            if (result.success) {
+                createOrUpdateVaccinesChart(result.labels, result.data);
+            }
+        } catch (error) {
+            console.error('Error updating vaccine stock trends:', error);
+        }
+    }
+
+    updateVaccineStockTrends();
+    setInterval(updateVaccineStockTrends, 300000);
 
    // --- SEVERITY CATEGORY CHART ---
    const severityChart = new Chart(document.getElementById("severityChart"), {
@@ -338,8 +364,7 @@ setInterval(updateSeverityChart, 300000);
 
     if (menuToggle && sidebar) {
         menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-            menuToggle.classList.toggle('active');
+            document.querySelector('.dashboard-container').classList.toggle('menu-collapsed');
         });
 
         // Close sidebar when clicking outside on mobile
@@ -569,27 +594,92 @@ setInterval(updateSeverityChart, 300000);
 
     // Fetch and update dashboard card values
     async function updateDashboardCards() {
+        const cardIds = ['totalPatientsCard', 'vaccineStocksCard', 'activeCasesCard', 'healthCentersCard'];
+        // Show spinners and hide values
+        cardIds.forEach(id => {
+            const spinner = document.getElementById('spinner-' + id);
+            const cardElem = document.getElementById(id);
+            const valueText = cardElem ? cardElem.querySelector('.value-text') : null;
+            if (spinner) spinner.style.display = '';
+            if (valueText) valueText.style.display = 'none';
+        });
+        // Artificial delay for spinner visibility
+        await new Promise(resolve => setTimeout(resolve, 1500));
         try {
+            // Fetch vaccine stocks separately
+            const vaccineResponse = await fetch('/api/vaccinestocks');
+            const vaccineResult = await vaccineResponse.json();
+            
+            if (vaccineResult.success) {
+                // Calculate total stock across all centers and vaccines
+                const totalStock = vaccineResult.data.reduce((sum, center) => {
+                    if (Array.isArray(center.vaccines)) {
+                        return sum + center.vaccines.reduce((centerSum, vaccine) => {
+                            const quantity = typeof vaccine.stock === 'object' && vaccine.stock.$numberDouble !== undefined 
+                                ? parseFloat(vaccine.stock.$numberDouble) 
+                                : (typeof vaccine.stock === 'object' && vaccine.stock.$numberInt !== undefined 
+                                    ? parseInt(vaccine.stock.$numberInt) 
+                                    : vaccine.stock);
+                            return centerSum + (typeof quantity === 'number' ? quantity : 0);
+                        }, 0);
+                    }
+                    return sum;
+                }, 0);
+
+                // Update vaccine stocks card
+                const vaccineStocksCard = document.getElementById('vaccineStocksCard');
+                if (vaccineStocksCard) {
+                    const valueText = vaccineStocksCard.querySelector('.value-text');
+                    if (valueText) {
+                        valueText.textContent = totalStock.toLocaleString();
+                    }
+                }
+            }
+
+            // Fetch other dashboard data
             const filterElem = document.getElementById('timeRange');
             const filter = filterElem ? filterElem.value : 'month';
             const response = await fetch(`/api/dashboard-summary?filter=${filter}`);
             const result = await response.json();
-            console.log('Dashboard summary result:', result); // DEBUG LOG
+            
             if (result.success) {
-                const { totalPatients, vaccineStocks, activeCases, healthCenters } = result.data;
+                const { totalPatients, activeCases, healthCenters } = result.data;
                 const totalPatientsCard = document.getElementById('totalPatientsCard');
-                const vaccineStocksCard = document.getElementById('vaccineStocksCard');
                 const activeCasesCard = document.getElementById('activeCasesCard');
                 const healthCentersCard = document.getElementById('healthCentersCard');
-                if (totalPatientsCard) totalPatientsCard.textContent = totalPatients;
-                if (vaccineStocksCard) vaccineStocksCard.textContent = vaccineStocks;
-                if (activeCasesCard) activeCasesCard.textContent = activeCases;
-                if (healthCentersCard) healthCentersCard.textContent = healthCenters;
-            } else {
-                console.error('Dashboard summary API did not return success:', result);
+                
+                if (totalPatientsCard) {
+                    const valueText = totalPatientsCard.querySelector('.value-text');
+                    if (valueText) valueText.textContent = totalPatients.toLocaleString();
+                }
+                if (activeCasesCard) {
+                    const valueText = activeCasesCard.querySelector('.value-text');
+                    if (valueText) valueText.textContent = activeCases.toLocaleString();
+                }
+                if (healthCentersCard) {
+                    const valueText = healthCentersCard.querySelector('.value-text');
+                    if (valueText) valueText.textContent = healthCenters.toLocaleString();
+                }
             }
         } catch (error) {
             console.error('Error updating dashboard cards:', error);
+            // Set default values if there's an error
+            cardIds.forEach(id => {
+                const cardElem = document.getElementById(id);
+                if (cardElem) {
+                    const valueText = cardElem.querySelector('.value-text');
+                    if (valueText) valueText.textContent = '0';
+                }
+            });
+        } finally {
+            // Hide spinners and show values
+            cardIds.forEach(id => {
+                const spinner = document.getElementById('spinner-' + id);
+                const cardElem = document.getElementById(id);
+                const valueText = cardElem ? cardElem.querySelector('.value-text') : null;
+                if (spinner) spinner.style.display = 'none';
+                if (valueText) valueText.style.display = '';
+            });
         }
     }
 
@@ -618,108 +708,4 @@ setInterval(updateSeverityChart, 300000);
     }
     updatePatientGrowth();
     setInterval(updatePatientGrowth, 300000);
-
-    // --- VACCINE STOCK TRENDS CHART ---
-    const vaccinesChart = new Chart(document.getElementById("vaccinesChart"), {
-        type: "line",
-        data: {
-            labels: [],
-            datasets: [{
-                label: "Available Stocks",
-                data: [],
-                borderColor: "#800000",
-                backgroundColor: "rgba(128, 0, 0, 0.1)",
-                borderWidth: 2,
-                pointBackgroundColor: "#800000",
-                pointBorderColor: "#fff",
-                pointHoverBackgroundColor: "#fff",
-                pointHoverBorderColor: "#800000",
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            ...commonOptions,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
-                    },
-                    ticks: {
-                        padding: 10,
-                        callback: function(value) {
-                            return value + ' units';
-                        }
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        padding: 10
-                    }
-                }
-            },
-            plugins: {
-                ...commonOptions.plugins,
-                title: {
-                    display: true,
-                    text: 'Vaccine Stock Levels',
-                    padding: {
-                        top: 10,
-                        bottom: 30
-                    },
-                    font: {
-                        size: 16,
-                        weight: '500'
-                    }
-                }
-            }
-        }
-    });
-    async function updateVaccineStockTrends() {
-        try {
-            const response = await fetch('/api/vaccine-stock-trends');
-            const result = await response.json();
-            if (result.success) {
-                vaccinesChart.data.labels = result.labels;
-                vaccinesChart.data.datasets[0].data = result.data;
-                vaccinesChart.update();
-            }
-        } catch (error) {
-            console.error('Error updating vaccine stock trends:', error);
-        }
-    }
-    updateVaccineStockTrends();
-    setInterval(updateVaccineStockTrends, 300000);
-
-    async function updateSeverityChart() {
-        try {
-            const response = await fetch('/api/severity-distribution');
-            const result = await response.json();
-            if (result.success) {
-                const { Mild, Moderate, Severe } = result.data;
-                const total = Mild + Moderate + Severe;
-                if (total === 0) {
-                    severityChart.data.datasets[0].data = [1, 0, 0];
-                    severityChart.data.labels = ["No Data", "", ""];
-                    severityChart.options.plugins.title.text = 'Case Severity Distribution (No Data)';
-                } else {
-                    severityChart.data.datasets[0].data = [Mild, Moderate, Severe];
-                    severityChart.data.labels = ["Mild", "Moderate", "Severe"];
-                    severityChart.options.plugins.title.text = 'Case Severity Distribution';
-                }
-                severityChart.update();
-            }
-        } catch (error) {
-            console.error('Error updating severity chart:', error);
-        }
-    }
-    updateSeverityChart();
-    setInterval(updateSeverityChart, 300000);
 });

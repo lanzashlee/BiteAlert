@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const menuToggle = document.querySelector('.menu-toggle');
     const sidebar = document.querySelector('.sidebar');
-    const sidebarOverlay = document.querySelector('.sidebar-overlay');
     const signOutBtn = document.getElementById('signOutBtn');
     const profileForm = document.getElementById('profileForm');
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -34,25 +33,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event Listeners
     if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', function(e) {
-            e.stopPropagation();
+        menuToggle.addEventListener('click', function() {
             sidebar.classList.toggle('active');
             menuToggle.classList.toggle('active');
-            if (sidebar.classList.contains('active')) {
-                document.body.classList.add('sidebar-open');
-            } else {
-                document.body.classList.remove('sidebar-open');
-            }
+            document.querySelector('.dashboard-container').classList.toggle('menu-collapsed');
         });
-
-        // Overlay click closes sidebar
-        if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', function() {
-                sidebar.classList.remove('active');
-                menuToggle.classList.remove('active');
-                document.body.classList.remove('sidebar-open');
-        });
-        }
 
         // Close sidebar when clicking outside on mobile
         document.addEventListener('click', function(event) {
@@ -60,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
                     sidebar.classList.remove('active');
                     menuToggle.classList.remove('active');
-                    document.body.classList.remove('sidebar-open');
+                    document.querySelector('.dashboard-container').classList.remove('menu-collapsed');
                 }
             }
         });
@@ -70,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (window.innerWidth > 768) {
                 sidebar.classList.remove('active');
                 menuToggle.classList.remove('active');
-                document.body.classList.remove('sidebar-open');
+                document.querySelector('.dashboard-container').classList.remove('menu-collapsed');
             }
         });
     }

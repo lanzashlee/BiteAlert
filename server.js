@@ -18,7 +18,7 @@ app.use(cors());
 app.use(express.static(path.join(__dirname)));
 
 // MongoDB Configuration
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://lricamara6:Lanz0517@bitealert.febjlgm.mongodb.net/bitealert?retryWrites=true&w=majority";
+const MONGODB_URI = "mongodb+srv://lricamara6:Lanz0517@bitealert.febjlgm.mongodb.net/bitealert?retryWrites=true&w=majority";
 const MONGODB_OPTIONS = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -96,7 +96,8 @@ const staffSchema = new mongoose.Schema({
     password: String,
     role: String,
     createdAt: Date,
-    isApproved: { type: Boolean, default: false }
+    isApproved: { type: Boolean, default: false },
+    isVerified: { type: Boolean, default: false }
 });
 const Staff = mongoose.model('Staff', staffSchema, 'staffs');
 
@@ -1552,7 +1553,11 @@ app.get('/api/staffs', async (req, res) => {
 // Approve staff
 app.post('/api/staffs/:id/approve', async (req, res) => {
     try {
-        const staff = await Staff.findByIdAndUpdate(req.params.id, { isApproved: true }, { new: true });
+        const staff = await Staff.findByIdAndUpdate(
+            req.params.id,
+            { isApproved: true, isVerified: true },
+            { new: true }
+        );
         if (!staff) return res.status(404).json({ success: false, message: 'Staff not found' });
         // Log staff approval
         let firstName = staff.fullName;

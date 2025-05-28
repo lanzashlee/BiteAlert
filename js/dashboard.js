@@ -421,13 +421,43 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         try {
+            // Fetch vaccine stocks separately
+            const vaccineResponse = await fetch('/api/vaccinestocks');
+            const vaccineResult = await vaccineResponse.json();
+            
+            if (vaccineResult.success) {
+                // Calculate total stock across all centers and vaccines
+                const totalStock = vaccineResult.data.reduce((sum, center) => {
+                    if (Array.isArray(center.vaccines)) {
+                        return sum + center.vaccines.reduce((centerSum, vaccine) => {
+                            const quantity = typeof vaccine.stock === 'object' && vaccine.stock.$numberDouble !== undefined 
+                                ? parseFloat(vaccine.stock.$numberDouble) 
+                                : (typeof vaccine.stock === 'object' && vaccine.stock.$numberInt !== undefined 
+                                    ? parseInt(vaccine.stock.$numberInt) 
+                                    : vaccine.stock);
+                            return centerSum + (typeof quantity === 'number' ? quantity : 0);
+                        }, 0);
+                    }
+                    return sum;
+                }, 0);
+
+                // Update vaccine stocks card
+                const vaccineStocksCard = document.getElementById('vaccineStocks');
+                if (vaccineStocksCard) {
+                    const valueText = vaccineStocksCard.querySelector('.value-text');
+                    if (valueText) {
+                        valueText.textContent = totalStock.toLocaleString();
+                    }
+                }
+            }
+
+            // Fetch other dashboard data
             const response = await fetch('/api/dashboard-summary');
             const result = await response.json();
             
             if (result.success && result.data) {
                 const mapping = {
                     totalPatients: result.data.totalPatients || 0,
-                    vaccineStocks: result.data.vaccineStocks || 0,
                     activeCases: result.data.activeCases || 0,
                     healthCenters: result.data.healthCenters || 0,
                     adminCount: result.data.adminCount || 0,
@@ -439,18 +469,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (!cardElem) return;
                     const valueText = cardElem.querySelector('.value-text');
                     if (valueText) {
-                        // Format numbers with commas for better readability
                         valueText.textContent = value.toLocaleString();
                     }
-                });
-            } else {
-                console.error('Failed to fetch dashboard summary:', result.message);
-                // Set default values if fetch fails
-                cardIds.forEach(id => {
-                    const cardElem = document.getElementById(id);
-                    if (!cardElem) return;
-                    const valueText = cardElem.querySelector('.value-text');
-                    if (valueText) valueText.textContent = '0';
                 });
             }
         } catch (error) {

@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingOverlay = document.getElementById('loadingOverlay');
     const toast = document.getElementById('toast');
     const paginationInfo = document.getElementById('paginationInfo');
+    const menuToggle = document.querySelector('.menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
 
     // State
     let allItems = [];
@@ -20,6 +22,41 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize
     loadInventory();
     setupEventListeners();
+
+    // Menu Toggle Functionality
+if (menuToggle && sidebar) {
+    menuToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+        menuToggle.classList.toggle('active');
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+        if (window.innerWidth <= 768) {
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('active');
+                menuToggle.classList.remove('active');
+            }
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+            menuToggle.classList.remove('active');
+        }
+    });
+}    // Load initial data
+    loadReportData();
+    
+    
+    // Sign out functionality
+    if (signOutBtn) {
+        signOutBtn.addEventListener('click', handleSignOut);
+    } else {
+        console.error('Sign out button not found');
+    }
 
     // Event Listeners Setup
     function setupEventListeners() {

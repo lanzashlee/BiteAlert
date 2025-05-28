@@ -6,30 +6,41 @@ const signOutBtn = document.getElementById('signOutBtn');
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-    // Add event listener for Rabies Registry Report if present
-    const rabiesRegistryForm = document.getElementById('rabiesRegistryReportForm');
-    if (rabiesRegistryForm) {
-        rabiesRegistryForm.addEventListener('submit', handleRabiesRegistryReport);
-    }
-    // Add event listener for Animal Bite Exposure Report
-    const animalBiteExposureForm = document.getElementById('animalBiteExposureReportForm');
-    if (animalBiteExposureForm) {
-        animalBiteExposureForm.addEventListener('submit', handleAnimalBiteExposureReport);
-    }
-    // Add event listener for Rabies Utilization Report
-    const rabiesUtilizationForm = document.getElementById('rabiesUtilizationReportForm');
-    if (rabiesUtilizationForm) {
-        rabiesUtilizationForm.addEventListener('submit', handleRabiesUtilizationReport);
-    }
-    // Menu toggle for mobile
-    if (menuToggle && sidebar) {
+// Menu Toggle Functionality
+if (menuToggle && sidebar) {
     menuToggle.addEventListener('click', function() {
         sidebar.classList.toggle('active');
+        menuToggle.classList.toggle('active');
     });
-    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+        if (window.innerWidth <= 768) {
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('active');
+                menuToggle.classList.remove('active');
+            }
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+            menuToggle.classList.remove('active');
+        }
+    });
+}    // Load initial data
+    loadReportData();
+    
+     
+
+    
     // Sign out functionality
     if (signOutBtn) {
-    signOutBtn.addEventListener('click', handleSignOut);
+        signOutBtn.addEventListener('click', handleSignOut);
+    } else {
+        console.error('Sign out button not found');
     }
 });
 

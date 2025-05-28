@@ -224,9 +224,33 @@ body {
 }
 
 .card-value {
-    color: #2c3e50;
+    position: relative;
+    min-height: 2em;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    justify-content: flex-start;
+}
+
+.card-value .spinner {
+    display: none;
+    font-size: 1.2em;
+    color: #aaa;
+    margin-right: 0.3em;
+    vertical-align: middle;
+    animation: spinner-fadein 0.3s;
+}
+
+@keyframes spinner-fadein {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.card-value .value-text {
     font-size: 1.5rem;
     font-weight: 600;
+    color: #2c3e50;
+    vertical-align: middle;
 }
 
 /* Chart Panels */
@@ -412,6 +436,7 @@ footer {
     
     .card-value {
         font-size: 1.1rem;
+        justify-content: center;
     }
 }
 

@@ -35,40 +35,40 @@
         <!-- Right Panel (Login Form) -->
         <div class="right-panel-modern">
             <div class="right-panel-content">
-                <form class="login-form-modern" id="loginForm">
-                    <div id="errorMessage" class="error-message" style="display: none;"></div>
-                    <label for="email">Email</label>
-                    <div class="email-input-container">
-                        <input type="email" id="email" name="email" placeholder="Enter your email" required maxlength="254" oninput="validateEmail(this)">
-                        <i class="fas fa-envelope"></i>
-                        <div id="validationPopup" class="validation-popup">
-                            <div class="popup-header">Email Requirements</div>
-                            <ul>
-                                <li id="lengthCheck" data-label=" Be between 5-254 characters"><i class="fas fa-circle"></i> Be between 5-254 characters</li>
-                                <li id="formatCheck" data-label="Include @ symbol"><i class="fas fa-circle"></i> Include @ symbol(like: yourname@gmail.com)</li>
-                                <li id="domainCheck" data-label="Have a valid domain extension(like: .com, .org, .in, etc.)"><i class="fas fa-circle"></i> Have a valid domain extension(like: .com, .org, .in, etc.)</li>
-                                <li id="specialCheck" data-label="Allowed: letters, numbers, ._-+"><i class="fas fa-circle"></i> Use only letters, numbers, and special characters(like: ._-+)</li>
-                            </ul>
-                        </div>
+            <form class="login-form-modern" id="loginForm">
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <label for="email">Email</label>
+                <div class="email-input-container">
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required maxlength="254" oninput="validateEmail(this)">
+                    <i class="fas fa-envelope"></i>
+                    <div id="validationPopup" class="validation-popup">
+                        <div class="popup-header">Email Requirements</div>
+                        <ul>
+                            <li id="lengthCheck" data-label=" Be between 5-254 characters"><i class="fas fa-circle"></i> Be between 5-254 characters</li>
+                            <li id="formatCheck" data-label="Include @ symbol"><i class="fas fa-circle"></i> Include @ symbol(like: yourname@gmail.com)</li>
+                            <li id="domainCheck" data-label="Have a valid domain extension(like: .com, .org, .in, etc.)"><i class="fas fa-circle"></i> Have a valid domain extension(like: .com, .org, .in, etc.)</li>
+                            <li id="specialCheck" data-label="Allowed: letters, numbers, ._-+"><i class="fas fa-circle"></i> Use only letters, numbers, and special characters(like: ._-+)</li>
+                        </ul>
                     </div>
-                    <label for="password">Password</label>
-                    <div class="password-container">
-                        <input type="password" id="password" placeholder="Enter your password" required oninput="validatePassword(this)">
-                        <i class="fa-solid fa-eye-slash toggle-password" onclick="togglePassword()"></i>
-                        <div id="passwordValidationPopup" class="password-validation-popup">
-                            <div class="popup-header">Password Requirements</div>
-                            <ul>
-                                <li id="passLengthCheck" data-label="At least 8 characters"><i class="fas fa-circle"></i> At least 8 characters</li>
-                                <li id="passUpperCheck" data-label="One uppercase letter"><i class="fas fa-circle"></i> One uppercase letter</li>
-                                <li id="passLowerCheck" data-label="One lowercase letter"><i class="fas fa-circle"></i> One lowercase letter</li>
-                                <li id="passNumberCheck" data-label="One number"><i class="fas fa-circle"></i> One number</li>
-                                <li id="passSpecialCheck" data-label="One special character"><i class="fas fa-circle"></i> One special character</li>
-                            </ul>
-                        </div>
+                </div>
+                <label for="password">Password</label>
+                <div class="password-container">
+                    <input type="password" id="password" placeholder="Enter your password" required oninput="validatePassword(this)">
+                    <i class="fa-solid fa-eye-slash toggle-password" onclick="togglePassword()"></i>
+                    <div id="passwordValidationPopup" class="password-validation-popup">
+                        <div class="popup-header">Password Requirements</div>
+                        <ul>
+                            <li id="passLengthCheck" data-label="At least 8 characters"><i class="fas fa-circle"></i> At least 8 characters</li>
+                            <li id="passUpperCheck" data-label="One uppercase letter"><i class="fas fa-circle"></i> One uppercase letter</li>
+                            <li id="passLowerCheck" data-label="One lowercase letter"><i class="fas fa-circle"></i> One lowercase letter</li>
+                            <li id="passNumberCheck" data-label="One number"><i class="fas fa-circle"></i> One number</li>
+                            <li id="passSpecialCheck" data-label="One special character"><i class="fas fa-circle"></i> One special character</li>
+                        </ul>
                     </div>
-                    <a href="#" class="forgot-password">Forgot Password?</a>
-                    <button type="submit" class="sign-in-btn-modern">Sign In</button>
-                </form>
+                </div>
+                <a href="#" class="forgot-password">Forgot Password?</a>
+                <button type="submit" class="sign-in-btn-modern">Sign In</button>
+            </form>
             </div>
         </div>
     </div>

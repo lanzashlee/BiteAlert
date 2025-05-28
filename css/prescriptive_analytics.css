@@ -1372,6 +1372,11 @@ body {
     background: rgba(255, 193, 7, 0.1);
 }
 
+.severity-card.low i {
+    color: #28a745;
+    background: rgba(40, 167, 69, 0.1);
+}
+
 .severity-info h3 {
     font-size: 1.1rem;
     font-weight: 600;
@@ -1575,5 +1580,18 @@ body {
     .search-box input, .filter-box select {
         font-size: 0.98rem;
         padding: 0.7rem 1rem 0.7rem 2.2rem;
+    }
+}
+
+/* Add responsive styles for menu toggle */
+@media (max-width: 768px) {
+    .dashboard-container.menu-collapsed .sidebar {
+        display: none;
+    }
+    .dashboard-container.menu-collapsed .main-content {
+        margin-left: 0;
+    }
+    .menu-toggle {
+        display: block;
     }
 }

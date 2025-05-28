@@ -347,7 +347,8 @@ document.addEventListener('DOMContentLoaded', () => {
             let actionButtons = '';
             let statusText = '';
             let statusClass = '';
-            if (staff.isApproved === undefined) {
+            // Show Approve/Reject if not approved or not verified
+            if (staff.isApproved === undefined || staff.isVerified === false) {
                 statusText = 'Pending';
                 statusClass = 'inactive';
                 actionButtons = `
@@ -391,8 +392,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 const confirmed = await customConfirm('Are you sure you want to approve this staff account?');
                 if (confirmed) {
                     const res = await fetch(`/api/staffs/${id}/approve`, { method: 'POST' });
-                    if (res.ok) loadStaffs();
-                    else showNotification('Failed to approve staff', 'error');
+                    if (res.ok) {
+                        // Update the row in-place
+                        const row = this.closest('tr, .staff-card');
+                        // Update status badge
+                        const statusBadge = row.querySelector('.status-badge');
+                        if (statusBadge) {
+                            statusBadge.textContent = 'Active';
+                            statusBadge.className = 'status-badge active';
+                            statusBadge.setAttribute('data-status', 'active');
+                        }
+                        // Update action buttons
+                        const actionsCell = row.querySelector('td:last-child, .card-actions');
+                        if (actionsCell) {
+                            actionsCell.innerHTML = `<button class="action-btn deactivate-btn" data-id="${id}">Deactivate</button>`;
+                            // Re-attach deactivate event
+                            actionsCell.querySelector('.deactivate-btn').addEventListener('click', async function() {
+                                const confirmed = await customConfirm('Are you sure you want to deactivate this staff account?');
+                                if (confirmed) {
+                                    const res = await fetch(`/api/staffs/${id}/deactivate`, { method: 'POST' });
+                                    if (res.ok) {
+                                        // Optionally update UI here as well
+                                        showNotification('Staff deactivated', 'success');
+                                    } else {
+                                        showNotification('Failed to deactivate staff', 'error');
+                                    }
+                                }
+                            });
+                        }
+                        showNotification('Staff approved', 'success');
+                    } else {
+                        showNotification('Failed to approve staff', 'error');
+                    }
                 }
             });
         });

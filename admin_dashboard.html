@@ -6,6 +6,7 @@
     <title>Bite Alert - Administrator Dashboard</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/admin_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -51,7 +52,10 @@
                     </div>
                     <div class="card-info">
                         <div class="card-title">Total Patients</div>
-                        <div class="card-value" id="totalPatientsCard">2,547</div>
+                        <div class="card-value" id="totalPatientsCard">
+                            <span class="spinner" id="spinner-totalPatientsCard" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
+                            <span class="value-text">2,547</span>
+                        </div>
                     </div>
                 </div>
                 <div class="card">
@@ -60,7 +64,10 @@
                     </div>
                     <div class="card-info">
                         <div class="card-title">Vaccine Stocks</div>
-                        <div class="card-value" id="vaccineStocksCard">1,250</div>
+                        <div class="card-value" id="vaccineStocksCard">
+                            <span class="spinner" id="spinner-vaccineStocksCard" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
+                            <span class="value-text">1,250</span>
+                        </div>
                     </div>
                 </div>
                 <div class="card">
@@ -69,7 +76,10 @@
                     </div>
                     <div class="card-info">
                         <div class="card-title">Active Cases</div>
-                        <div class="card-value" id="activeCasesCard">156</div>
+                        <div class="card-value" id="activeCasesCard">
+                            <span class="spinner" id="spinner-activeCasesCard" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
+                            <span class="value-text">156</span>
+                        </div>
                     </div>
                 </div>
                 <div class="card">
@@ -78,7 +88,10 @@
                     </div>
                     <div class="card-info">
                         <div class="card-title">Health Centers</div>
-                        <div class="card-value" id="healthCentersCard">3</div>
+                        <div class="card-value" id="healthCentersCard">
+                            <span class="spinner" id="spinner-healthCentersCard" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
+                            <span class="value-text">3</span>
+                        </div>
                     </div>
                 </div>
             </div>

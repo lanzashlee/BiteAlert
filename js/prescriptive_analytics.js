@@ -6,6 +6,9 @@ const signOutBtn = document.getElementById('signOutBtn');
 const mainContent = document.querySelector('.main-content');
 
 
+
+   
+
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing...');
@@ -13,16 +16,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load initial data
     loadAnalyticsData(30); // Load last 30 days of data
     
-    // Menu toggle functionality
-    if (menuToggle) {
+     // Menu Toggle Functionality
+     if (menuToggle && sidebar) {
         menuToggle.addEventListener('click', function() {
-            document.querySelector('.dashboard-container').classList.toggle('menu-collapsed');
+            sidebar.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                }
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                menuToggle.classList.remove('active');
+            }
         });
     }
+
     
     // Sign out functionality
     if (signOutBtn) {
-    signOutBtn.addEventListener('click', handleSignOut);
+        signOutBtn.addEventListener('click', handleSignOut);
     } else {
         console.error('Sign out button not found');
     }
@@ -131,7 +154,8 @@ function analyzeData(casesData, inventoryData) {
         severityCounts: {
             emergency: 0,
             high: 0,
-            medium: 0
+            medium: 0,
+            low: 0
         },
         barangayData: [] // Now an array of rows, not an object
     };
@@ -182,6 +206,9 @@ function analyzeData(casesData, inventoryData) {
         } else if (currentStock <= 29) {
             priority = 'medium';
             analysis.severityCounts.medium++;
+        } else if (currentStock >= 30) {
+            priority = 'low';
+            analysis.severityCounts.low++;
         }
             analysis.barangayData.push({
             barangay: barangay,
@@ -282,6 +309,7 @@ function updateSeverityCards(analysis) {
     document.querySelector('.severity-card.emergency .count').textContent = analysis.severityCounts.emergency;
     document.querySelector('.severity-card.high .count').textContent = analysis.severityCounts.high;
     document.querySelector('.severity-card.medium .count').textContent = analysis.severityCounts.medium;
+    document.querySelector('.severity-card.low .count').textContent = analysis.severityCounts.low;
 }
 
 // Update barangay analysis table to support array data
