@@ -18,15 +18,15 @@ app.use(cors());
 app.use(express.static(path.join(__dirname)));
 
 // MongoDB Configuration
-const MONGODB_URI = "mongodb+srv://lricamara6:Lanz0517@bitealert.febjlgm.mongodb.net/bitealert?retryWrites=true&w=majority";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://lricamara6:Lanz0517@bitealert.febjlgm.mongodb.net/bitealert?retryWrites=true&w=majority";
 const MONGODB_OPTIONS = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 60000, // Increased to 60 seconds
-    socketTimeoutMS: 60000, // Increased to 60 seconds
-    connectTimeoutMS: 60000, // Added connect timeout
+    serverSelectionTimeoutMS: 60000,
+    socketTimeoutMS: 60000,
+    connectTimeoutMS: 60000,
     family: 4,
-    maxPoolSize: 10 // Added connection pool size
+    maxPoolSize: 10
 };
 
 // Schema Definitions

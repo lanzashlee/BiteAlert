@@ -15,9 +15,9 @@ A comprehensive rabies bite case management and vaccine distribution system that
 ## Tech Stack
 
 - Frontend: HTML, CSS, JavaScript
-- Backend: PHP
-- Database: MySQL
-- Server: XAMPP
+- Backend: Node.js
+- Database: MongoDB
+- Server: Node.js Express
 
 ## Setup Instructions
 
@@ -26,23 +26,32 @@ A comprehensive rabies bite case management and vaccine distribution system that
 git clone https://github.com/yourusername/BiteAlert.git
 ```
 
-2. Set up XAMPP:
-   - Install XAMPP if you haven't already
-   - Place the project in the `htdocs` folder
-   - Start Apache and MySQL services
+2. Install dependencies:
+```bash
+npm install
+```
 
-3. Import the database:
-   - Open phpMyAdmin
-   - Create a new database named `bitealert`
-   - Import the database schema from the `database` folder
+3. Set up MongoDB:
+   - Install MongoDB if you haven't already
+   - Start MongoDB service
+   - Create a database named `bitealert`
 
 4. Configure the application:
-   - Update database credentials in `config/database.php`
-   - Ensure proper permissions are set for the project directory
+   - Create a `.env` file in the root directory
+   - Add your MongoDB connection string:
+     ```
+     MONGODB_URI=mongodb://localhost:27017/bitealert
+     PORT=3000
+     ```
 
-5. Access the application:
+5. Start the application:
+```bash
+npm start
+```
+
+6. Access the application:
    - Open your browser
-   - Navigate to `http://localhost/BiteAlert`
+   - Navigate to `http://localhost:3000`
 
 ## Contributing
 
