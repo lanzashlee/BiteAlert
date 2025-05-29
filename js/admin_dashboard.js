@@ -364,6 +364,8 @@ setInterval(updateSeverityChart, 300000);
 
     if (menuToggle && sidebar) {
         menuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            menuToggle.classList.toggle('active');
             document.querySelector('.dashboard-container').classList.toggle('menu-collapsed');
         });
 
@@ -373,6 +375,7 @@ setInterval(updateSeverityChart, 300000);
                 if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
                     sidebar.classList.remove('active');
                     menuToggle.classList.remove('active');
+                    document.querySelector('.dashboard-container').classList.remove('menu-collapsed');
                 }
             }
         });
@@ -382,6 +385,7 @@ setInterval(updateSeverityChart, 300000);
             if (window.innerWidth > 768) {
                 sidebar.classList.remove('active');
                 menuToggle.classList.remove('active');
+                document.querySelector('.dashboard-container').classList.remove('menu-collapsed');
             }
         });
     }

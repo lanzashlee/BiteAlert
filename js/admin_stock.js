@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', function() {
     loadInventory();
     setupEventListeners();
 
-    // Menu Toggle Functionality
-if (menuToggle && sidebar) {
+ // Menu Toggle Functionality
+ if (menuToggle && sidebar) {
     menuToggle.addEventListener('click', function() {
         sidebar.classList.toggle('active');
         menuToggle.classList.toggle('active');
@@ -47,8 +47,9 @@ if (menuToggle && sidebar) {
             menuToggle.classList.remove('active');
         }
     });
-}    // Load initial data
-    loadReportData();
+}
+
+
     
     
     // Sign out functionality

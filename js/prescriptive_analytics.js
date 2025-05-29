@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
         menuToggle.addEventListener('click', function() {
             sidebar.classList.toggle('active');
             menuToggle.classList.toggle('active');
+            document.querySelector('.dashboard-container').classList.toggle('menu-collapsed');
         });
 
         // Close sidebar when clicking outside on mobile
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
                     sidebar.classList.remove('active');
                     menuToggle.classList.remove('active');
+                    document.querySelector('.dashboard-container').classList.remove('menu-collapsed');
                 }
             }
         });
@@ -38,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (window.innerWidth > 768) {
                 sidebar.classList.remove('active');
                 menuToggle.classList.remove('active');
+                document.querySelector('.dashboard-container').classList.remove('menu-collapsed');
             }
         });
     }
@@ -177,11 +180,13 @@ function analyzeData(casesData, inventoryData) {
         // Determine trend (simple: compare last 7 days to previous 7 days)
         const now = new Date();
         const last7 = barangayCases.filter(c => c.incidentDate && (new Date(c.incidentDate) > new Date(now.getTime() - 7*24*60*60*1000))).length;
-        const prev7 = barangayCases.filter(c => c.incidentDate && (new Date(c.incidentDate) > new Date(now.getTime() - 14*24*60*60*1000)) && (new Date(c.incidentDate) <= new Date(now.getTime() - 7*24*60*60*1000))).length;
+        const prev7 = barangayCases.filter(c => c.incidentDate && 
+            (new Date(c.incidentDate) <= new Date(now.getTime() - 7*24*60*60*1000)) && 
+            (new Date(c.incidentDate) > new Date(now.getTime() - 14*24*60*60*1000))
+        ).length;
         let caseTrend = null;
         if (last7 > prev7) caseTrend = 'increasing';
         else if (last7 < prev7) caseTrend = 'decreasing';
-        else caseTrend = 'stable';
 
         // Dynamic required calculation
         let baseRequired = (severeCases * 3) + (moderateCases * 2) + (mildCases * 1);
@@ -270,8 +275,6 @@ function generateRecommendation(data, required, current, options = {}) {
         trendMsg = 'Recent data indicates an upward trend in cases. ';
     } else if (caseTrend === 'decreasing') {
         trendMsg = 'Recent data shows a decrease in cases. ';
-    } else if (caseTrend === 'stable') {
-        trendMsg = 'Case numbers have remained stable recently. ';
     }
 
     // Compose a severity message
