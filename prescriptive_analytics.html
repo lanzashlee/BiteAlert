@@ -19,7 +19,7 @@
             <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
             <ul class="menu">
                 <li><a href="admin_dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="staff_management.html"><i class="fa-solid fa-users"></i> Staff Management</a></li>
+                <li><a href="staff_management.html"><i class="fa-solid fa-users"></i> Staff Account Management</a></li>
                 <li><a href="admin_center.html"><i class="fa-solid fa-building"></i> Center Data Management</a></li>
                 <li class="active"><a href="prescriptive_analytics.html"><i class="fa-solid fa-chart-line"></i> Prescriptive Analytics</a></li>
                 <li><a href="generate_report.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
@@ -54,20 +54,12 @@
 
             <!-- Severity Cards -->
             <div class="severity-cards">
-                <div class="severity-card emergency">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    <div class="severity-info">
-                        <h3>Emergency</h3>
-                        <p class="count">0</p>
-                        <p class="description">Immediate action required</p>
-                    </div>
-                </div>
                 <div class="severity-card high">
                     <i class="fa-solid fa-circle-exclamation"></i>
                     <div class="severity-info">
                         <h3>High Priority</h3>
                         <p class="count">0</p>
-                        <p class="description">Action needed within 24 hours</p>
+                        <p class="description">Immediate action required</p>
                     </div>
                 </div>
                 <div class="severity-card medium">
@@ -75,7 +67,7 @@
                     <div class="severity-info">
                         <h3>Medium Priority</h3>
                         <p class="count">0</p>
-                        <p class="description">Action needed within 48 hours</p>
+                        <p class="description">Action needed soon</p>
                     </div>
                 </div>
                 <div class="severity-card low">
@@ -113,9 +105,30 @@
 
             <!-- Full Prescriptive Analytics Transfer Plan -->
             <div class="analytics-card full-width" style="margin-top: 2rem;">
-                <h3><i class="fa-solid fa-truck"></i> Vaccine Transfer Plan (Prescriptive Analytics)</h3>
-                <div id="transferPlanList">
-                    <!-- Transfer plan will be populated by JavaScript -->
+                <h3><i class="fa-solid fa-truck"></i> Vaccine Transfer Plan</h3>
+                <div class="transfer-plan-container">
+                    <div class="transfer-plan-header">
+                        <div class="transfer-summary">
+                            <div class="summary-item">
+                                <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                                <span class="summary-label">Total Transfers</span>
+                                <span class="summary-value" id="totalTransfers">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fa-solid fa-syringe"></i>
+                                <span class="summary-label">Total Doses</span>
+                                <span class="summary-value" id="totalDoses">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fa-solid fa-building"></i>
+                                <span class="summary-label">Centers Involved</span>
+                                <span class="summary-value" id="centersInvolved">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="transfer-plan-list" id="transferPlanList">
+                        <!-- Transfer plan will be populated by JavaScript -->
+                    </div>
                 </div>
             </div>
         </main>
@@ -125,6 +138,27 @@
     <div id="loadingOverlay" class="loading-overlay">
         <div class="spinner">
             <i class="fas fa-circle-notch fa-spin"></i>
+        </div>
+    </div>
+
+    <!-- Logout Modal -->
+    <div class="signout-modal" id="signoutModal">
+        <div class="signout-modal-overlay"></div>
+        <div class="signout-modal-content">
+            <div class="signout-modal-header">
+                <div class="signout-icon-wrapper">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </div>
+                <h3>Sign Out</h3>
+            </div>
+            <div class="signout-modal-body">
+                <p>Are you sure you want to sign out?</p>
+                <span class="signout-subtitle">You will need to log in again to access your account.</span>
+            </div>
+            <div class="signout-modal-footer">
+                <button class="cancel-btn" id="cancelSignout">Cancel</button>
+                <button class="confirm-btn" id="confirmSignout">Sign Out</button>
+            </div>
         </div>
     </div>
 

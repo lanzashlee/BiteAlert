@@ -21,7 +21,7 @@
             <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
             <ul class="menu">
                 <li class="active"><a href="admin_dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="staff_management.html"><i class="fa-solid fa-users"></i> Staff Management</a></li>
+                <li><a href="staff_management.html"><i class="fa-solid fa-users"></i> Staff Account Management</a></li>
                 <li><a href="admin_center.html"><i class="fa-solid fa-building"></i> Center Data Management</a></li>
                 <li><a href="prescriptive_analytics.html"><i class="fa-solid fa-chart-line"></i> Prescriptive Analytics</a></li>
                 <li><a href="generate_report.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
@@ -149,5 +149,25 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script src="js/admin_dashboard.js"></script>
     
+    <!-- Logout Modal -->
+    <div class="signout-modal" id="signoutModal">
+        <div class="signout-modal-overlay"></div>
+        <div class="signout-modal-content">
+            <div class="signout-modal-header">
+                <div class="signout-icon-wrapper">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </div>
+                <h3>Sign Out</h3>
+            </div>
+            <div class="signout-modal-body">
+                <p>Are you sure you want to sign out?</p>
+                <span class="signout-subtitle">You will need to log in again to access your account.</span>
+            </div>
+            <div class="signout-modal-footer">
+                <button class="cancel-btn" id="cancelSignout">Cancel</button>
+                <button class="confirm-btn" id="confirmSignout">Sign Out</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

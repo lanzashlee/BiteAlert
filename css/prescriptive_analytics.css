@@ -751,17 +751,17 @@ body {
 }
 
 .priority-high {
-    background-color: var(--danger-color);
+    background-color: #dc3545;
     color: white;
 }
 
 .priority-medium {
-    background-color: var(--warning-color);
+    background-color: #ffc107;
     color: #212529;
 }
 
 .priority-low {
-    background-color: var(--success-color);
+    background-color: #28a745;
     color: white;
 }
 
@@ -1357,14 +1357,9 @@ body {
     background: rgba(128, 0, 0, 0.1);
 }
 
-.severity-card.emergency i {
+.severity-card.high i {
     color: #dc3545;
     background: rgba(220, 53, 69, 0.1);
-}
-
-.severity-card.high i {
-    color: #fd7e14;
-    background: rgba(253, 126, 20, 0.1);
 }
 
 .severity-card.medium i {
@@ -1445,13 +1440,8 @@ body {
     text-transform: uppercase;
 }
 
-.priority-emergency {
-    background: #dc3545;
-    color: white;
-}
-
 .priority-high {
-    background: #fd7e14;
+    background: #dc3545;
     color: white;
 }
 
@@ -1594,4 +1584,433 @@ body {
     .menu-toggle {
         display: block;
     }
+}
+
+/* Modern Transfer Plan Styles */
+.transfer-plan-container {
+    background: #fff;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.transfer-plan-header {
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-bottom: 1px solid #eee;
+}
+
+.transfer-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    padding: 0.5rem;
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.03);
+}
+
+.summary-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.summary-item i {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    background: rgba(128, 0, 0, 0.08);
+    padding: 1rem;
+    border-radius: 14px;
+    transition: all 0.3s ease;
+}
+
+.summary-item:hover i {
+    transform: scale(1.1);
+    background: rgba(128, 0, 0, 0.12);
+}
+
+.summary-item .summary-label {
+    font-size: 0.95rem;
+    color: #666;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.summary-item .summary-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-left: auto;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.transfer-plan-list {
+    padding: 2rem;
+    background: #f8f9fa;
+}
+
+.transfer-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.8rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 16px;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.transfer-item.emergency {
+    border-left: 4px solid #dc3545;
+}
+
+.transfer-item.high {
+    border-left: 4px solid #fd7e14;
+}
+
+.transfer-item.medium {
+    border-left: 4px solid #ffc107;
+}
+
+.transfer-item.low {
+    border-left: 4px solid #28a745;
+}
+
+.transfer-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.stat-item i {
+    color: var(--primary-color);
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.transfer-item .priority-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.transfer-item .priority-badge.priority-emergency {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.transfer-item .priority-badge.priority-high {
+    background: rgba(253, 126, 20, 0.1);
+    color: #fd7e14;
+}
+
+.transfer-item .priority-badge.priority-medium {
+    background: rgba(255, 193, 7, 0.1);
+    color: #856404;
+}
+
+.transfer-item .priority-badge.priority-low {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+@media (max-width: 768px) {
+    .transfer-stats {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .stat-item {
+        width: 100%;
+        justify-content: space-between;
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+}
+
+.no-transfers {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #666;
+    font-size: 1.2rem;
+    background: white;
+    border-radius: 16px;
+    margin: 1rem 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.03);
+}
+
+.no-transfers i {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    display: block;
+    opacity: 0.8;
+}
+
+.no-transfers p {
+    max-width: 400px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+    .transfer-plan-header {
+        padding: 1.5rem;
+    }
+    
+    .transfer-plan-list {
+        padding: 1.5rem;
+    }
+    
+    .summary-item {
+        padding: 1.2rem;
+    }
+    
+    .summary-item .summary-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* Modern Compact Transfer Plan Summary List - Enhanced Card/Pill Style */
+#transferPlanSummaryList {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.transfer-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    background: #fff;
+    border-radius: 2rem;
+    box-shadow: 0 4px 16px rgba(128,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+    padding: 1.1rem 2rem;
+    font-size: 1.12rem;
+    font-weight: 500;
+    color: #2c3e50;
+    border-left: 7px solid var(--primary-color);
+    border-right: 7px solid transparent;
+    transition: box-shadow 0.2s, border-color 0.2s, transform 0.15s;
+    margin-bottom: 0.2rem;
+    cursor: pointer;
+    position: relative;
+}
+.transfer-summary-item.emergency { border-left-color: #dc3545; }
+.transfer-summary-item.high { border-left-color: #fd7e14; }
+.transfer-summary-item.medium { border-left-color: #ffc107; }
+.transfer-summary-item.low { border-left-color: #28a745; }
+.transfer-summary-item:hover {
+    box-shadow: 0 8px 32px rgba(128,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07);
+    transform: translateY(-2px) scale(1.01);
+    border-right: 7px solid var(--primary-color);
+    background: linear-gradient(90deg, #f8f9fa 0%, #fff 100%);
+}
+.summary-icon {
+    color: var(--primary-color);
+    font-size: 1.4rem;
+    background: rgba(128,0,0,0.10);
+    border-radius: 50%;
+    padding: 0.7rem;
+    min-width: 2.2rem;
+    min-height: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.summary-amount {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.18rem;
+    background: #f8f9fa;
+    border-radius: 1.2rem;
+    padding: 0.3rem 1rem;
+    margin-right: 0.5rem;
+    box-shadow: 0 1px 4px rgba(128,0,0,0.07);
+}
+.summary-label {
+    font-weight: 400;
+    color: #666;
+    font-size: 0.98rem;
+    margin-left: 0.2rem;
+}
+.summary-vaccine {
+    font-weight: 600;
+    color: #26324a;
+    margin-right: 0.7rem;
+    background: #f3f3f3;
+    border-radius: 1rem;
+    padding: 0.2rem 0.8rem;
+}
+.summary-from, .summary-to {
+    font-weight: 600;
+    color: #34495e;
+    background: #f8f9fa;
+    border-radius: 1rem;
+    padding: 0.2rem 0.8rem;
+}
+.summary-arrow {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    margin: 0 0.2rem;
+}
+@media (max-width: 700px) {
+    #transferPlanSummaryList {
+        gap: 0.6rem;
+    }
+    .transfer-summary-item {
+        font-size: 1rem;
+        padding: 0.7rem 0.7rem;
+        gap: 0.7rem;
+        border-radius: 1.2rem;
+    }
+    .summary-icon {
+        font-size: 1.1rem;
+        padding: 0.4rem;
+        min-width: 1.5rem;
+        min-height: 1.5rem;
+    }
+    .summary-amount {
+        font-size: 1rem;
+        padding: 0.2rem 0.7rem;
+    }
+    .summary-vaccine, .summary-from, .summary-to {
+        padding: 0.15rem 0.5rem;
+        font-size: 0.95rem;
+    }
+}
+
+/* Logout Modal Styles */
+.signout-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.4);
+}
+.signout-modal.active {
+    display: flex;
+}
+.signout-modal-overlay {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    background: transparent;
+}
+.signout-modal-content {
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.15);
+    padding: 2rem 2.5rem;
+    max-width: 350px;
+    width: 90vw;
+    z-index: 2;
+    text-align: center;
+    animation: modalPopIn 0.2s;
+}
+@keyframes modalPopIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.signout-modal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.signout-icon-wrapper {
+    background: #800000;
+    color: #fff;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.signout-modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #800000;
+    font-weight: 600;
+}
+.signout-modal-body p {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.05rem;
+}
+.signout-subtitle {
+    color: #888;
+    font-size: 0.95rem;
+}
+.signout-modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.signout-modal-footer .cancel-btn,
+.signout-modal-footer .confirm-btn {
+    padding: 0.6rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.signout-modal-footer .cancel-btn {
+    background: #eee;
+    color: #333;
+}
+.signout-modal-footer .cancel-btn:hover {
+    background: #ddd;
+}
+.signout-modal-footer .confirm-btn {
+    background: #800000;
+    color: #fff;
+}
+.signout-modal-footer .confirm-btn:hover {
+    background: #a83232;
 }

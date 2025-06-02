@@ -124,13 +124,24 @@ async function loadAnalyticsData(days) {
             vaccinestocksData.data.forEach(center => {
                 if (Array.isArray(center.vaccines)) {
                     center.vaccines.forEach(vaccine => {
+                        // Sum all stockEntries for this vaccine
+                        let quantity = 0;
+                        if (Array.isArray(vaccine.stockEntries)) {
+                            quantity = vaccine.stockEntries.reduce((sum, entry) => {
+                                let val = entry.stock;
+                                if (typeof val === 'object' && val.$numberInt !== undefined) val = parseInt(val.$numberInt);
+                                else if (typeof val === 'object' && val.$numberDouble !== undefined) val = parseFloat(val.$numberDouble);
+                                else val = Number(val);
+                                return sum + (isNaN(val) ? 0 : val);
+                            }, 0);
+                        }
                         inventoryData.push({
                             barangay: center.centerName,
                             name: vaccine.name,
                             type: vaccine.type,
                             brand: vaccine.brand,
-                            quantity: typeof vaccine.stock === 'object' && vaccine.stock.$numberDouble !== undefined ? parseFloat(vaccine.stock.$numberDouble) : (typeof vaccine.stock === 'object' && vaccine.stock.$numberInt !== undefined ? parseInt(vaccine.stock.$numberInt) : vaccine.stock),
-                            status: (typeof vaccine.stock === 'object' && vaccine.stock.$numberDouble !== undefined ? parseFloat(vaccine.stock.$numberDouble) : (typeof vaccine.stock === 'object' && vaccine.stock.$numberInt !== undefined ? parseInt(vaccine.stock.$numberInt) : vaccine.stock)) <= 0 ? 'out' : ((typeof vaccine.stock === 'object' && vaccine.stock.$numberDouble !== undefined ? parseFloat(vaccine.stock.$numberDouble) : (typeof vaccine.stock === 'object' && vaccine.stock.$numberInt !== undefined ? parseInt(vaccine.stock.$numberInt) : vaccine.stock)) <= 10 ? 'low' : 'active')
+                            quantity,
+                            status: quantity <= 0 ? 'out' : (quantity <= 10 ? 'low' : 'active')
                         });
                     });
                 }
@@ -155,7 +166,6 @@ function analyzeData(casesData, inventoryData) {
     console.log('Bite cases data structure:', casesData); // Debug log for bitecases data
     const analysis = {
         severityCounts: {
-            emergency: 0,
             high: 0,
             medium: 0,
             low: 0
@@ -177,48 +187,28 @@ function analyzeData(casesData, inventoryData) {
         const mildCases = barangayCases.filter(c => c.severity && (c.severity.toLowerCase() === 'mild' || c.severity.toLowerCase() === 'low')).length;
         const totalCases = barangayCases.length;
 
-        // Determine trend (simple: compare last 7 days to previous 7 days)
-        const now = new Date();
-        const last7 = barangayCases.filter(c => c.incidentDate && (new Date(c.incidentDate) > new Date(now.getTime() - 7*24*60*60*1000))).length;
-        const prev7 = barangayCases.filter(c => c.incidentDate && 
-            (new Date(c.incidentDate) <= new Date(now.getTime() - 7*24*60*60*1000)) && 
-            (new Date(c.incidentDate) > new Date(now.getTime() - 14*24*60*60*1000))
-        ).length;
-        let caseTrend = null;
-        if (last7 > prev7) caseTrend = 'increasing';
-        else if (last7 < prev7) caseTrend = 'decreasing';
+        // Set required vaccines to always 30
+        const requiredVaccines = 30;
 
-        // Dynamic required calculation
-        let baseRequired = (severeCases * 3) + (moderateCases * 2) + (mildCases * 1);
-        if (caseTrend === 'increasing') {
-            baseRequired = Math.ceil(baseRequired * 1.3);
-        } else if (caseTrend === 'stable') {
-            baseRequired = Math.ceil(baseRequired * 1.1);
-        }
-        // If there are no cases, required is 0; otherwise, at least 30
-        const requiredVaccines = totalCases > 0 ? Math.max(baseRequired, 30) : 0;
-
-        inventoryByBarangay[barangay].forEach(vaccine => {
-        // Determine priority level
-            const currentStock = vaccine.quantity ?? 0;
+        // Merge all vaccine types for this barangay
+        const vaccines = inventoryByBarangay[barangay];
+        const vaccineTypes = vaccines.map(v => v.name).join(', ');
+        const currentStock = vaccines.reduce((sum, v) => sum + (v.quantity ?? 0), 0);
         let priority = 'low';
         if (currentStock <= 10) {
-            priority = 'emergency';
-            analysis.severityCounts.emergency++;
-        } else if (currentStock <= 20) {
             priority = 'high';
             analysis.severityCounts.high++;
-        } else if (currentStock <= 29) {
+        } else if (currentStock <= 20) {
             priority = 'medium';
             analysis.severityCounts.medium++;
-        } else if (currentStock >= 30) {
+        } else {
             priority = 'low';
             analysis.severityCounts.low++;
         }
             analysis.barangayData.push({
             barangay: barangay,
             totalCases: totalCases,
-                vaccineType: vaccine.name,
+            vaccineType: vaccineTypes,
             currentStock: currentStock,
             requiredStock: requiredVaccines,
                 priority: priority,
@@ -228,14 +218,13 @@ function analyzeData(casesData, inventoryData) {
                     currentStock,
                     {
                         barangay,
-                        vaccineType: vaccine.name,
+                    vaccineType: vaccineTypes,
                         severeCases,
                         moderateCases,
                         mildCases,
-                        caseTrend
+                    caseTrend: null
                     }
                 )
-            });
         });
     });
 
@@ -244,13 +233,27 @@ function analyzeData(casesData, inventoryData) {
     // Render the plan in the UI (if #transferPlanList exists)
     setTimeout(() => {
         const planDiv = document.getElementById('transferPlanList');
+        const summaryDiv = document.getElementById('transferPlanSummaryList');
         if (planDiv) {
-            const planHtml = transferPlan.length
-                ? transferPlan.map(t =>
-                    `<li>Transfer <strong>${t.amount}</strong> doses of <strong>${t.vaccine}</strong> from <strong>${t.from}</strong> to <strong>${t.to}</strong></li>`
-                  ).join('')
-                : '<li>No transfers needed. All centers are sufficiently stocked.</li>';
-            planDiv.innerHTML = `<ul>${planHtml}</ul>`;
+            if (transferPlan.length === 0) {
+                planDiv.innerHTML = `
+                    <div class="no-transfers">
+                        <i class="fa-solid fa-check-circle"></i>
+                        <p>No transfers needed. All centers are sufficiently stocked.</p>
+                    </div>
+                `;
+                if (summaryDiv) summaryDiv.innerHTML = '';
+            } else {
+                const summaryHtml = transferPlan.map(t => `
+                    <div class="transfer-summary-item ${t.priority}">
+                        <i class="fa-solid fa-arrow-right-arrow-left summary-icon"></i>
+                        <span class="summary-sentence">
+                            Send <span class="summary-amount">${Number(t.amount) % 1 === 0 ? Number(t.amount) : Number(t.amount).toFixed(1)}</span> doses of <span class="summary-vaccine">${t.vaccine}</span> from <span class="summary-from">${t.from}</span> to <span class="summary-to">${t.to}</span>.
+                        </span>
+                    </div>
+                `).join('');
+                summaryDiv.innerHTML = summaryHtml;
+            }
         }
     }, 0);
 
@@ -309,7 +312,6 @@ function generateRecommendation(data, required, current, options = {}) {
 
 // Update severity cards
 function updateSeverityCards(analysis) {
-    document.querySelector('.severity-card.emergency .count').textContent = analysis.severityCounts.emergency;
     document.querySelector('.severity-card.high .count').textContent = analysis.severityCounts.high;
     document.querySelector('.severity-card.medium .count').textContent = analysis.severityCounts.medium;
     document.querySelector('.severity-card.low .count').textContent = analysis.severityCounts.low;
@@ -426,36 +428,94 @@ function showError(message) {
 
 // Sign Out Handler
 async function handleSignOut() {
-    try {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!user) {
-            window.location.href = '/login.html';
-            return;
-        }
-        
-        const response = await fetch('/api/logout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                userId: user.id,
-                role: user.role,
-                fullName: user.fullName
-            })
-        });
-        
-        if (response.ok) {
-            localStorage.removeItem('user');
-            window.location.href = '/login.html';
-        } else {
-            throw new Error('Logout failed');
-        }
-    } catch (error) {
-        console.error('Error during sign out:', error);
-        showError('Failed to sign out. Please try again.');
+    const signoutModal = document.getElementById('signoutModal');
+    if (signoutModal) {
+        signoutModal.classList.add('active');
     }
 }
+
+// Handle signout confirmation
+document.getElementById('confirmSignout')?.addEventListener('click', async () => {
+    try {
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(localStorage.getItem('userData'));
+        
+        // Always fetch the latest account status to ensure we have the correct ID
+        if (currentUser && currentUser.email) {
+            try {
+                const res = await fetch(`/api/account-status/${encodeURIComponent(currentUser.email)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.account) {
+                        currentUser = { ...currentUser, ...data.account };
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to fetch account status for logout:', err);
+            }
+        }
+
+        if (!currentUser) {
+            throw new Error('No active session found');
+        }
+
+        // Send logout event to backend for audit trail
+        const logoutData = {
+            role: currentUser.role,
+            firstName: currentUser.firstName,
+            middleName: currentUser.middleName || '',
+            lastName: currentUser.lastName,
+            action: 'Signed out'
+        };
+
+        // Always include the ID if it exists, regardless of format
+        if (currentUser.role === 'admin' && currentUser.adminID) {
+            logoutData.adminID = currentUser.adminID;
+        } else if (currentUser.role === 'superadmin' && currentUser.superAdminID) {
+            logoutData.superAdminID = currentUser.superAdminID;
+        }
+
+        try {
+            await fetch('/api/logout', {
+            method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(logoutData)
+            });
+        } catch (err) {
+            console.warn('Logout API call failed:', err);
+        }
+
+        // Clear user session
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('token');
+        
+        // Redirect to login page
+        window.location.replace('login.html');
+    } catch (error) {
+        console.error('Error during sign out:', error);
+        alert(error.message || 'Error signing out. Please try again.');
+    } finally {
+        const signoutModal = document.getElementById('signoutModal');
+        if (signoutModal) {
+            signoutModal.classList.remove('active');
+        }
+    }
+});
+
+// Handle signout cancellation
+document.getElementById('cancelSignout')?.addEventListener('click', () => {
+    const signoutModal = document.getElementById('signoutModal');
+    if (signoutModal) {
+        signoutModal.classList.remove('active');
+    }
+});
+
+// Close modal when clicking outside overlay
+document.getElementById('signoutModal')?.addEventListener('click', (e) => {
+    if (e.target.classList.contains('signout-modal-overlay')) {
+        e.target.closest('.signout-modal').classList.remove('active');
+    }
+});
 
 // Calculate vaccine allocation from patient data
 function calculateVaccineAllocationFromPatients(analysis) {
@@ -583,7 +643,10 @@ function generateFullTransferPlan(allCenters) {
                     from: donor.barangay,
                     to: needCenter.barangay,
                     vaccine: needCenter.vaccineType,
-                    amount: transferAmount
+                    amount: transferAmount,
+                    priority: needCenter.priority,
+                    currentStock: needCenter.currentStock,
+                    requiredStock: needCenter.requiredStock
                 });
                 donor.excess -= transferAmount;
                 donor.currentStock -= transferAmount;
@@ -592,5 +655,74 @@ function generateFullTransferPlan(allCenters) {
             }
         }
     });
+
+    // Update summary statistics
+    const totalTransfers = transfers.length;
+    const totalDoses = transfers.reduce((sum, t) => sum + t.amount, 0);
+    const centersInvolved = new Set([...transfers.map(t => t.from), ...transfers.map(t => t.to)]).size;
+
+    // Update summary elements
+    document.getElementById('totalTransfers').textContent = totalTransfers;
+    document.getElementById('totalDoses').textContent = totalDoses;
+    document.getElementById('centersInvolved').textContent = centersInvolved;
+
+    // Render the plan in the UI
+    const planDiv = document.getElementById('transferPlanList');
+    const summaryDiv = document.getElementById('transferPlanSummaryList');
+    if (planDiv) {
+        if (transfers.length === 0) {
+            planDiv.innerHTML = `
+                <div class="no-transfers">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <p>No transfers needed. All centers are sufficiently stocked.</p>
+                </div>
+            `;
+            if (summaryDiv) summaryDiv.innerHTML = '';
+        } else {
+            const planHtml = transfers.map(t => `
+                <div class="transfer-item ${t.priority}">
+                    <div class="transfer-icon">
+                        <i class="fa-solid fa-truck"></i>
+                    </div>
+                    <div class="transfer-details">
+                        <div class="transfer-header">
+                            <span class="transfer-vaccine">${t.vaccine}</span>
+                            <span class="transfer-amount">${Number(t.amount) % 1 === 0 ? Number(t.amount) : Number(t.amount).toFixed(1)} doses</span>
+                            <span class="priority-badge priority-${t.priority}">${t.priority}</span>
+                        </div>
+                        <div class="transfer-route">
+                            <span class="from">${t.from}</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                            <span class="to">${t.to}</span>
+                        </div>
+                        <div class="transfer-stats">
+                            <div class="stat-item">
+                                <i class="fa-solid fa-box"></i>
+                                <span>Current Stock: ${t.currentStock}</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>Required: ${t.requiredStock}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            planDiv.innerHTML = planHtml;
+            // Modern summary/compact list
+            if (summaryDiv) {
+                const summaryHtml = transfers.map(t => `
+                    <div class="transfer-summary-item ${t.priority}">
+                        <i class="fa-solid fa-arrow-right-arrow-left summary-icon"></i>
+                        <span class="summary-sentence">
+                            Send <span class="summary-amount">${Number(t.amount) % 1 === 0 ? Number(t.amount) : Number(t.amount).toFixed(1)}</span> doses of <span class="summary-vaccine">${t.vaccine}</span> from <span class="summary-from">${t.from}</span> to <span class="summary-to">${t.to}</span>.
+                        </span>
+                    </div>
+                `).join('');
+                summaryDiv.innerHTML = summaryHtml;
+            }
+        }
+    }
+
     return transfers;
 }

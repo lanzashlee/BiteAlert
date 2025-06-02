@@ -21,7 +21,7 @@
             <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
             <ul class="menu">
                 <li><a href="admin_dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="staff_management.html"><i class="fa-solid fa-users"></i> Staff Management</a></li>
+                <li><a href="staff_management.html"><i class="fa-solid fa-users"></i> Staff Account Management</a></li>
                 <li class="active"><a href="admin_center.html"><i class="fa-solid fa-building"></i> Center Data Management</a></li>
                 <li><a href="prescriptive_analytics.html"><i class="fa-solid fa-chart-line"></i> Prescriptive Analytics</a></li>
                 <li><a href="generate_report.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
@@ -33,17 +33,20 @@
         </aside>
         <main class="main-content">
             <div class="barangay-section">
-                <div class="barangay-header">
-                    <h2><i class="fa-solid fa-building"></i> Center Data Management</h2>
-                </div>
-                <div class="barangay-description">
-                    Administrators can input, update, and manage center information for tracking cases and vaccine distribution.
-                </div>
+                <h2 class="barangay-header">Barangay Data Management</h2>
+                <p class="barangay-description">Manage and track barangay health centers and their data.</p>
+                
                 <div class="button-group">
-                    <button class="btn btn-success" data-toggle="modal" data-target="#addModal"><i class="fa fa-plus"></i> Add Center</button>
+                    <button class="btn btn-primary" onclick="$('#addModal').modal('show')">
+                        <i class="fa fa-plus"></i> Add Center
+                    </button>
+                    <a href="admin_center_archive.html" class="btn btn-danger" style="margin-left: 8px;">
+                        <i class="fa fa-archive"></i> Archived
+                    </a>
                 </div>
-                <div class="table-responsive" style="margin-top: 20px;">
-                    <table class="table table-bordered table-striped">
+
+                <div class="table-responsive">
+                    <table class="table table-striped">
                         <thead>
                             <tr>
                                 <th>Center Name</th>
@@ -54,7 +57,7 @@
                             </tr>
                         </thead>
                         <tbody id="barangayTableBody">
-                            <!-- Mock data rows will be inserted by JS -->
+                            <!-- Data will be loaded here -->
                         </tbody>
                     </table>
                 </div>
@@ -120,6 +123,27 @@
           </form>
         </div>
       </div>
+    </div>
+
+    <!-- Logout Modal -->
+    <div class="signout-modal" id="signoutModal">
+        <div class="signout-modal-overlay"></div>
+        <div class="signout-modal-content">
+            <div class="signout-modal-header">
+                <div class="signout-icon-wrapper">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </div>
+                <h3>Sign Out</h3>
+            </div>
+            <div class="signout-modal-body">
+                <p>Are you sure you want to sign out?</p>
+                <span class="signout-subtitle">You will need to log in again to access your account.</span>
+            </div>
+            <div class="signout-modal-footer">
+                <button class="cancel-btn" id="cancelSignout">Cancel</button>
+                <button class="confirm-btn" id="confirmSignout">Sign Out</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

@@ -231,35 +231,94 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function handleSignOut() {
-        try {
-            showLoading();
-            const currentUser = userData;
-            if (currentUser) {
-                await fetch('/api/logout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify({
-                        userId: currentUser.id,
-                        role: currentUser.role,
-                        firstName: currentUser.firstName,
-                        middleName: currentUser.middleName || '',
-                        lastName: currentUser.lastName
-                    })
-                });
-            }
-            // Clear local storage and redirect to login
-            localStorage.removeItem('userData');
-            localStorage.removeItem('token');
-            window.location.href = 'login.html';
-        } catch (error) {
-            console.error('Error during logout:', error);
-            showError('Failed to sign out');
-            hideLoading();
+        const signoutModal = document.getElementById('signoutModal');
+        if (signoutModal) {
+            signoutModal.classList.add('active');
         }
     }
+
+    // Handle signout confirmation
+    document.getElementById('confirmSignout')?.addEventListener('click', async () => {
+        try {
+            let currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(localStorage.getItem('userData'));
+            
+            // Always fetch the latest account status to ensure we have the correct ID
+            if (currentUser && currentUser.email) {
+                try {
+                    const res = await fetch(`/api/account-status/${encodeURIComponent(currentUser.email)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.account) {
+                            currentUser = { ...currentUser, ...data.account };
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch account status for logout:', err);
+                }
+            }
+
+            if (!currentUser) {
+                throw new Error('No active session found');
+            }
+
+            // Send logout event to backend for audit trail
+            const logoutData = {
+                role: currentUser.role,
+                firstName: currentUser.firstName,
+                middleName: currentUser.middleName || '',
+                lastName: currentUser.lastName,
+                action: 'Signed out'
+            };
+
+            // Always include the ID if it exists, regardless of format
+            if (currentUser.role === 'admin' && currentUser.adminID) {
+                logoutData.adminID = currentUser.adminID;
+            } else if (currentUser.role === 'superadmin' && currentUser.superAdminID) {
+                logoutData.superAdminID = currentUser.superAdminID;
+            }
+
+            try {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(logoutData)
+                });
+            } catch (err) {
+                console.warn('Logout API call failed:', err);
+            }
+
+            // Clear user session
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('userData');
+            localStorage.removeItem('token');
+            
+            // Redirect to login page
+            window.location.replace('login.html');
+        } catch (error) {
+            console.error('Error during sign out:', error);
+            alert(error.message || 'Error signing out. Please try again.');
+        } finally {
+            const signoutModal = document.getElementById('signoutModal');
+            if (signoutModal) {
+                signoutModal.classList.remove('active');
+            }
+        }
+    });
+
+    // Handle signout cancellation
+    document.getElementById('cancelSignout')?.addEventListener('click', () => {
+        const signoutModal = document.getElementById('signoutModal');
+        if (signoutModal) {
+            signoutModal.classList.remove('active');
+        }
+    });
+
+    // Close modal when clicking outside overlay
+    document.getElementById('signoutModal')?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('signout-modal-overlay')) {
+            e.target.closest('.signout-modal').classList.remove('active');
+        }
+    });
 
     // Utility Functions
     function showLoading() {

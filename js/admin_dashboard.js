@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 ...commonOptions.plugins,
                 title: {
                     display: true,
-                    text: 'Vaccine Stock Levels',
+                            text: 'Vaccine Stock Trends',
                     padding: {
                         top: 10,
                         bottom: 30
@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
    // --- SEVERITY CATEGORY CHART ---
    const severityChart = new Chart(document.getElementById("severityChart"), {
-    type: "doughnut",
+    type: "pie",
     data: {
         labels: ["Mild", "Moderate", "Severe"],
         datasets: [{
@@ -292,7 +292,6 @@ document.addEventListener("DOMContentLoaded", function () {
     },
     options: {
         ...commonOptions,
-        cutout: '70%',
         plugins: {
             ...commonOptions.plugins,
             title: {
@@ -391,20 +390,93 @@ setInterval(updateSeverityChart, 300000);
     }
 
     // Sign-out functionality
-    document.querySelector('.sign-out')?.addEventListener('click', async () => {
+    document.querySelector('.sign-out')?.addEventListener('click', () => {
+        const signoutModal = document.getElementById('signoutModal');
+        if (signoutModal) {
+            signoutModal.classList.add('active');
+        }
+    });
+
+    // Handle signout confirmation
+    document.getElementById('confirmSignout')?.addEventListener('click', async () => {
         try {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            let currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(localStorage.getItem('userData'));
             
-            if (currentUser) {
-                // Clear user session
-                localStorage.removeItem('currentUser');
+            // Always fetch the latest account status to ensure we have the correct ID
+            if (currentUser && currentUser.email) {
+                try {
+                    const res = await fetch(`/api/account-status/${encodeURIComponent(currentUser.email)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.account) {
+                            currentUser = { ...currentUser, ...data.account };
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch account status for logout:', err);
+                }
             }
+
+            if (!currentUser) {
+                throw new Error('No active session found');
+            }
+
+            // Send logout event to backend for audit trail
+            const logoutData = {
+                role: currentUser.role,
+                firstName: currentUser.firstName,
+                middleName: currentUser.middleName || '',
+                lastName: currentUser.lastName,
+                action: 'Signed out'
+            };
+
+            // Always include the ID if it exists, regardless of format
+            if (currentUser.role === 'admin' && currentUser.adminID) {
+                logoutData.adminID = currentUser.adminID;
+            } else if (currentUser.role === 'superadmin' && currentUser.superAdminID) {
+                logoutData.superAdminID = currentUser.superAdminID;
+            }
+
+            try {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(logoutData)
+                });
+            } catch (err) {
+                console.warn('Logout API call failed:', err);
+            }
+
+            // Clear user session
+                localStorage.removeItem('currentUser');
+            localStorage.removeItem('userData');
+            localStorage.removeItem('token');
             
             // Redirect to login page
             window.location.replace('login.html');
         } catch (error) {
             console.error('Error during sign out:', error);
-            alert('Error signing out. Please try again.');
+            alert(error.message || 'Error signing out. Please try again.');
+        } finally {
+            const signoutModal = document.getElementById('signoutModal');
+            if (signoutModal) {
+                signoutModal.classList.remove('active');
+            }
+        }
+    });
+
+    // Handle signout cancellation
+    document.getElementById('cancelSignout')?.addEventListener('click', () => {
+        const signoutModal = document.getElementById('signoutModal');
+        if (signoutModal) {
+            signoutModal.classList.remove('active');
+        }
+    });
+
+    // Close modal when clicking outside overlay
+    document.getElementById('signoutModal')?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('signout-modal-overlay')) {
+            e.target.closest('.signout-modal').classList.remove('active');
         }
     });
 
@@ -599,16 +671,16 @@ setInterval(updateSeverityChart, 300000);
     // Fetch and update dashboard card values
     async function updateDashboardCards() {
         const cardIds = ['totalPatientsCard', 'vaccineStocksCard', 'activeCasesCard', 'healthCentersCard'];
+        
         // Show spinners and hide values
         cardIds.forEach(id => {
             const spinner = document.getElementById('spinner-' + id);
             const cardElem = document.getElementById(id);
             const valueText = cardElem ? cardElem.querySelector('.value-text') : null;
-            if (spinner) spinner.style.display = '';
+            if (spinner) spinner.style.display = 'inline-block';
             if (valueText) valueText.style.display = 'none';
         });
-        // Artificial delay for spinner visibility
-        await new Promise(resolve => setTimeout(resolve, 1500));
+
         try {
             // Fetch vaccine stocks separately
             const vaccineResponse = await fetch('/api/vaccinestocks');
@@ -619,11 +691,17 @@ setInterval(updateSeverityChart, 300000);
                 const totalStock = vaccineResult.data.reduce((sum, center) => {
                     if (Array.isArray(center.vaccines)) {
                         return sum + center.vaccines.reduce((centerSum, vaccine) => {
-                            const quantity = typeof vaccine.stock === 'object' && vaccine.stock.$numberDouble !== undefined 
-                                ? parseFloat(vaccine.stock.$numberDouble) 
-                                : (typeof vaccine.stock === 'object' && vaccine.stock.$numberInt !== undefined 
-                                    ? parseInt(vaccine.stock.$numberInt) 
-                                    : vaccine.stock);
+                            // Sum all stockEntries for this vaccine
+                            let quantity = 0;
+                            if (Array.isArray(vaccine.stockEntries)) {
+                                quantity = vaccine.stockEntries.reduce((s, entry) => {
+                                    let val = entry.stock;
+                                    if (typeof val === 'object' && val.$numberInt !== undefined) val = parseInt(val.$numberInt);
+                                    else if (typeof val === 'object' && val.$numberDouble !== undefined) val = parseFloat(val.$numberDouble);
+                                    else val = Number(val);
+                                    return s + (isNaN(val) ? 0 : val);
+                                }, 0);
+                            }
                             return centerSum + (typeof quantity === 'number' ? quantity : 0);
                         }, 0);
                     }
@@ -640,6 +718,20 @@ setInterval(updateSeverityChart, 300000);
                 }
             }
 
+            // Fetch all cases directly from bitecases
+            let allCases = 0;
+            try {
+                const bitecasesResponse = await fetch('/api/bitecases');
+                const bitecasesResult = await bitecasesResponse.json();
+                if (Array.isArray(bitecasesResult)) {
+                    allCases = bitecasesResult.length;
+                } else if (Array.isArray(bitecasesResult.data)) {
+                    allCases = bitecasesResult.data.length;
+                }
+            } catch (err) {
+                console.error('Error fetching all cases from bitecases:', err);
+            }
+
             // Fetch other dashboard data
             const filterElem = document.getElementById('timeRange');
             const filter = filterElem ? filterElem.value : 'month';
@@ -647,23 +739,24 @@ setInterval(updateSeverityChart, 300000);
             const result = await response.json();
             
             if (result.success) {
-                const { totalPatients, activeCases, healthCenters } = result.data;
-                const totalPatientsCard = document.getElementById('totalPatientsCard');
-                const activeCasesCard = document.getElementById('activeCasesCard');
-                const healthCentersCard = document.getElementById('healthCentersCard');
+                const { totalPatients, healthCenters } = result.data;
                 
-                if (totalPatientsCard) {
-                    const valueText = totalPatientsCard.querySelector('.value-text');
-                    if (valueText) valueText.textContent = totalPatients.toLocaleString();
-                }
-                if (activeCasesCard) {
-                    const valueText = activeCasesCard.querySelector('.value-text');
-                    if (valueText) valueText.textContent = activeCases.toLocaleString();
-                }
-                if (healthCentersCard) {
-                    const valueText = healthCentersCard.querySelector('.value-text');
-                    if (valueText) valueText.textContent = healthCenters.toLocaleString();
-                }
+                // Update each card with new data
+                const updates = [
+                    { id: 'totalPatientsCard', value: totalPatients },
+                    { id: 'activeCasesCard', value: allCases },
+                    { id: 'healthCentersCard', value: healthCenters }
+                ];
+
+                updates.forEach(({ id, value }) => {
+                    const cardElem = document.getElementById(id);
+                    if (cardElem) {
+                        const valueText = cardElem.querySelector('.value-text');
+                        if (valueText) {
+                            valueText.textContent = value.toLocaleString();
+                        }
+                    }
+                });
             }
         } catch (error) {
             console.error('Error updating dashboard cards:', error);
@@ -676,14 +769,16 @@ setInterval(updateSeverityChart, 300000);
                 }
             });
         } finally {
-            // Hide spinners and show values
-            cardIds.forEach(id => {
-                const spinner = document.getElementById('spinner-' + id);
-                const cardElem = document.getElementById(id);
-                const valueText = cardElem ? cardElem.querySelector('.value-text') : null;
-                if (spinner) spinner.style.display = 'none';
-                if (valueText) valueText.style.display = '';
-            });
+            // Hide spinners and show values with a small delay for smooth transition
+            setTimeout(() => {
+                cardIds.forEach(id => {
+                    const spinner = document.getElementById('spinner-' + id);
+                    const cardElem = document.getElementById(id);
+                    const valueText = cardElem ? cardElem.querySelector('.value-text') : null;
+                    if (spinner) spinner.style.display = 'none';
+                    if (valueText) valueText.style.display = 'inline-block';
+                });
+            }, 300); // Small delay for smooth transition
         }
     }
 

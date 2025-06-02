@@ -39,6 +39,7 @@ const adminSchema = new mongoose.Schema({
     birthdate: { type: Date, required: true },
     password: { type: String, required: true },
     role: { type: String, enum: ['admin'], required: true },
+    adminID: { type: String, unique: true }, // e.g., AD001
     createdAt: { type: Date, default: Date.now },
     isActive: { type: Boolean, default: true },
     updatedAt: { type: Date, default: Date.now },
@@ -55,6 +56,7 @@ const superAdminSchema = new mongoose.Schema({
     birthdate: { type: Date, required: true },
     password: { type: String, required: true },
     role: { type: String, default: 'superadmin' },
+    superAdminID: { type: String, unique: true }, // e.g., SA001
     createdAt: { type: Date, default: Date.now },
     isActive: { type: Boolean, default: true },
     resetOTP: String,
@@ -63,12 +65,15 @@ const superAdminSchema = new mongoose.Schema({
 
 const auditLogSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now },
-    userId: { type: String, required: true },
     role: { type: String, required: true },
     firstName: { type: String, required: true },
     middleName: { type: String },
     lastName: { type: String, required: true },
-    action: { type: String, required: true }
+    action: { type: String, required: true },
+    adminID: String,
+    superAdminID: String,
+    patientID: String,
+    staffID: String
 });
 
 const animalBiteSchema = new mongoose.Schema({
@@ -103,7 +108,7 @@ const Staff = mongoose.model('Staff', staffSchema, 'staffs');
 
 const Admin = mongoose.model('Admin', adminSchema);
 const SuperAdmin = mongoose.model('SuperAdmin', superAdminSchema);
-const AuditLog = mongoose.model('AuditLog', auditLogSchema);
+const AuditTrail = mongoose.model('AuditTrail', auditLogSchema, 'audittrail');
 const AnimalBite = mongoose.model('AnimalBite', animalBiteSchema);
 
 // Inventory Item Schema and Model
@@ -136,60 +141,119 @@ const stockHistorySchema = new mongoose.Schema({
 });
 const StockHistory = mongoose.model('StockHistory', stockHistorySchema);
 
-// Default SuperAdmin Account
-const DEFAULT_SUPERADMIN = {
-    id: "681a4d793a6a72d951d31394",
-    firstName: "SuperAdmin",
-    middleName: "",
-    lastName: "Admin",
-    email: "admin@bitealert.com",
-    phoneNumber: "09123456789",
-    birthdate: new Date("1990-01-01"),
-    password: "Admin123!",
-    role: "superadmin"
-};
+// Default SuperAdmin Accounts
+const DEFAULT_SUPERADMINS = [
+    {
+        id: "681a4d793a6a72d951d31394",
+        firstName: "Lanz Ashlee",
+        middleName: "D.",
+        lastName: "Ricamara",
+        email: "admin@bitealert.com",
+        phoneNumber: "09123456789",
+        birthdate: new Date("1990-01-01"),
+        password: "Admin123!",
+        role: "superadmin",
+        superAdminID: "SA001"
+    },
+    {
+        id: "681a4d793a6a72d951d31395",
+        firstName: "Bite",
+        middleName: "",
+        lastName: "Alert",
+        email: "bitealert1@gmail.com",
+        phoneNumber: "09123456788",
+        birthdate: new Date("1991-01-01"),
+        password: "Admin123!",
+        role: "superadmin",
+        superAdminID: "SA002"
+    },
+    {
+        id: "681a4d793a6a72d951d31396",
+        firstName: "Juan",
+        middleName: "",
+        lastName: "Dela Cruz",
+        email: "admin3@bitealert.com",
+        phoneNumber: "09123456787",
+        birthdate: new Date("1992-01-01"),
+        password: "Admin123!",
+        role: "superadmin",
+        superAdminID: "SA003"
+    }
+];
 
-// Initialize SuperAdmin Account
-async function createInitialSuperAdmin() {
-    try {
-        const existingUser = await SuperAdmin.findOne({ email: DEFAULT_SUPERADMIN.email });
-        if (existingUser) {
-            // Update existing superadmin's password
-            const hashedPassword = await bcrypt.hash(DEFAULT_SUPERADMIN.password, 10);
-            existingUser.password = hashedPassword;
-            await existingUser.save();
-            console.log('Existing SuperAdmin account password updated successfully');
-        } else {
-            // Create new superadmin
-            const hashedPassword = await bcrypt.hash(DEFAULT_SUPERADMIN.password, 10);
-            const superAdmin = new SuperAdmin({
-                firstName: DEFAULT_SUPERADMIN.firstName,
-                middleName: DEFAULT_SUPERADMIN.middleName,
-                lastName: DEFAULT_SUPERADMIN.lastName,
-                email: DEFAULT_SUPERADMIN.email,
-                phoneNumber: DEFAULT_SUPERADMIN.phoneNumber,
-                birthdate: DEFAULT_SUPERADMIN.birthdate,
-                password: hashedPassword,
-                role: DEFAULT_SUPERADMIN.role
-            });
-            await superAdmin.save();
-            console.log('New SuperAdmin account created successfully');
+// Initialize SuperAdmin Accounts
+async function createInitialSuperAdmins() {
+    for (const superAdminData of DEFAULT_SUPERADMINS) {
+        try {
+            const existingUser = await SuperAdmin.findOne({ email: superAdminData.email });
+            if (existingUser) {
+                // Update existing superadmin's password
+                const hashedPassword = await bcrypt.hash(superAdminData.password, 10);
+                existingUser.password = hashedPassword;
+                existingUser.superAdminID = superAdminData.superAdminID;
+                await existingUser.save();
+                console.log(`Existing SuperAdmin account (${superAdminData.email}) password updated successfully`);
+            } else {
+                // Create new superadmin
+                const hashedPassword = await bcrypt.hash(superAdminData.password, 10);
+                const superAdmin = new SuperAdmin({
+                    firstName: superAdminData.firstName,
+                    middleName: superAdminData.middleName,
+                    lastName: superAdminData.lastName,
+                    email: superAdminData.email,
+                    phoneNumber: superAdminData.phoneNumber,
+                    birthdate: superAdminData.birthdate,
+                    password: hashedPassword,
+                    role: superAdminData.role,
+                    superAdminID: superAdminData.superAdminID
+                });
+                await superAdmin.save();
+                console.log(`New SuperAdmin account (${superAdminData.email}) created successfully`);
+            }
+        } catch (error) {
+            console.error(`Error managing SuperAdmin account (${superAdminData.email}):`, error);
         }
-    } catch (error) {
-        console.error('Error managing SuperAdmin account:', error);
+    }
+}
+
+// Patch all superadmins and admins to ensure they have superAdminID and adminID
+async function patchAdminAndSuperAdminIDs() {
+    // Patch SuperAdmins
+    const superAdmins = await SuperAdmin.find({});
+    let superAdminCounter = 1;
+    for (const sa of superAdmins) {
+        if (!sa.superAdminID) {
+            sa.superAdminID = `SA${String(superAdminCounter).padStart(3, '0')}`;
+            await sa.save();
+        }
+        superAdminCounter++;
+    }
+    // Patch Admins
+    const admins = await Admin.find({});
+    let adminCounter = 1;
+    for (const admin of admins) {
+        if (!admin.adminID) {
+            admin.adminID = `AD${String(adminCounter).padStart(3, '0')}`;
+            await admin.save();
+        }
+        adminCounter++;
     }
 }
 
 // Function to log audit trail
-async function logAuditTrail(userId, role, firstName, middleName, lastName, action) {
+async function logAuditTrail(role, firstName, middleName, lastName, action, ids = {}) {
     try {
-        const auditLog = new AuditLog({
-            userId,
+        const auditLog = new AuditTrail({
+            timestamp: new Date(),
             role,
             firstName,
             middleName,
             lastName,
-            action
+            action,
+            adminID: ids.adminID || null,
+            superAdminID: ids.superAdminID || null,
+            patientID: ids.patientID || null,
+            staffID: ids.staffID || null
         });
         await auditLog.save();
     } catch (error) {
@@ -295,46 +359,69 @@ app.post('/api/create-account', async (req, res) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create new admin
-        const newAdmin = new Admin({
-            firstName,
-            middleName,
-            lastName,
-            email: email.toLowerCase(),
-            phoneNumber,
-            birthdate,
-            password: hashedPassword,
-            role,
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
+        let newAccount;
+        if (role === 'superadmin') {
+            const superAdminID = await getNextSuperAdminID();
+            newAccount = new SuperAdmin({
+                firstName,
+                middleName,
+                lastName,
+                email: email.toLowerCase(),
+                phoneNumber,
+                birthdate,
+                password: hashedPassword,
+                role,
+                superAdminID,
+                isActive: true,
+                createdAt: new Date()
+            });
+        } else {
+            const adminID = await getNextAdminID();
+            newAccount = new Admin({
+                firstName,
+                middleName,
+                lastName,
+                email: email.toLowerCase(),
+                phoneNumber,
+                birthdate,
+                password: hashedPassword,
+                role,
+                adminID,
+                isActive: true,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+        }
 
         // Save the admin to the database
-        await newAdmin.save();
-        console.log('New admin created successfully:', newAdmin); // Debug log
+        await newAccount.save();
+        console.log('New admin created successfully:', newAccount); // Debug log
 
         // Log the action
         await logAuditTrail(
-            newAdmin._id,
-            newAdmin.role,
-            newAdmin.firstName,
-            newAdmin.middleName,
-            newAdmin.lastName,
-            'CREATE_ACCOUNT'
+            newAccount.role,
+            newAccount.firstName,
+            newAccount.middleName,
+            newAccount.lastName,
+            'CREATE_ACCOUNT',
+            {
+                adminID: newAccount.adminID,
+                superAdminID: newAccount.superAdminID
+            }
         );
 
         // Broadcast the update to all connected clients
         broadcastUpdate({
             type: 'newAccount',
             account: {
-                id: newAdmin._id,
-                firstName: newAdmin.firstName,
-                middleName: newAdmin.middleName,
-                lastName: newAdmin.lastName,
-                email: newAdmin.email,
-                role: newAdmin.role,
-                isActive: newAdmin.isActive
+                id: newAccount._id,
+                firstName: newAccount.firstName,
+                middleName: newAccount.middleName,
+                lastName: newAccount.lastName,
+                email: newAccount.email,
+                role: newAccount.role,
+                adminID: newAccount.adminID,
+                superAdminID: newAccount.superAdminID
             }
         });
 
@@ -342,12 +429,14 @@ app.post('/api/create-account', async (req, res) => {
             success: true, 
             message: 'Account created successfully',
             user: {
-                id: newAdmin._id,
-                firstName: newAdmin.firstName,
-                middleName: newAdmin.middleName,
-                lastName: newAdmin.lastName,
-                email: newAdmin.email,
-                role: newAdmin.role
+                id: newAccount._id,
+                firstName: newAccount.firstName,
+                middleName: newAccount.middleName,
+                lastName: newAccount.lastName,
+                email: newAccount.email,
+                role: newAccount.role,
+                adminID: newAccount.adminID,
+                superAdminID: newAccount.superAdminID
             }
         });
     } catch (error) {
@@ -356,136 +445,6 @@ app.post('/api/create-account', async (req, res) => {
             success: false, 
             message: 'Failed to create account. Please try again.',
             error: error.message
-        });
-    }
-});
-
-// Login
-app.post('/api/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        // Check SuperAdmin collection first
-        let user = await SuperAdmin.findOne({ email });
-        let userType = 'superadmin';
-
-        // If not found, check Admin collection
-        if (!user) {
-            user = await Admin.findOne({ email });
-            userType = user ? user.role : null;
-        }
-
-        if (!user) {
-            return res.json({
-                success: false,
-                message: 'Invalid email or password'
-            });
-        }
-
-        // Validate password
-        const isValidPassword = await bcrypt.compare(password, user.password);
-        if (!isValidPassword) {
-            return res.json({
-                success: false,
-                message: 'Invalid email or password'
-            });
-        }
-
-        // Check if admin account is active (only for regular admins)
-        if (userType === 'admin' && !user.isActive) {
-            return res.json({
-                success: false,
-                message: 'Your account has been deactivated. Please contact a super admin.'
-            });
-        }
-
-        // Add audit log after successful login
-        await logAuditTrail(user._id, userType, user.firstName, user.middleName, user.lastName, 'Signed in');
-
-        // Send response
-        res.json({
-            success: true,
-            user: {
-                id: user._id,
-                firstName: user.firstName,
-                middleName: user.middleName,
-                lastName: user.lastName,
-                email: user.email,
-                role: userType,
-                isActive: user.isActive || true
-            }
-        });
-    } catch (error) {
-        console.error('Login error:', error);
-        res.json({
-            success: false,
-            message: 'An error occurred during login. Please try again.'
-        });
-    }
-});
-
-// Admin Login Route
-app.post('/api/admin/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        // First check in Admin collection for admin
-        let user = await Admin.findOne({ email, role: 'admin' });
-        let userType = 'admin';
-
-        // If not found in Admin collection, check SuperAdmin collection
-        if (!user) {
-            user = await SuperAdmin.findOne({ email });
-            userType = 'superadmin';
-        }
-
-        // If no user found with that email
-        if (!user) {
-            return res.json({
-                success: false,
-                message: 'Invalid email or password'
-            });
-        }
-
-        // Check if admin account is active (only for regular admins)
-        if (userType === 'admin' && !user.isActive) {
-            return res.json({
-                success: false,
-                message: 'Your account has been deactivated. Please contact a super admin.'
-            });
-        }
-
-        // Verify password
-        const isValidPassword = await bcrypt.compare(password, user.password);
-        if (!isValidPassword) {
-            return res.json({
-                success: false,
-                message: 'Invalid email or password'
-            });
-        }
-
-        // Log the successful login
-        await logAuditTrail(user._id, user.role, user.firstName, user.middleName, user.lastName, 'Logged in to admin portal');
-
-        // Send success response with user info
-        res.json({
-            success: true,
-            user: {
-                id: user._id,
-                firstName: user.firstName,
-                middleName: user.middleName,
-                lastName: user.lastName,
-                email: user.email,
-                role: userType,
-                isActive: user.isActive
-            }
-        });
-
-    } catch (error) {
-        console.error('Login error:', error);
-        res.json({
-            success: false,
-            message: 'An error occurred during login. Please try again.'
         });
     }
 });
@@ -533,8 +492,22 @@ app.post('/login', async (req, res) => {
             });
         }
 
-        // Add audit log after successful login
-        await logAuditTrail(user._id, userType, user.firstName, user.middleName, user.lastName, 'Signed in');
+        // Log the action with the correct ID
+        const ids = {};
+        if (userType === 'admin') {
+            ids.adminID = user.adminID;
+        } else if (userType === 'superadmin') {
+            ids.superAdminID = user.superAdminID;
+        }
+
+        await logAuditTrail(
+            userType,
+            user.firstName,
+            user.middleName,
+            user.lastName,
+            'Signed in',
+            ids
+        );
         
         console.log(`Login successful for ${email} (${userType})`);
 
@@ -548,7 +521,8 @@ app.post('/login', async (req, res) => {
                 lastName: user.lastName,
                 email: user.email,
                 role: userType,
-                isActive: userType === 'superadmin' ? true : user.isActive
+                adminID: user.adminID,
+                superAdminID: user.superAdminID
             }
         });
     } catch (error) {
@@ -565,31 +539,15 @@ app.get('/api/audit-trail', async (req, res) => {
     try {
         const { dateFrom, dateTo, role } = req.query;
         let query = {};
-
-        // Add date range to query if provided
         if (dateFrom || dateTo) {
             query.timestamp = {};
-            if (dateFrom) {
-                query.timestamp.$gte = new Date(dateFrom);
-            }
-            if (dateTo) {
-                query.timestamp.$lte = new Date(dateTo);
-            }
+            if (dateFrom) query.timestamp.$gte = new Date(dateFrom);
+            if (dateTo) query.timestamp.$lte = new Date(dateTo);
         }
-
-        // Add role filter if provided
-        if (role) {
-            query.role = new RegExp(role, 'i');
-        }
-
-        console.log('Fetching audit logs with query:', query);
-        
-        const auditLogs = await AuditLog.find(query)
-            .sort({ timestamp: -1 }) // Sort by newest first
-            .limit(100); // Limit to last 100 entries
-
-        console.log(`Found ${auditLogs.length} audit log entries:`, auditLogs);
-        
+        if (role) query.role = new RegExp(role, 'i');
+        const auditLogs = await AuditTrail.find(query)
+            .sort({ timestamp: -1 })
+            .limit(100);
         res.json(auditLogs);
     } catch (error) {
         console.error('Error fetching audit trail:', error);
@@ -600,8 +558,26 @@ app.get('/api/audit-trail', async (req, res) => {
 // Modify your existing logout endpoint or add one if it doesn't exist
 app.post('/api/logout', async (req, res) => {
     try {
-        const { userId, role, firstName, middleName, lastName } = req.body;
-        await logAuditTrail(userId, role, firstName, middleName, lastName, 'Signed out');
+        const { role, firstName, middleName, lastName, adminID, superAdminID, action } = req.body;
+        
+        // Create the appropriate ID object based on role
+        const ids = {};
+        if (role === 'admin' && adminID) {
+            ids.adminID = adminID;
+        } else if (role === 'superadmin' && superAdminID) {
+            ids.superAdminID = superAdminID;
+        }
+
+        // Log the audit trail with the correct ID
+        await logAuditTrail(
+            role,
+            firstName,
+            middleName,
+            lastName,
+            action || 'Signed out',
+            ids
+        );
+
         res.json({ message: 'Logged out successfully' });
     } catch (error) {
         console.error('Error during logout:', error);
@@ -614,10 +590,10 @@ app.get('/api/admin-accounts', async (req, res) => {
     try {
         const [adminUsers, superAdmins] = await Promise.all([
             Admin.find({ role: 'admin' })
-                .select('_id firstName middleName lastName email createdAt isActive')
+                .select('_id firstName middleName lastName email createdAt isActive adminID')
                 .lean(),
             SuperAdmin.find()
-                .select('_id firstName middleName lastName email createdAt')
+                .select('_id firstName middleName lastName email createdAt superAdminID')
                 .lean()
         ]);
         
@@ -630,7 +606,8 @@ app.get('/api/admin-accounts', async (req, res) => {
                 lastName: admin.lastName,
                 role: 'superadmin',
                 createdAt: admin.createdAt,
-                isActive: true
+                isActive: true,
+                superAdminID: admin.superAdminID
             })),
             ...adminUsers.map(admin => ({
                 id: admin._id,
@@ -640,7 +617,8 @@ app.get('/api/admin-accounts', async (req, res) => {
                 lastName: admin.lastName,
                 role: 'admin',
                 createdAt: admin.createdAt,
-                isActive: admin.isActive
+                isActive: admin.isActive,
+                adminID: admin.adminID
             }))
         ];
 
@@ -686,12 +664,15 @@ app.post('/api/update-account-status', async (req, res) => {
 
         // Log the action in the background
         logAuditTrail(
-            user._id,
             user.role,
             user.firstName,
             user.middleName,
             user.lastName,
-            `Account ${isActiveBoolean ? 'activated' : 'deactivated'}`
+            `Account ${isActiveBoolean ? 'activated' : 'deactivated'}`,
+            {
+                adminID: user.adminID,
+                superAdminID: user.superAdminID
+            }
         ).catch(error => console.error('Error logging audit trail:', error));
 
         // Broadcast the update to all connected clients
@@ -704,7 +685,8 @@ app.post('/api/update-account-status', async (req, res) => {
                 middleName: user.middleName,
                 lastName: user.lastName,
                 role: user.role,
-                isActive: user.isActive
+                adminID: user.adminID,
+                superAdminID: user.superAdminID
             }
         });
         
@@ -718,7 +700,8 @@ app.post('/api/update-account-status', async (req, res) => {
                 lastName: user.lastName,
                 email: user.email,
                 role: user.role,
-                isActive: user.isActive
+                adminID: user.adminID,
+                superAdminID: user.superAdminID
             }
         });
     } catch (error) {
@@ -749,8 +732,8 @@ app.get('/api/account-status/:email', async (req, res) => {
                 middleName: user.middleName,
                 lastName: user.lastName,
                 role: user.role,
-                isActive: user.isActive,
-                createdAt: user.createdAt
+                adminID: user.adminID,
+                superAdminID: user.superAdminID
             };
         } else {
             // If not found, check SuperAdmin collection
@@ -763,8 +746,8 @@ app.get('/api/account-status/:email', async (req, res) => {
                     middleName: superAdmin.middleName,
                     lastName: superAdmin.lastName,
                     role: 'superadmin',
+                    superAdminID: superAdmin.superAdminID, // <-- FIXED
                     isActive: true, // SuperAdmins are always active
-                    createdAt: superAdmin.createdAt
                 };
             }
         }
@@ -931,7 +914,7 @@ app.get('/api/reports/staff', async (req, res) => {
             activityQuery.role = role;
         }
 
-        const activities = await AuditLog.find(activityQuery).sort({ timestamp: -1 });
+        const activities = await AuditTrail.find(activityQuery).sort({ timestamp: -1 });
 
         const response = {
             totalStaff: allStaff.length,
@@ -974,7 +957,9 @@ app.get('/api/profile/:userId', async (req, res) => {
             email: user.email,
             phoneNumber: user.phoneNumber,
             birthdate: user.birthdate,
-            role: user.role
+            role: user.role,
+            adminID: user.adminID,
+            superAdminID: user.superAdminID
         });
     } catch (error) {
         console.error('Error fetching profile:', error);
@@ -1018,13 +1003,17 @@ app.put('/api/profile/:userId', async (req, res) => {
         await user.save();
 
         // Log the update
+        const auditUserId3 = getAuditUserId(user);
         await logAuditTrail(
-            userId,
             isSuperAdmin ? 'superadmin' : 'admin',
             firstName,
             middleName,
             lastName,
-            'Updated profile information'
+            'Updated profile information',
+            {
+                adminID: user.adminID,
+                superAdminID: user.superAdminID
+            }
         );
 
         res.json({
@@ -1034,7 +1023,9 @@ app.put('/api/profile/:userId', async (req, res) => {
                 middleName: user.middleName,
                 lastName: user.lastName,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                adminID: user.adminID,
+                superAdminID: user.superAdminID
             }
         });
     } catch (error) {
@@ -1072,13 +1063,17 @@ app.put('/api/profile/:userId/password', async (req, res) => {
         await user.save();
 
         // Log the password change
+        const auditUserId4 = getAuditUserId(user);
         await logAuditTrail(
-            userId,
             isSuperAdmin ? 'superadmin' : 'admin',
             user.firstName,
             user.middleName,
             user.lastName,
-            'Changed password'
+            'Changed password',
+            {
+                adminID: user.adminID,
+                superAdminID: user.superAdminID
+            }
         );
 
         res.json({ message: 'Password updated successfully' });
@@ -1567,13 +1562,14 @@ app.post('/api/staffs/:id/approve', async (req, res) => {
             firstName = parts[0];
             lastName = parts.slice(1).join(' ');
         }
+        const auditUserId5 = getAuditUserId(staff);
         await logAuditTrail(
-            staff._id,
             staff.role,
             firstName,
             '',
             lastName,
-            'Staff approved'
+            'Staff approved',
+            { staffID: staff.staffID }
         );
         res.json({ success: true, staff });
     } catch (error) {
@@ -1594,13 +1590,14 @@ app.delete('/api/staffs/:id', async (req, res) => {
             firstName = parts[0];
             lastName = parts.slice(1).join(' ');
         }
+        const auditUserId6 = getAuditUserId(staff);
         await logAuditTrail(
-            staff._id,
             staff.role,
             firstName,
             '',
             lastName,
-            'Staff rejected/deleted'
+            'Staff rejected/deleted',
+            { staffID: staff.staffID }
         );
         res.json({ success: true });
     } catch (error) {
@@ -1621,13 +1618,14 @@ app.post('/api/staffs/:id/deactivate', async (req, res) => {
             firstName = parts[0];
             lastName = parts.slice(1).join(' ');
         }
+        const auditUserId7 = getAuditUserId(staff);
         await logAuditTrail(
-            staff._id,
             staff.role,
             firstName,
             '',
             lastName,
-            'Staff deactivated'
+            'Staff deactivated',
+            { staffID: staff.staffID }
         );
         res.json({ success: true, staff });
     } catch (error) {
@@ -1648,13 +1646,15 @@ app.post('/api/staffs/:id/activate', async (req, res) => {
             firstName = parts[0];
             lastName = parts.slice(1).join(' ');
         }
+        const auditUserId8 = getAuditUserId(staff);
         await logAuditTrail(
-            staff._id,
+            auditUserId8,
             staff.role,
             firstName,
             '',
             lastName,
-            'Staff activated'
+            'Staff activated',
+            { staffID: staff.staffID }
         );
         res.json({ success: true, staff });
     } catch (error) {
@@ -1846,6 +1846,7 @@ const centerSchema = new mongoose.Schema({
   address: { type: String, required: true },
   contactPerson: { type: String, required: true },
   contactNumber: { type: String, required: true },
+  isArchived: { type: Boolean, default: false },
   lastUpdated: { type: Date, default: Date.now }
 });
 const Center = mongoose.model('Center', centerSchema);
@@ -1968,6 +1969,38 @@ app.delete('/api/centers/:id', async (req, res) => {
   }
 });
 
+// Add archive/unarchive endpoint
+app.put('/api/centers/:id/archive', async (req, res) => {
+  try {
+    console.log('Updating center archive status:', req.params.id, req.body);
+    const { isArchived } = req.body;
+    
+    if (typeof isArchived !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'isArchived must be a boolean value' });
+    }
+
+    const center = await Center.findByIdAndUpdate(
+      req.params.id,
+      { 
+        isArchived,
+        lastUpdated: new Date()
+      },
+      { new: true }
+    );
+
+    if (!center) {
+      console.log('Center not found:', req.params.id);
+      return res.status(404).json({ success: false, message: 'Center not found.' });
+    }
+
+    console.log('Center archive status updated successfully:', center);
+    res.json({ success: true, data: center });
+  } catch (err) {
+    console.error('Error updating center archive status:', err);
+    res.status(500).json({ success: false, message: 'Failed to update center archive status', error: err.message });
+  }
+});
+
 // Connect to MongoDB with retry logic
 const connectWithRetry = async () => {
     try {
@@ -1976,7 +2009,8 @@ const connectWithRetry = async () => {
         console.log('Connected to MongoDB Atlas');
         
         // Create initial super admin after successful connection
-        await createInitialSuperAdmin();
+        await createInitialSuperAdmins();
+        await patchAdminAndSuperAdminIDs(); // <-- Ensure all IDs are patched on startup
         
         // Start the server only after successful database connection
         server.listen(PORT, () => {
@@ -2258,6 +2292,7 @@ app.post('/api/insert-sample-centers', async (req, res) => {
                 address: "N. Domingo St., San Juan City",
                 contactPerson: "Dr. Maria Santos",
                 contactNumber: "09123456789",
+                isArchived: false,
                 vaccines: [
                     { type: "Anti-Rabies", count: 150 },
                     { type: "Tetanus Toxoid", count: 100 }
@@ -2268,6 +2303,7 @@ app.post('/api/insert-sample-centers', async (req, res) => {
                 address: "Greenhills Shopping Center, San Juan City",
                 contactPerson: "Dr. John Cruz",
                 contactNumber: "09234567890",
+                isArchived: false,
                 vaccines: [
                     { type: "Anti-Rabies", count: 200 },
                     { type: "Tetanus Toxoid", count: 150 }
@@ -2278,6 +2314,7 @@ app.post('/api/insert-sample-centers', async (req, res) => {
                 address: "Pinaglabanan St., San Juan City",
                 contactPerson: "Dr. Robert Lim",
                 contactNumber: "09345678901",
+                isArchived: false,
                 vaccines: [
                     { type: "Anti-Rabies", count: 180 },
                     { type: "Tetanus Toxoid", count: 120 }
@@ -2288,6 +2325,7 @@ app.post('/api/insert-sample-centers', async (req, res) => {
                 address: "Little Baguio, San Juan City",
                 contactPerson: "Dr. Sarah Tan",
                 contactNumber: "09456789012",
+                isArchived: false,
                 vaccines: [
                     { type: "Anti-Rabies", count: 120 },
                     { type: "Tetanus Toxoid", count: 80 }
@@ -2298,6 +2336,7 @@ app.post('/api/insert-sample-centers', async (req, res) => {
                 address: "Salapan Rd., San Juan City",
                 contactPerson: "Dr. Michael Reyes",
                 contactNumber: "09567890123",
+                isArchived: false,
                 vaccines: [
                     { type: "Anti-Rabies", count: 100 },
                     { type: "Tetanus Toxoid", count: 70 }
@@ -2325,9 +2364,8 @@ app.get('/api/bitecases', async (req, res) => {
     try {
         // Use the correct model for the 'bitecases' collection
         const BiteCase = mongoose.connection.model('BiteCase', new mongoose.Schema({}, { strict: false }), 'bitecases');
-        const cases = await BiteCase.find({})
-            .select('patientName age gender barangay incidentDate animalType vaccinationStatus woundLocation severity treatmentGiven followUpDate status')
-            .sort({ incidentDate: -1 });
+        // Return all fields for each case
+        const cases = await BiteCase.find({}).sort({ incidentDate: -1 });
         res.json(cases);
     } catch (error) {
         console.error('Error fetching bite cases:', error);
@@ -2435,6 +2473,15 @@ app.get('/api/vaccine-stock-trends', async (req, res) => {
             const items = await InventoryItem.find({ lastUpdated: { $lt: end } });
             return items.reduce((sum, item) => sum + (item.quantity || 0), 0);
         }));
+
+        // FIX: For the latest month, use the current total from vaccinestocks
+        if (months.length > 0) {
+            const VaccineStock = mongoose.connection.model('VaccineStock', new mongoose.Schema({}, { strict: false }), 'vaccinestocks');
+            const allStocks = await VaccineStock.find({});
+            const currentTotal = allStocks.reduce((sum, item) => sum + (item.quantity || 0), 0);
+            data[data.length - 1] = currentTotal;
+        }
+
         res.json({ success: true, labels: months.map(m => m.label), data });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -2692,3 +2739,33 @@ app.get('/api/vaccinestocks', async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to fetch vaccine stocks', error: err.message });
     }
 });
+
+// Helper to generate next adminID or superAdminID
+async function getNextAdminID() {
+    const lastAdmin = await Admin.findOne({}).sort({ adminID: -1 }).select('adminID');
+    let next = 1;
+    if (lastAdmin && lastAdmin.adminID) {
+        const num = parseInt(lastAdmin.adminID.replace('AD', ''));
+        if (!isNaN(num)) next = num + 1;
+    }
+    return `AD${String(next).padStart(3, '0')}`;
+}
+async function getNextSuperAdminID() {
+    const lastSuper = await SuperAdmin.findOne({}).sort({ superAdminID: -1 }).select('superAdminID');
+    let next = 1;
+    if (lastSuper && lastSuper.superAdminID) {
+        const num = parseInt(lastSuper.superAdminID.replace('SA', ''));
+        if (!isNaN(num)) next = num + 1;
+    }
+    return `SA${String(next).padStart(3, '0')}`;
+}
+
+// Helper to get the correct audit user ID
+function getAuditUserId(user) {
+    if (!user) return '';
+    if (user.role === 'admin' && user.adminID) return user.adminID;
+    if (user.role === 'superadmin' && user.superAdminID) return user.superAdminID;
+    if (user.role === 'staff' && user.staffID) return user.staffID;
+    if (user.role === 'patient' && user.patientID) return user.patientID;
+    return user._id;
+}

@@ -619,3 +619,107 @@
         padding: 1.5rem;
     }
 } 
+
+/* Logout Modal Styles */
+.signout-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.4);
+}
+.signout-modal.active {
+    display: flex;
+}
+.signout-modal-overlay {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    background: transparent;
+}
+.signout-modal-content {
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.15);
+    padding: 2rem 2.5rem;
+    max-width: 350px;
+    width: 90vw;
+    z-index: 2;
+    text-align: center;
+    animation: modalPopIn 0.2s;
+}
+@keyframes modalPopIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.signout-modal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.signout-icon-wrapper {
+    background: #800000;
+    color: #fff;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.signout-modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #800000;
+    font-weight: 600;
+}
+.signout-modal-body p {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.05rem;
+}
+.signout-subtitle {
+    color: #888;
+    font-size: 0.95rem;
+}
+.signout-modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+.signout-modal-footer .cancel-btn,
+.signout-modal-footer .confirm-btn {
+    padding: 0.6rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.signout-modal-footer .cancel-btn {
+    background: #eee;
+    color: #333;
+}
+.signout-modal-footer .cancel-btn:hover {
+    background: #ddd;
+}
+.signout-modal-footer .confirm-btn {
+    background: #800000;
+    color: #fff;
+}
+.signout-modal-footer .confirm-btn:hover {
+    background: #a83232;
+} 

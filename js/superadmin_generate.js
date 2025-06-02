@@ -2,36 +2,35 @@
 const loadingOverlay = document.getElementById('loadingOverlay');
 const menuToggle = document.querySelector('.menu-toggle');
 const sidebar = document.querySelector('.sidebar');
-const signOutBtn = document.getElementById('signOutBtn');
+
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-    animateCards();
-    // Menu Toggle Functionality
-    if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-            menuToggle.classList.toggle('active');
-        });
+// Menu Toggle Functionality
+if (menuToggle && sidebar) {
+    menuToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+        menuToggle.classList.toggle('active');
+    });
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
-                    sidebar.classList.remove('active');
-                    menuToggle.classList.remove('active');
-                }
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 768) {
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+        if (window.innerWidth <= 768) {
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
                 sidebar.classList.remove('active');
                 menuToggle.classList.remove('active');
             }
-        });
-    }    // Load initial data
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+            menuToggle.classList.remove('active');
+        }
+    });
+}    // Load initial data
     // loadReportData();
     
      
@@ -39,9 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Sign out functionality
     if (signOutBtn) {
-        signOutBtn.addEventListener('click', function() {
-            showModal(document.getElementById('signoutModal'));
-        });
+        signOutBtn.addEventListener('click', handleSignOut);
     } else {
         console.error('Sign out button not found');
     }
@@ -50,21 +47,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const rabiesUtilizationForm = document.getElementById('rabiesUtilizationReportForm');
     if (rabiesUtilizationForm) {
         rabiesUtilizationForm.addEventListener('submit', handleRabiesUtilizationReport);
-        rabiesUtilizationForm.querySelector('.btn-secondary').addEventListener('click', handlePrintRabiesUtilizationReport);
     }
     const animalBiteExposureForm = document.getElementById('animalBiteExposureReportForm');
     if (animalBiteExposureForm) {
         animalBiteExposureForm.addEventListener('submit', handleAnimalBiteExposureReport);
-        animalBiteExposureForm.querySelector('.btn-secondary').addEventListener('click', handlePrintAnimalBiteExposureReport);
     }
     const rabiesRegistryForm = document.getElementById('rabiesRegistryReportForm');
     if (rabiesRegistryForm) {
         rabiesRegistryForm.addEventListener('submit', handleRabiesRegistryReport);
-        rabiesRegistryForm.querySelector('.btn-secondary').addEventListener('click', handlePrintRabiesRegistryReport);
     }
     // --- Custom Demographic Report Handler ---
     document.getElementById('customDemographicReportForm').addEventListener('submit', handleCustomDemographicReport);
-    document.querySelector('#customDemographicReportForm .btn-secondary').addEventListener('click', handlePrintCustomDemographicReport);
+
+    document.getElementById('rabiesUtilizationReportForm').querySelector('.btn-secondary').addEventListener('click', handlePrintRabiesUtilizationReport);
+    document.getElementById('animalBiteExposureReportForm').querySelector('.btn-secondary').addEventListener('click', handlePrintAnimalBiteExposureReport);
+    document.getElementById('rabiesRegistryReportForm').querySelector('.btn-secondary').addEventListener('click', handlePrintRabiesRegistryReport);
+    document.getElementById('customDemographicReportForm').querySelector('.btn-secondary').addEventListener('click', handlePrintCustomDemographicReport);
 });
 
 // Error Handler
@@ -301,93 +299,55 @@ function formatDate(date) {
     }
 }
 
-// Sign Out Handler
-async function handleSignOut() {
-    const signoutModal = document.getElementById('signoutModal');
-    if (signoutModal) {
+// Sign-out functionality
+const signOutBtn = document.querySelector('.sign-out');
+const signoutModal = document.getElementById('signoutModal');
+const cancelSignout = document.getElementById('cancelSignout');
+const confirmSignout = document.getElementById('confirmSignout');
+
+if (signOutBtn) {
+    signOutBtn.addEventListener('click', () => {
         signoutModal.classList.add('active');
-    }
+    });
 }
 
-// Handle signout confirmation
-document.getElementById('confirmSignout')?.addEventListener('click', async () => {
-    try {
-        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(localStorage.getItem('userData'));
-        
-        // Always fetch the latest account status to ensure we have the correct ID
-        if (currentUser && currentUser.email) {
-            try {
-                const res = await fetch(`/api/account-status/${encodeURIComponent(currentUser.email)}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.success && data.account) {
-                        currentUser = { ...currentUser, ...data.account };
-                    }
-                }
-            } catch (err) {
-                console.warn('Failed to fetch account status for logout:', err);
-            }
-        }
+if (cancelSignout) {
+    cancelSignout.addEventListener('click', () => {
+        signoutModal.classList.remove('active');
+    });
+}
 
-        if (!currentUser) {
-            throw new Error('No active session found');
-        }
-
-        // Send logout event to backend for audit trail
-        const logoutData = {
-            role: currentUser.role,
-            firstName: currentUser.firstName,
-            middleName: currentUser.middleName || '',
-            lastName: currentUser.lastName,
-            action: 'Signed out'
-        };
-
-        // Always include the ID if it exists, regardless of format
-        if (currentUser.role === 'admin' && currentUser.adminID) {
-            logoutData.adminID = currentUser.adminID;
-        } else if (currentUser.role === 'superadmin' && currentUser.superAdminID) {
-            logoutData.superAdminID = currentUser.superAdminID;
-        }
-
+if (confirmSignout) {
+    confirmSignout.addEventListener('click', async () => {
         try {
-            await fetch('/api/logout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(logoutData)
-            });
-        } catch (err) {
-            console.warn('Logout API call failed:', err);
-        }
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            if (!currentUser) {
+                throw new Error('No active session found');
+            }
 
-        // Clear user session
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('userData');
-        localStorage.removeItem('token');
-        
-        // Redirect to login page
-        window.location.replace('login.html');
-    } catch (error) {
-        console.error('Error during sign out:', error);
-        alert(error.message || 'Error signing out. Please try again.');
-    } finally {
-        const signoutModal = document.getElementById('signoutModal');
-        if (signoutModal) {
+            // Clear user session
+            localStorage.removeItem('currentUser');
+            
+            // Redirect to login page
+            window.location.replace('login.html');
+        } catch (error) {
+            console.error('Error during sign out:', error);
+            alert(error.message || 'Error signing out. Please try again.');
+        } finally {
             signoutModal.classList.remove('active');
         }
-    }
-});
+    });
+}
 
-// Handle signout cancellation
-document.getElementById('cancelSignout')?.addEventListener('click', function() {
-    hideModal(document.getElementById('signoutModal'));
-});
-
-// Close modal when clicking outside overlay
-document.getElementById('signoutModal')?.addEventListener('click', function(e) {
-    if (e.target.classList.contains('signout-modal-overlay')) {
-        hideModal(document.getElementById('signoutModal'));
-    }
-});
+// Close modal when clicking outside
+if (signoutModal) {
+    signoutModal.addEventListener('click', (e) => {
+        if (e.target === signoutModal) {
+            signoutModal.classList.remove('active');
+        }
+    });
+}
 
 // Handler for Animal Bite Exposure Report
 async function handleAnimalBiteExposureReport(e) {
@@ -574,7 +534,7 @@ function generateRabiesUtilizationPDF(data) {
     doc.save('rabies-utilization-report.pdf');
 }
 
-// --- Custom Demographic Report Handler ---
+// Handler for Custom Demographic Report
 async function handleCustomDemographicReport(e) {
     e.preventDefault();
     try {
@@ -699,106 +659,6 @@ function generateCustomDemographicPDF(data, sex, ageGroup) {
     doc.save('custom-demographic-report.pdf');
 }
 
-async function handlePrintCustomDemographicReport(e) {
-    e.preventDefault();
-    try {
-        // Fetch registry data (reuse rabies registry endpoint)
-        const response = await fetch('/api/reports/rabies-registry');
-        const result = await response.json();
-        if (!result.success) throw new Error(result.message);
-        let data = result.data;
-        // Get filters
-        const sex = document.getElementById('filterSex').value;
-        const ageGroup = document.getElementById('filterAge').value;
-        // Filter by sex
-        if (sex !== 'all') {
-            data = data.filter(row => (row.sex || '').toLowerCase() === sex.toLowerCase());
-        }
-        // Filter by age group
-        if (ageGroup !== 'all') {
-            data = data.filter(row => {
-                let age = parseInt(row.age);
-                if (isNaN(age)) return false;
-                if (ageGroup === '0-5') return age >= 0 && age <= 5;
-                if (ageGroup === '6-12') return age >= 6 && age <= 12;
-                if (ageGroup === '13-18') return age >= 13 && age <= 18;
-                if (ageGroup === '19-35') return age >= 19 && age <= 35;
-                if (ageGroup === '36-60') return age >= 36 && age <= 60;
-                if (ageGroup === '61+') return age >= 61;
-                return false;
-            });
-        }
-        printCustomDemographicReport(data, sex, ageGroup);
-    } catch (error) {
-        handleError(error);
-    }
-}
-
-function printCustomDemographicReport(data, sex, ageGroup) {
-    // Build printable HTML
-    let win = window.open('', '', 'width=1000,height=700');
-    let filterText = `<div style='font-size:16px;font-weight:600;margin-bottom:8px;'>Custom Demographic Report</div>`;
-    filterText += `<div style='font-size:13px;margin-bottom:8px;'>Filters: ${sex === 'all' ? 'Sex: All' : 'Sex: ' + sex} | ${ageGroup === 'all' ? 'Age: All' : 'Age: ' + ageGroup}</div>`;
-    filterText += `<div style='font-size:12px;margin-bottom:12px;'>Generated: ${new Date().toLocaleString()}</div>`;
-    // Table
-    let table = `<table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse;width:100%;font-size:12px;'>`;
-    table += `<thead><tr style='background:#800000;color:#fff;'><th>Reg. No.</th><th>Date</th><th>Name (Last, First)</th><th>Sex</th><th>Age</th><th>Exposure Date</th><th>Animal Type</th><th>Bite Type</th><th>Bite Site</th></tr></thead><tbody>`;
-    data.forEach(row => {
-        table += `<tr>` +
-            `<td>${row.registrationNo || ''}</td>` +
-            `<td>${row.registrationDate || ''}</td>` +
-            `<td>${row.name || ''}</td>` +
-            `<td>${row.sex || ''}</td>` +
-            `<td>${row.age || ''}</td>` +
-            `<td>${row.exposureDate || ''}</td>` +
-            `<td>${row.animalType || ''}</td>` +
-            `<td>${row.biteType || ''}</td>` +
-            `<td>${row.biteSite || ''}</td>` +
-        `</tr>`;
-    });
-    table += `</tbody></table>`;
-    // Summary by Sex
-    const sexCounts = {};
-    data.forEach(row => {
-        const s = (row.sex || 'Unknown').toString().trim();
-        sexCounts[s] = (sexCounts[s] || 0) + 1;
-    });
-    let sexSummary = `<div style='margin-top:18px;font-size:14px;font-weight:600;'>Summary by Sex</div><table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse;width:300px;font-size:12px;margin-bottom:12px;'><thead><tr style='background:#800000;color:#fff;'><th>Sex</th><th>Count</th></tr></thead><tbody>`;
-    Object.entries(sexCounts).forEach(([k,v]) => {
-        sexSummary += `<tr><td>${k}</td><td>${v}</td></tr>`;
-    });
-    sexSummary += `</tbody></table>`;
-    // Summary by Age Group
-    const ageGroups = {
-        '0-5': 0,
-        '6-12': 0,
-        '13-18': 0,
-        '19-35': 0,
-        '36-60': 0,
-        '61+': 0,
-        'Unknown': 0
-    };
-    data.forEach(row => {
-        let age = parseInt(row.age);
-        if (isNaN(age)) ageGroups['Unknown']++;
-        else if (age <= 5) ageGroups['0-5']++;
-        else if (age <= 12) ageGroups['6-12']++;
-        else if (age <= 18) ageGroups['13-18']++;
-        else if (age <= 35) ageGroups['19-35']++;
-        else if (age <= 60) ageGroups['36-60']++;
-        else ageGroups['61+']++;
-    });
-    let ageSummary = `<div style='margin-top:10px;font-size:14px;font-weight:600;'>Summary by Age Group</div><table border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse;width:350px;font-size:12px;'><thead><tr style='background:#800000;color:#fff;'><th>Age Group</th><th>Count</th></tr></thead><tbody>`;
-    Object.entries(ageGroups).forEach(([k,v]) => {
-        ageSummary += `<tr><td>${k}</td><td>${v}</td></tr>`;
-    });
-    ageSummary += `</tbody></table>`;
-    // Print
-    win.document.write(`<html><head><title>Print Report</title></head><body style='font-family:Poppins,sans-serif;padding:24px;'>${filterText}${table}${sexSummary}${ageSummary}</body></html>`);
-    win.document.close();
-    setTimeout(() => { win.print(); win.close(); }, 400);
-}
-
 async function handlePrintRabiesUtilizationReport(e) {
     e.preventDefault();
     try {
@@ -917,38 +777,4 @@ function printRabiesRegistryReport(data) {
     win.document.write(`<html><head><title>Print Report</title></head><body style='font-family:Poppins,sans-serif;padding:24px;'>${html}</body></html>`);
     win.document.close();
     setTimeout(() => { win.print(); win.close(); }, 400);
-}
-
-// Animate cards on load
-function animateCards() {
-    const cards = document.querySelectorAll('.report-card');
-    cards.forEach((card, i) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px) scale(0.98)';
-        setTimeout(() => {
-            card.style.transition = 'opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0) scale(1)';
-        }, 120 + i * 120);
-    });
-}
-
-// Smooth loading overlay transitions
-function showLoading() {
-    loadingOverlay.classList.add('active');
-    loadingOverlay.setAttribute('aria-busy', 'true');
-}
-function hideLoading() {
-    loadingOverlay.classList.remove('active');
-    loadingOverlay.setAttribute('aria-busy', 'false');
-}
-
-// Enhance modal fade in/out
-function showModal(modal) {
-    modal.classList.add('active');
-    modal.setAttribute('aria-busy', 'true');
-}
-function hideModal(modal) {
-    modal.classList.remove('active');
-    modal.setAttribute('aria-busy', 'false');
 }

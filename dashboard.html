@@ -25,9 +25,9 @@
             </div>
             <ul class="menu">
                 <li class="active"><a href="dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="admin-management.html"><i class="fa-solid fa-user-gear"></i> Admin Management</a></li>
-                <li><a href="audit-trail.html"><i class="fa-solid fa-file-lines"></i> Audit Logs</a></li>
-                <li><a href="create_account.html"><i class="fa-solid fa-user-plus"></i> Create Account</a></li>
+                <li><a href="admin-management.html"><i class="fa-solid fa-user-gear"></i> Administrator Account Management</a></li>
+                <li><a href="audit-trail.html"><i class="fa-solid fa-file-lines"></i> Audit Trail</a></li>
+                <li><a href="superadmin_generate.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
                 <li><a href="superadmin_profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
             </ul>
             <button class="sign-out" id="signOutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
@@ -102,7 +102,7 @@
                         <i class="fa-solid fa-user-shield" style="color: #007bff;"></i>
                     </div>
                     <div class="card-info">
-                        <div class="card-title">Admins</div>
+                        <div class="card-title">Administrator Accounts</div>
                         <div class="card-value" id="adminCount">
                             <span class="spinner" id="spinner-adminCount" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
                             <span class="value-text">1</span>
@@ -139,7 +139,7 @@
                 <div class="col-md-6">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h3 class="panel-title">Age Distribution</h3>
+                            <h3 class="panel-title">Case Distribution</h3>
                         </div>
                         <div class="panel-body">
                             <canvas id="casesChart"></canvas>
@@ -149,7 +149,7 @@
                 <div class="col-md-6">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h3 class="panel-title">Vaccine Stock Trends</h3>
+                            <h3 class="panel-title">Vaccine Stock Levels</h3>
                         </div>
                         <div class="panel-body">
                             <canvas id="vaccinesChart"></canvas>
@@ -175,5 +175,32 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script src="js/dashboard.js"></script>
+
+    <!-- Sign Out Modal -->
+    <div class="signout-modal" id="signoutModal">
+        <div class="signout-modal-overlay"></div>
+        <div class="signout-modal-content">
+            <div class="signout-modal-header">
+                <div class="signout-icon-wrapper">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </div>
+                <h3>Sign Out</h3>
+            </div>
+            <div class="signout-modal-body">
+                <p>Are you sure you want to sign out?</p>
+                <span class="signout-subtitle">You will need to log in again to access your account.</span>
+            </div>
+            <div class="signout-modal-footer">
+                <button class="cancel-btn" id="cancelSignout">
+                    <i class="fa-solid fa-xmark"></i>
+                    Cancel
+                </button>
+                <button class="confirm-btn" id="confirmSignout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

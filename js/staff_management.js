@@ -367,10 +367,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const tr = document.createElement('tr');
             tr.setAttribute('data-staff-id', staff._id);
             tr.innerHTML = `
-                <td>${staff.staffId}</td>
-                <td>${staff.firstName || ''}</td>
-                <td>${staff.middleName || ''}</td>
-                <td>${staff.lastName || ''}</td>
+                <td>${staff.staffId || ''}</td>
+                <td>${staff.firstName || (staff.fullName ? staff.fullName.split(' ')[0] : '')}</td>
+                <td>${staff.middleName || (staff.fullName && staff.fullName.split(' ').length === 3 ? staff.fullName.split(' ')[1] : '')}</td>
+                <td>${staff.lastName || (staff.fullName ? staff.fullName.split(' ').slice(-1)[0] : '')}</td>
                 <td>${staff.role || ''}</td>
                 <td>${staff.phone || ''}</td>
                 <td>
@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${statusText}
                     </span>
                 </td>
-                <td>
+                <td class="action-buttons">
                     ${actionButtons}
                 </td>
             `;
@@ -443,11 +443,78 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.querySelectorAll('.deactivate-btn').forEach(btn => {
             btn.addEventListener('click', async function() {
                 const id = this.getAttribute('data-id');
-                const confirmed = await customConfirm('Are you sure you want to deactivate this staff account?');
+                const confirmed = await customConfirm('Are you sure you want to deactivate this staff account? This will prevent the staff from accessing the system.');
                 if (confirmed) {
                     const res = await fetch(`/api/staffs/${id}/deactivate`, { method: 'POST' });
-                    if (res.ok) loadStaffs();
-                    else showNotification('Failed to deactivate staff', 'error');
+                    if (res.ok) {
+                        // --- Real-time UI update ---
+                        const row = this.closest('tr, .staff-card');
+                        // Update status badge
+                        const statusBadge = row.querySelector('.status-badge');
+                        if (statusBadge) {
+                            statusBadge.textContent = 'Inactive';
+                            statusBadge.className = 'status-badge inactive';
+                            statusBadge.setAttribute('data-status', 'inactive');
+                        }
+                        // Update action buttons
+                        const actionsCell = row.querySelector('td:last-child, .card-actions');
+                        if (actionsCell) {
+                            actionsCell.innerHTML = `<button class="action-btn activate-btn" data-id="${id}">Activate</button>`;
+                            // Re-attach activate event
+                            actionsCell.querySelector('.activate-btn').addEventListener('click', async function() {
+                                const confirmed = await customConfirm('Are you sure you want to activate this staff account? The staff will regain access to the system.');
+                                if (confirmed) {
+                                    const res = await fetch(`/api/staffs/${id}/activate`, { method: 'POST' });
+                                    if (res.ok) {
+                                        // Real-time UI update for activation
+                                        const row = this.closest('tr, .staff-card');
+                                        const statusBadge = row.querySelector('.status-badge');
+                                        if (statusBadge) {
+                                            statusBadge.textContent = 'Active';
+                                            statusBadge.className = 'status-badge active';
+                                            statusBadge.setAttribute('data-status', 'active');
+                                        }
+                                        const actionsCell = row.querySelector('td:last-child, .card-actions');
+                                        if (actionsCell) {
+                                            actionsCell.innerHTML = `<button class="action-btn deactivate-btn" data-id="${id}">Deactivate</button>`;
+                                            // Re-attach deactivate event
+                                            actionsCell.querySelector('.deactivate-btn').addEventListener('click', async function() {
+                                                const confirmed = await customConfirm('Are you sure you want to deactivate this staff account? This will prevent the staff from accessing the system.');
+                                                if (confirmed) {
+                                                    const res = await fetch(`/api/staffs/${id}/deactivate`, { method: 'POST' });
+                                                    if (res.ok) {
+                                                        // Real-time UI update for deactivation
+                                                        const row = this.closest('tr, .staff-card');
+                                                        const statusBadge = row.querySelector('.status-badge');
+                                                        if (statusBadge) {
+                                                            statusBadge.textContent = 'Inactive';
+                                                            statusBadge.className = 'status-badge inactive';
+                                                            statusBadge.setAttribute('data-status', 'inactive');
+                                                        }
+                                                        const actionsCell = row.querySelector('td:last-child, .card-actions');
+                                                        if (actionsCell) {
+                                                            actionsCell.innerHTML = `<button class="action-btn activate-btn" data-id="${id}">Activate</button>`;
+                                                            // Re-attach activate event
+                                                            actionsCell.querySelector('.activate-btn').addEventListener('click', arguments.callee.caller);
+                                                        }
+                                                        showNotification('Staff deactivated', 'success');
+                                                    } else {
+                                                        showNotification('Failed to deactivate staff', 'error');
+                                                    }
+                                                }
+                                            });
+                                        }
+                                        showNotification('Staff activated', 'success');
+                                    } else {
+                                        showNotification('Failed to activate staff', 'error');
+                                    }
+                                }
+                            });
+                        }
+                        showNotification('Staff deactivated', 'success');
+                    } else {
+                        showNotification('Failed to deactivate staff', 'error');
+                    }
                 }
             });
         });
@@ -455,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.querySelectorAll('.activate-btn').forEach(btn => {
             btn.addEventListener('click', async function() {
                 const id = this.getAttribute('data-id');
-                const confirmed = await customConfirm('Are you sure you want to activate this staff account?');
+                const confirmed = await customConfirm('Are you sure you want to activate this staff account? The staff will regain access to the system.');
                 if (confirmed) {
                     const res = await fetch(`/api/staffs/${id}/activate`, { method: 'POST' });
                     if (res.ok) loadStaffs();
@@ -470,29 +537,93 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sign-out functionality
     const signOutBtn = document.getElementById('signOutBtn');
-    signOutBtn?.addEventListener('click', async () => {
+    signOutBtn?.addEventListener('click', () => {
+        const signoutModal = document.getElementById('signoutModal');
+        if (signoutModal) {
+            signoutModal.classList.add('active');
+        }
+    });
+
+    // Handle signout confirmation
+    document.getElementById('confirmSignout')?.addEventListener('click', async () => {
         try {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || localStorage.getItem('userData'));
-            if (currentUser) {
+            let currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(localStorage.getItem('userData'));
+            
+            // Always fetch the latest account status to ensure we have the correct ID
+            if (currentUser && currentUser.email) {
+                try {
+                    const res = await fetch(`/api/account-status/${encodeURIComponent(currentUser.email)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.account) {
+                            currentUser = { ...currentUser, ...data.account };
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch account status for logout:', err);
+                }
+            }
+
+            if (!currentUser) {
+                throw new Error('No active session found');
+            }
+
+            // Send logout event to backend for audit trail
+            const logoutData = {
+                role: currentUser.role,
+                firstName: currentUser.firstName,
+                middleName: currentUser.middleName || '',
+                lastName: currentUser.lastName,
+                action: 'Signed out'
+            };
+
+            // Always include the ID if it exists, regardless of format
+            if (currentUser.role === 'admin' && currentUser.adminID) {
+                logoutData.adminID = currentUser.adminID;
+            } else if (currentUser.role === 'superadmin' && currentUser.superAdminID) {
+                logoutData.superAdminID = currentUser.superAdminID;
+            }
+
+            try {
                 await fetch('/api/logout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: currentUser.id,
-                        role: currentUser.role,
-                        firstName: currentUser.firstName,
-                        middleName: currentUser.middleName || '',
-                        lastName: currentUser.lastName
-                    })
+                    body: JSON.stringify(logoutData)
                 });
+            } catch (err) {
+                console.warn('Logout API call failed:', err);
+            }
+
+            // Clear user session
                 localStorage.removeItem('currentUser');
                 localStorage.removeItem('userData');
                 localStorage.removeItem('token');
-            }
+            
+            // Redirect to login page
             window.location.replace('login.html');
         } catch (error) {
             console.error('Error during sign out:', error);
-            alert('Error signing out. Please try again.');
+            alert(error.message || 'Error signing out. Please try again.');
+        } finally {
+            const signoutModal = document.getElementById('signoutModal');
+            if (signoutModal) {
+                signoutModal.classList.remove('active');
+            }
+        }
+    });
+
+    // Handle signout cancellation
+    document.getElementById('cancelSignout')?.addEventListener('click', () => {
+        const signoutModal = document.getElementById('signoutModal');
+        if (signoutModal) {
+            signoutModal.classList.remove('active');
+        }
+    });
+
+    // Close modal when clicking outside overlay
+    document.getElementById('signoutModal')?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('signout-modal-overlay')) {
+            e.target.closest('.signout-modal').classList.remove('active');
         }
     });
 }); 

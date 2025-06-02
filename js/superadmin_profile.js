@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const menuToggle = document.querySelector('.menu-toggle');
     const sidebar = document.querySelector('.sidebar');
-    const signOutBtn = document.getElementById('signOutBtn');
     const profileForm = document.getElementById('profileForm');
     const loadingOverlay = document.getElementById('loadingOverlay');
     const toast = document.getElementById('toast');
@@ -60,20 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    signOutBtn?.addEventListener('click', handleSignOut);
-    profileForm?.addEventListener('submit', handleFormSubmit);
-    
-    passwordToggles?.forEach(toggle => {
-        toggle.addEventListener('click', () => {
-            const input = toggle.previousElementSibling;
-            if (input) {
-                const type = input.type === 'password' ? 'text' : 'password';
-                input.type = type;
-                toggle.classList.toggle('fa-eye');
-                toggle.classList.toggle('fa-eye-slash');
-            }
-        });
-    });
 
     // Functions
     async function loadUserProfile() {
@@ -298,3 +283,52 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+// Sign-out functionality
+const signOutBtn = document.querySelector('.sign-out');
+const signoutModal = document.getElementById('signoutModal');
+const cancelSignout = document.getElementById('cancelSignout');
+const confirmSignout = document.getElementById('confirmSignout');
+
+if (signOutBtn) {
+    signOutBtn.addEventListener('click', () => {
+        signoutModal.classList.add('active');
+    });
+}
+
+if (cancelSignout) {
+    cancelSignout.addEventListener('click', () => {
+        signoutModal.classList.remove('active');
+    });
+}
+
+if (confirmSignout) {
+    confirmSignout.addEventListener('click', async () => {
+        try {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            if (!currentUser) {
+                throw new Error('No active session found');
+            }
+
+            // Clear user session
+            localStorage.removeItem('currentUser');
+            
+            // Redirect to login page
+            window.location.replace('login.html');
+        } catch (error) {
+            console.error('Error during sign out:', error);
+            alert(error.message || 'Error signing out. Please try again.');
+        } finally {
+            signoutModal.classList.remove('active');
+        }
+    });
+}
+
+// Close modal when clicking outside
+if (signoutModal) {
+    signoutModal.addEventListener('click', (e) => {
+        if (e.target === signoutModal) {
+            signoutModal.classList.remove('active');
+        }
+    });
+}

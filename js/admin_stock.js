@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const paginationInfo = document.getElementById('paginationInfo');
     const menuToggle = document.querySelector('.menu-toggle');
     const sidebar = document.querySelector('.sidebar');
+    const signOutBtn = document.querySelector('.sign-out');
 
     // State
     let allItems = [];
@@ -54,10 +55,96 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Sign out functionality
     if (signOutBtn) {
-        signOutBtn.addEventListener('click', handleSignOut);
-    } else {
-        console.error('Sign out button not found');
+        signOutBtn.addEventListener('click', () => {
+            const signoutModal = document.getElementById('signoutModal');
+            if (signoutModal) {
+                signoutModal.classList.add('active');
+            }
+        });
     }
+
+    // Handle signout confirmation
+    document.getElementById('confirmSignout')?.addEventListener('click', async () => {
+        try {
+            let currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(localStorage.getItem('userData'));
+            
+            // Always fetch the latest account status to ensure we have the correct ID
+            if (currentUser && currentUser.email) {
+                try {
+                    const res = await fetch(`/api/account-status/${encodeURIComponent(currentUser.email)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.account) {
+                            currentUser = { ...currentUser, ...data.account };
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch account status for logout:', err);
+                }
+            }
+
+            if (!currentUser) {
+                throw new Error('No active session found');
+            }
+
+            // Send logout event to backend for audit trail
+            const logoutData = {
+                role: currentUser.role,
+                firstName: currentUser.firstName,
+                middleName: currentUser.middleName || '',
+                lastName: currentUser.lastName,
+                action: 'Signed out'
+            };
+
+            // Always include the ID if it exists, regardless of format
+            if (currentUser.role === 'admin' && currentUser.adminID) {
+                logoutData.adminID = currentUser.adminID;
+            } else if (currentUser.role === 'superadmin' && currentUser.superAdminID) {
+                logoutData.superAdminID = currentUser.superAdminID;
+            }
+
+            try {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(logoutData)
+                });
+            } catch (err) {
+                console.warn('Logout API call failed:', err);
+            }
+
+            // Clear user session
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('userData');
+            localStorage.removeItem('token');
+            
+            // Redirect to login page
+            window.location.replace('login.html');
+        } catch (error) {
+            console.error('Error during sign out:', error);
+            alert(error.message || 'Error signing out. Please try again.');
+        } finally {
+            const signoutModal = document.getElementById('signoutModal');
+            if (signoutModal) {
+                signoutModal.classList.remove('active');
+            }
+        }
+    });
+
+    // Handle signout cancellation
+    document.getElementById('cancelSignout')?.addEventListener('click', () => {
+        const signoutModal = document.getElementById('signoutModal');
+        if (signoutModal) {
+            signoutModal.classList.remove('active');
+        }
+    });
+
+    // Close modal when clicking outside overlay
+    document.getElementById('signoutModal')?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('signout-modal-overlay')) {
+            e.target.closest('.signout-modal').classList.remove('active');
+    }
+    });
 
     // Event Listeners Setup
     function setupEventListeners() {
@@ -86,12 +173,23 @@ document.addEventListener('DOMContentLoaded', function() {
             result.data.forEach(center => {
                 if (Array.isArray(center.vaccines)) {
                     center.vaccines.forEach(vaccine => {
+                        // Sum all stockEntries for this vaccine
+                        let quantity = 0;
+                        if (Array.isArray(vaccine.stockEntries)) {
+                            quantity = vaccine.stockEntries.reduce((sum, entry) => {
+                                let val = entry.stock;
+                                if (typeof val === 'object' && val.$numberInt !== undefined) val = parseInt(val.$numberInt);
+                                else if (typeof val === 'object' && val.$numberDouble !== undefined) val = parseFloat(val.$numberDouble);
+                                else val = Number(val);
+                                return sum + (isNaN(val) ? 0 : val);
+                            }, 0);
+                        }
                         allItems.push({
                             centerName: center.centerName,
                             name: vaccine.name,
                             type: vaccine.type,
                             brand: vaccine.brand,
-                            quantity: typeof vaccine.stock === 'object' && vaccine.stock.$numberDouble !== undefined ? parseFloat(vaccine.stock.$numberDouble) : (typeof vaccine.stock === 'object' && vaccine.stock.$numberInt !== undefined ? parseInt(vaccine.stock.$numberInt) : vaccine.stock)
+                            quantity
                         });
                     });
                 }
@@ -222,7 +320,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalStock = allItems.reduce((sum, item) => sum + (typeof item.quantity === 'number' ? item.quantity : 0), 0);
         const lowStock = allItems.filter(item => item.quantity <= 10 && item.quantity > 0).length;
         const outOfStock = allItems.filter(item => item.quantity === 0).length;
-        document.getElementById('totalItems').textContent = totalStock;
+        
+        // Format total stock to remove excessive zeros
+        const formattedTotal = Number(totalStock).toLocaleString();
+        
+        document.getElementById('totalItems').textContent = formattedTotal;
         document.getElementById('lowStockItems').textContent = lowStock;
         document.getElementById('outOfStockItems').textContent = outOfStock;
         document.getElementById('expiredItems').textContent = 0;

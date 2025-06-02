@@ -22,9 +22,9 @@
             </div>
             <ul class="menu">
                 <li><a href="dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="admin-management.html"><i class="fa-solid fa-user-gear"></i> Admin Management</a></li>
-                <li><a href="audit-trail.html"><i class="fa-solid fa-file-lines"></i> Audit Logs</a></li>
-                <li class="active"><a href="create_account.html"><i class="fa-solid fa-user-plus"></i> Create Account</a></li>
+                <li class="active"><a href="admin-management.html"><i class="fa-solid fa-user-gear"></i> Administrator Account Management</a></li>
+                <li><a href="audit-trail.html"><i class="fa-solid fa-file-lines"></i> Audit Trail</a></li>
+                <li><a href="superadmin_generate.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
                 <li><a href="superadmin_profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
             </ul>
             <button class="sign-out" id="signOutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
@@ -33,6 +33,9 @@
         <main class="main-content">
             <div class="content-header">
                 <h2>Create Account</h2>
+                <button type="button" class="back-btn" onclick="window.location.href='admin-management.html'">
+                    <i class="fa fa-arrow-left"></i> Back to Admin Accounts
+                </button>
             </div>
             <div class="admin-panel">
                 <form id="createAccountForm" novalidate>
@@ -126,6 +129,11 @@
                         </div>
                     </div>
 
+                    <div class="form-group" id="idDisplayGroup" style="display: none;">
+                        <label>Generated ID</label>
+                        <div id="generatedId" class="generated-id"></div>
+                    </div>
+
                     <div class="action-buttons">
                         <button type="submit" class="btn btn-primary">
                             <i class="fa-solid fa-user-plus"></i>
@@ -135,6 +143,33 @@
                 </form>
             </div>
         </main>
+    </div>
+
+    <!-- Sign Out Modal -->
+    <div class="signout-modal" id="signoutModal">
+        <div class="signout-modal-overlay"></div>
+        <div class="signout-modal-content">
+            <div class="signout-modal-header">
+                <div class="signout-icon-wrapper">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </div>
+                <h3>Sign Out</h3>
+            </div>
+            <div class="signout-modal-body">
+                <p>Are you sure you want to sign out?</p>
+                <span class="signout-subtitle">You will need to log in again to access your account.</span>
+            </div>
+            <div class="signout-modal-footer">
+                <button class="cancel-btn" id="cancelSignout">
+                    <i class="fa-solid fa-xmark"></i>
+                    Cancel
+                </button>
+                <button class="confirm-btn" id="confirmSignout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Sign Out
+                </button>
+            </div>
+        </div>
     </div>
 
     <script src="js/create_account.js"></script>

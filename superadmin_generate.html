@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Report</title>
+    <link rel="stylesheet" href="css/superadmin_generate.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <button class="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
+            </div>
+            <ul class="menu">
+                <li><a href="dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="admin-management.html"><i class="fa-solid fa-user-gear"></i> Administrator Accounts Management</a></li>
+                <li><a href="audit-trail.html"><i class="fa-solid fa-file-lines"></i> Audit Trail</a></li>
+                <li class="active"><a href="superadmin_generate.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
+                <li><a href="superadmin_profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+            </ul>
+            <button class="sign-out" id="signOutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
+        </aside>
+        
+        <main class="main-content">
+            <div class="content-header">
+                <h2>Generate Reports</h2>
+                <p class="subtitle">Generate and download detailed reports in PDF format</p>
+            </div>
+
+            <div class="reports-container">
+                <!-- Rabies Utilization Report -->
+                <div class="report-card card-fade-in">
+                    <div class="report-header">
+                        <i class="fas fa-syringe"></i>
+                        <h3>Rabies Utilization Report</h3>
+                    </div>
+                    <div class="report-body">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" id="exportRabiesUtilizationPDF">
+                                <i class="fas fa-file-pdf"></i> Export PDF
+                            </button>
+                            <button type="button" class="btn btn-primary" id="printRabiesUtilizationPDF">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Animal Bite Exposure Report -->
+                <div class="report-card card-fade-in">
+                    <div class="report-header">
+                        <i class="fas fa-file-medical-alt"></i>
+                        <h3>Animal Bite Exposure Report</h3>
+                    </div>
+                    <div class="report-body">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" id="exportAnimalBiteExposurePDF">
+                                <i class="fas fa-file-pdf"></i> Export PDF
+                            </button>
+                            <button type="button" class="btn btn-primary" id="printAnimalBiteExposurePDF">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Rabies Exposure Registry -->
+                <div class="report-card card-fade-in">
+                    <div class="report-header">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>Rabies Exposure Registry</h3>
+                    </div>
+                    <div class="report-body">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" id="exportRabiesRegistryPDF">
+                                <i class="fas fa-file-pdf"></i> Export PDF
+                            </button>
+                            <button type="button" class="btn btn-primary" id="printRabiesRegistryPDF">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Custom Demographic Report -->
+                <div class="report-card card-fade-in">
+                    <div class="report-header">
+                        <i class="fas fa-user-friends"></i>
+                        <h3>Custom Demographic Report</h3>
+                    </div>
+                    <div class="report-body">
+                        <form id="customDemographicReportForm">
+                            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                                <div style="flex:1;">
+                                    <label for="filterSex">Sex</label>
+                                    <select id="filterSex" class="form-control">
+                                        <option value="all">All</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                                <div style="flex:1;">
+                                    <label for="filterAge">Age Group</label>
+                                    <select id="filterAge" class="form-control">
+                                        <option value="all">All</option>
+                                        <option value="0-5">0-5</option>
+                                        <option value="6-12">6-12</option>
+                                        <option value="13-18">13-18</option>
+                                        <option value="19-35">19-35</option>
+                                        <option value="36-60">36-60</option>
+                                        <option value="61+">61+</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary" id="exportCustomDemographicPDF">
+                                    <i class="fas fa-file-pdf"></i> Export PDF
+                                </button>
+                                <button type="button" class="btn btn-primary" id="printCustomDemographicPDF">
+                                    <i class="fas fa-print"></i> Print
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            <span>Generating Report...</span>
+        </div>
+    </div>
+
+    <!-- Sign Out Modal -->
+    <div class="signout-modal" id="signoutModal">
+        <div class="signout-modal-overlay"></div>
+        <div class="signout-modal-content">
+            <div class="signout-modal-header">
+                <div class="signout-icon-wrapper">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </div>
+                <h3>Sign Out</h3>
+            </div>
+            <div class="signout-modal-body">
+                <p>Are you sure you want to sign out?</p>
+                <span class="signout-subtitle">You will need to log in again to access your account.</span>
+            </div>
+            <div class="signout-modal-footer">
+                <button class="cancel-btn" id="cancelSignout">
+                    <i class="fa-solid fa-xmark"></i>
+                    Cancel
+                </button>
+                <button class="confirm-btn" id="confirmSignout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="js/superadmin_generate.js"></script>
+</body>
+</html>

@@ -93,10 +93,13 @@ function populateAccountsTable(accounts) {
             : `<div class="action-buttons">
                 <button class="btn-activate" data-account-id="${account.id}" data-action="activate" ${account.isActive ? 'style="display:none;"' : ''}><i class="fa-solid fa-check-circle"></i> Activate</button>
                 <button class="btn-deactivate" data-account-id="${account.id}" data-action="deactivate" ${!account.isActive ? 'style="display:none;"' : ''}><i class="fa-solid fa-ban"></i> Deactivate</button>
+                <button class="btn-change-password" data-account-id="${account.id}" data-action="change-password"><i class="fa-solid fa-key"></i> Change Password</button>
             </div>`;
+        // Determine which ID to show
+        const displayId = account.role.toLowerCase() === 'superadmin' ? (account.superAdminID || '-') : (account.adminID || '-');
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${account.id}</td>
+            <td>${displayId}</td>
             <td>${userInfo}</td>
             <td><span class="role ${account.role.toLowerCase()}">${account.role}</span></td>
             <td>${status}</td>
@@ -111,12 +114,16 @@ function populateAccountsTable(accounts) {
     document.addEventListener('DOMContentLoaded', function() {
         const tableBody = document.getElementById('accountsTableBody');
         tableBody.addEventListener('click', function(e) {
-            const btn = e.target.closest('.btn-activate, .btn-deactivate');
-            if (btn) {
-                const accountId = btn.getAttribute('data-account-id');
-                const action = btn.getAttribute('data-action');
+            const actionBtn = e.target.closest('.btn-activate, .btn-deactivate, .btn-change-password');
+            if (actionBtn) {
+                const accountId = actionBtn.getAttribute('data-account-id');
+                const action = actionBtn.getAttribute('data-action');
                 if (accountId && action) {
+                    if (action === 'change-password') {
+                        showPasswordChangeModal(accountId);
+                    } else {
                     handleActivation(accountId, action === 'activate');
+                    }
                 }
             }
         });
@@ -213,6 +220,8 @@ function handleActivation(accountId, activate) {
                 throw new Error(data.message || 'Failed to update account status');
             }
             showToast(`Account successfully ${activate ? 'activated' : 'deactivated'}`, 'success');
+            // Log to audit trail
+            await logAuditTrail(accountId, `Account ${activate ? 'activated' : 'deactivated'}`);
         } catch (error) {
             // Revert UI if failed
             if (affectedRow) {
@@ -354,31 +363,199 @@ function setupMenuFunctionality() {
             sidebar.classList.remove('active');
         }
     });
+}
 
-    // Sign-out functionality
-    document.querySelector('.sign-out').addEventListener('click', async () => {
+// Sign-out functionality
+const signOutBtn = document.querySelector('.sign-out');
+const signoutModal = document.getElementById('signoutModal');
+const cancelSignout = document.getElementById('cancelSignout');
+const confirmSignout = document.getElementById('confirmSignout');
+
+if (signOutBtn) {
+    signOutBtn.addEventListener('click', () => {
+        signoutModal.classList.add('active');
+    });
+}
+
+if (cancelSignout) {
+    cancelSignout.addEventListener('click', () => {
+        signoutModal.classList.remove('active');
+    });
+}
+
+if (confirmSignout) {
+    confirmSignout.addEventListener('click', async () => {
         try {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || localStorage.getItem('userData'));
-            if (currentUser) {
+            let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            // Always fetch the latest account status to ensure we have the correct ID
+            if (currentUser && currentUser.email) {
+                try {
+                    const res = await fetch(`/api/account-status/${encodeURIComponent(currentUser.email)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.account) {
+                            currentUser = { ...currentUser, ...data.account };
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch account status for logout:', err);
+                }
+            }
+            
+            if (!currentUser) {
+                throw new Error('No active session found');
+            }
+
+            // Send logout event to backend for audit trail
+            const logoutData = {
+                role: currentUser.role,
+                firstName: currentUser.firstName,
+                middleName: currentUser.middleName || '',
+                lastName: currentUser.lastName,
+                action: 'Signed out'
+            };
+
+            // Always include the ID if it exists, regardless of format
+            if (currentUser.role === 'admin' && currentUser.adminID) {
+                logoutData.adminID = currentUser.adminID;
+            } else if (currentUser.role === 'superadmin' && currentUser.superAdminID) {
+                logoutData.superAdminID = currentUser.superAdminID;
+            }
+
+            try {
                 await fetch('/api/logout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: currentUser.id,
-                        role: currentUser.role,
-                        firstName: currentUser.firstName,
-                        middleName: currentUser.middleName || '',
-                        lastName: currentUser.lastName
-                    })
+                    body: JSON.stringify(logoutData)
                 });
-                localStorage.removeItem('currentUser');
-                localStorage.removeItem('userData');
-                localStorage.removeItem('token');
+            } catch (err) {
+                console.warn('Logout API call failed:', err);
             }
+
+            // Clear user session
+            localStorage.removeItem('currentUser');
+            
+            // Redirect to login page
             window.location.replace('login.html');
         } catch (error) {
             console.error('Error during sign out:', error);
-            showToast('Error signing out. Please try again.', 'error');
+            alert(error.message || 'Error signing out. Please try again.');
+        } finally {
+            signoutModal.classList.remove('active');
         }
     });
+}
+
+// Close modal when clicking outside
+if (signoutModal) {
+    signoutModal.addEventListener('click', (e) => {
+        if (e.target === signoutModal) {
+            signoutModal.classList.remove('active');
+        }
+    });
+}
+
+// Add password change modal to the HTML
+document.body.insertAdjacentHTML('beforeend', `
+    <div class="modal" id="passwordChangeModal">
+        <div class="modal-content">
+            <h3>Change Password</h3>
+            <form id="passwordChangeForm">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <div class="password-input">
+                        <input type="password" id="currentPassword" name="currentPassword" required>
+                        <i class="fas fa-eye toggle-password"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <div class="password-input">
+                        <input type="password" id="newPassword" name="newPassword" required>
+                        <i class="fas fa-eye toggle-password"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="password-input">
+                        <input type="password" id="confirmPassword" name="confirmPassword" required>
+                        <i class="fas fa-eye toggle-password"></i>
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="closePasswordModal()">Cancel</button>
+                    <button type="submit" class="btn-confirm">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+`);
+
+// Add password change form handler
+document.getElementById('passwordChangeForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const modal = document.getElementById('passwordChangeModal');
+    const accountId = modal.getAttribute('data-account-id');
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (newPassword !== confirmPassword) {
+        showToast('Passwords do not match', 'error');
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        showToast('Password must be at least 6 characters long', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/profile/${accountId}/password`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                currentPassword,
+                newPassword
+            })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to change password');
+        }
+
+        showToast('Password changed successfully', 'success');
+        closePasswordModal();
+        await logAuditTrail(accountId, 'Admin password changed');
+    } catch (error) {
+        showToast(error.message || 'Error changing password', 'error');
+    }
+});
+
+// Add password toggle functionality
+document.querySelectorAll('.toggle-password').forEach(toggle => {
+    toggle.addEventListener('click', function() {
+        const input = this.previousElementSibling;
+        const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+        input.setAttribute('type', type);
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+    });
+});
+
+// Password change modal functions
+function showPasswordChangeModal(accountId) {
+    const modal = document.getElementById('passwordChangeModal');
+    modal.classList.add('active');
+    modal.setAttribute('data-account-id', accountId);
+}
+
+function closePasswordModal() {
+    const modal = document.getElementById('passwordChangeModal');
+    modal.classList.remove('active');
+    document.getElementById('passwordChangeForm').reset();
 }

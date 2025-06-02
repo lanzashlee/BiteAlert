@@ -48,19 +48,32 @@ function populateAuditTable(data) {
     const tableBody = document.getElementById('auditTableBody');
     
     if (!data || data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="5" class="no-data">No audit trail records found</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="9" class="no-data">No audit trail records found</td></tr>';
         return;
     }
 
     tableBody.innerHTML = '';
     data.forEach(entry => {
         const row = document.createElement('tr');
+        // Determine which ID to show based on role
+        let displayId = '';
+        if (entry.role === 'admin' && entry.adminID) {
+            displayId = entry.adminID;
+        } else if (entry.role === 'superadmin' && entry.superAdminID) {
+            displayId = entry.superAdminID;
+        } else if (entry.patientID) {
+            displayId = entry.patientID;
+        } else if (entry.staffID) {
+            displayId = entry.staffID;
+        }
+
         row.innerHTML = `
-            <td>${formatDateTime(entry.timestamp)}</td>
-            <td>${entry.userId}</td>
+           
+            <td>${displayId || 'N/A'}</td>
             <td>${entry.role}</td>
             <td>${[entry.firstName, entry.middleName, entry.lastName].filter(Boolean).join(' ')}</td>
             <td>${entry.action}</td>
+             <td>${formatDateTime(entry.timestamp)}</td>
         `;
         tableBody.appendChild(row);
     });
@@ -141,30 +154,97 @@ function setupMenuFunctionality() {
         }
     });
 
-    // Sign-out functionality
-    document.querySelector('.sign-out').addEventListener('click', async () => {
+}
+
+// Sign-out functionality
+const signOutBtn = document.getElementById('signOutBtn') || document.querySelector('.sign-out');
+const signoutModal = document.getElementById('signoutModal');
+const cancelSignout = document.getElementById('cancelSignout');
+const confirmSignout = document.getElementById('confirmSignout');
+
+if (signOutBtn) {
+    signOutBtn.addEventListener('click', () => {
+        signoutModal.classList.add('active');
+    });
+}
+
+if (cancelSignout) {
+    cancelSignout.addEventListener('click', () => {
+        signoutModal.classList.remove('active');
+    });
+}
+
+if (confirmSignout) {
+    confirmSignout.addEventListener('click', async () => {
         try {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || localStorage.getItem('userData'));
-            if (currentUser) {
-                await fetch('/api/logout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: currentUser.id,
-                        role: currentUser.role,
-                        firstName: currentUser.firstName,
-                        middleName: currentUser.middleName || '',
-                        lastName: currentUser.lastName
-                    })
-                });
-                localStorage.removeItem('currentUser');
-                localStorage.removeItem('userData');
-                localStorage.removeItem('token');
+            let currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(localStorage.getItem('userData'));
+            
+            // Always fetch the latest account status to ensure we have the correct ID
+            if (currentUser && currentUser.email) {
+                try {
+                    const res = await fetch(`/api/account-status/${encodeURIComponent(currentUser.email)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.account) {
+                            currentUser = { ...currentUser, ...data.account };
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch account status for logout:', err);
+                }
             }
+
+            if (!currentUser) {
+                throw new Error('No active session found');
+            }
+
+            // Send logout event to backend for audit trail
+            const logoutData = {
+                role: currentUser.role,
+                firstName: currentUser.firstName,
+                middleName: currentUser.middleName || '',
+                lastName: currentUser.lastName,
+                action: 'Signed out'
+            };
+
+            // Always include the ID if it exists, regardless of format
+            if (currentUser.role === 'admin' && currentUser.adminID) {
+                logoutData.adminID = currentUser.adminID;
+            } else if (currentUser.role === 'superadmin' && currentUser.superAdminID) {
+                logoutData.superAdminID = currentUser.superAdminID;
+            }
+
+                try {
+                    await fetch('/api/logout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(logoutData)
+                    });
+                } catch (err) {
+                    console.warn('Logout API call failed:', err);
+            }
+
+            // Clear user session
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('userData');
+            localStorage.removeItem('token');
+            
+            // Redirect to login page
             window.location.replace('login.html');
         } catch (error) {
             console.error('Error during sign out:', error);
-            alert('Error signing out. Please try again.');
+            alert(error.message || 'Error signing out. Please try again.');
+        } finally {
+            signoutModal.classList.remove('active');
+        }
+    });
+}
+
+// Close modal when clicking outside overlay
+if (signoutModal) {
+    signoutModal.addEventListener('click', (e) => {
+        if (e.target.classList.contains('signout-modal-overlay')) {
+            signoutModal.classList.remove('active');
         }
     });
 }

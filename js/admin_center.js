@@ -3,20 +3,37 @@ const sidebar = document.querySelector('.sidebar');
 
 let centers = [];
 let editId = null;
+let showArchived = false;
 
 function renderTable() {
+    console.log('Rendering table...');
     const tbody = $('#barangayTableBody');
     tbody.empty();
-    centers.forEach((c, i) => {
+    
+    if (centers.length === 0) {
         tbody.append(`
             <tr>
-                <td>${c.centerName}</td>
-                <td>${c.address}</td>
-                <td>${c.contactPerson}</td>
-                <td>${c.contactNumber}</td>
+                <td colspan="5" class="text-center">No centers found</td>
+            </tr>
+        `);
+        return;
+    }
+    
+    centers.forEach((c, i) => {
+        console.log('Rendering center:', c);
+        tbody.append(`
+            <tr>
+                <td>${c.centerName || ''}</td>
+                <td>${c.address || ''}</td>
+                <td>${c.contactPerson || ''}</td>
+                <td>${c.contactNumber || ''}</td>
                 <td class="table-actions">
-                    <button class="btn btn-xs btn-info" onclick="editCenter('${c._id}')"><i class="fa fa-edit"></i> Edit</button>
-                    <button class="btn btn-xs btn-danger" onclick="deleteCenter('${c._id}')"><i class="fa fa-trash"></i> Delete</button>
+                    <button class="btn btn-xs btn-info" onclick="editCenter('${c._id}')">
+                        <i class="fa fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-xs btn-danger" onclick="archiveCenter('${c._id}')">
+                        <i class="fa fa-archive"></i> Archive
+                    </button>
                 </td>
             </tr>
         `);
@@ -43,19 +60,50 @@ window.editCenter = function(id) {
     $('#addModal').modal('show');
 };
 
-window.deleteCenter = async function(id) {
-    if (confirm('Are you sure you want to delete this center?')) {
+window.archiveCenter = async function(id) {
+    // Validate ID
+    if (!id) {
+        alert('Invalid center ID');
+        return;
+    }
+
+    // Find the center to be archived
+    const centerToArchive = centers.find(c => c._id === id);
+    if (!centerToArchive) {
+        alert('Center not found');
+        return;
+    }
+
+    // Populate modal with center details
+    $('#archiveCenterName').text(centerToArchive.centerName);
+    $('#archiveAddress').text(centerToArchive.address);
+    $('#archiveContactPerson').text(centerToArchive.contactPerson);
+    $('#archiveContactNumber').text(centerToArchive.contactNumber);
+
+    // Store the center ID for the confirm button
+    $('#confirmArchiveBtn').data('center-id', id);
+
+    // Show the modal
+    $('#archiveModal').modal('show');
+};
+
+window.restoreCenter = async function(id) {
+    if (confirm('Are you sure you want to restore this center?')) {
         try {
-            const response = await fetch(`/api/centers/${id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/centers/${id}/archive`, { 
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isArchived: false })
+            });
             const result = await response.json();
             if (result.success) {
                 loadCenters();
             } else {
-                alert('Failed to delete center: ' + result.message);
+                alert('Failed to restore center: ' + result.message);
             }
         } catch (error) {
-            console.error('Error deleting center:', error);
-            alert('Error deleting center. Please try again.');
+            console.error('Error restoring center:', error);
+            alert('Error restoring center. Please try again.');
         }
     }
 };
@@ -111,10 +159,14 @@ $('#barangayForm').on('submit', async function(e) {
 
 async function loadCenters() {
     try {
+        console.log('Fetching centers...');
         const response = await fetch('/api/centers');
         const result = await response.json();
+        console.log('API Response:', result);
+        
         if (result.success) {
-            centers = result.data;
+            centers = result.data.filter(c => !c.isArchived);
+            console.log('Loaded centers:', centers);
             renderTable();
         } else {
             console.error('Failed to load centers:', result.message);
@@ -126,23 +178,106 @@ async function loadCenters() {
     }
 }
 
+// Toggle between active and archived views
+$('#viewArchivedBtn').on('click', function() {
+    showArchived = !showArchived;
+    $(this).html(showArchived ? 
+        '<i class="fa fa-list"></i> View Active' : 
+        '<i class="fa fa-archive"></i> View Archived'
+    );
+    renderTable();
+});
+
 $(document).ready(loadCenters);
 
 // Sign-out functionality
-document.querySelector('.sign-out')?.addEventListener('click', async () => {
+document.querySelector('.sign-out')?.addEventListener('click', () => {
+    const signoutModal = document.getElementById('signoutModal');
+    if (signoutModal) {
+        signoutModal.classList.add('active');
+    }
+});
+
+// Handle signout confirmation
+document.getElementById('confirmSignout')?.addEventListener('click', async () => {
     try {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(localStorage.getItem('userData'));
         
-        if (currentUser) {
-            // Clear user session
-            localStorage.removeItem('currentUser');
+        // Always fetch the latest account status to ensure we have the correct ID
+        if (currentUser && currentUser.email) {
+            try {
+                const res = await fetch(`/api/account-status/${encodeURIComponent(currentUser.email)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && data.account) {
+                        currentUser = { ...currentUser, ...data.account };
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to fetch account status for logout:', err);
+            }
         }
+
+        if (!currentUser) {
+            throw new Error('No active session found');
+        }
+
+        // Send logout event to backend for audit trail
+        const logoutData = {
+            role: currentUser.role,
+            firstName: currentUser.firstName,
+            middleName: currentUser.middleName || '',
+            lastName: currentUser.lastName,
+            action: 'Signed out'
+        };
+
+        // Always include the ID if it exists, regardless of format
+        if (currentUser.role === 'admin' && currentUser.adminID) {
+            logoutData.adminID = currentUser.adminID;
+        } else if (currentUser.role === 'superadmin' && currentUser.superAdminID) {
+            logoutData.superAdminID = currentUser.superAdminID;
+        }
+
+        try {
+            await fetch('/api/logout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(logoutData)
+            });
+        } catch (err) {
+            console.warn('Logout API call failed:', err);
+        }
+
+        // Clear user session
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('userData');
+        localStorage.removeItem('token');
         
         // Redirect to login page
         window.location.replace('login.html');
     } catch (error) {
         console.error('Error during sign out:', error);
-        alert('Error signing out. Please try again.');
+        alert(error.message || 'Error signing out. Please try again.');
+    } finally {
+        const signoutModal = document.getElementById('signoutModal');
+        if (signoutModal) {
+            signoutModal.classList.remove('active');
+        }
+    }
+});
+
+// Handle signout cancellation
+document.getElementById('cancelSignout')?.addEventListener('click', () => {
+    const signoutModal = document.getElementById('signoutModal');
+    if (signoutModal) {
+        signoutModal.classList.remove('active');
+    }
+});
+
+// Close modal when clicking outside overlay
+document.getElementById('signoutModal')?.addEventListener('click', (e) => {
+    if (e.target.classList.contains('signout-modal-overlay')) {
+        e.target.closest('.signout-modal').classList.remove('active');
     }
 });
 
@@ -193,4 +328,79 @@ $('#addSampleDataBtn').on('click', async function() {
             }
         });
     }
+
+// Add this after the existing modals in the HTML
+$('body').append(`
+    <div class="modal fade" id="archiveModal" tabindex="-1" role="dialog" aria-labelledby="archiveModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="archiveModalLabel">Confirm Archive</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to archive the following center?</p>
+                    <div class="center-details">
+                        <p><strong>Center Name:</strong> <span id="archiveCenterName"></span></p>
+                        <p><strong>Address:</strong> <span id="archiveAddress"></span></p>
+                        <p><strong>Contact Person:</strong> <span id="archiveContactPerson"></span></p>
+                        <p><strong>Contact Number:</strong> <span id="archiveContactNumber"></span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmArchiveBtn">
+                        <i class="fa fa-archive"></i> Archive Center
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+`);
+
+// Add event listener for the confirm archive button
+$('#confirmArchiveBtn').on('click', async function() {
+    const id = $(this).data('center-id');
+    const $btn = $(this);
+    
+    try {
+        // Show loading state
+        $btn.prop('disabled', true)
+            .html('<i class="fa fa-spinner fa-spin"></i> Archiving...');
+
+        const response = await fetch(`/api/centers/${id}/archive`, { 
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ isArchived: true })
+        });
+
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            // Close the modal
+            $('#archiveModal').modal('hide');
+            await loadCenters();
+        } else {
+            throw new Error(result.message || 'Failed to archive center');
+        }
+    } catch (error) {
+        console.error('Error archiving center:', error);
+        alert('Error archiving center: ' + (error.message || 'Please try again'));
+    } finally {
+        // Reset button state
+        $btn.prop('disabled', false)
+            .html('<i class="fa fa-archive"></i> Archive Center');
+    }
+});
+
+// Reset modal when it's hidden
+$('#archiveModal').on('hidden.bs.modal', function() {
+    $('#confirmArchiveBtn').prop('disabled', false)
+        .html('<i class="fa fa-archive"></i> Archive Center');
+});
 
