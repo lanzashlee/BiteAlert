@@ -69,4 +69,23 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 Your Name - your.email@example.com
 
-Project Link: [https://github.com/yourusername/BiteAlert](https://github.com/yourusername/BiteAlert) 
+Project Link: [https://github.com/yourusername/BiteAlert](https://github.com/yourusername/BiteAlert)
+
+## Deploying to Render
+
+To deploy this project to [Render](https://render.com):
+
+1. **Push your code to GitHub.**
+2. **Create a new Web Service on Render:**
+   - Connect your GitHub repo.
+   - Set the build command to `npm install` (or leave blank).
+   - Set the start command to `npm start`.
+3. **Set Environment Variables in Render:**
+   - `MONGODB_URI` (your MongoDB Atlas connection string)
+   - `EMAIL_USER` (for nodemailer, if used)
+   - `EMAIL_PASSWORD` (for nodemailer, if used)
+   - Any other secrets your app requires
+4. **Allow Render's IPs in MongoDB Atlas Network Access.**
+5. **Visit your Render URL after deployment!**
+
+**Note:** Never commit your `.env` file or secrets to your repository. Use environment variables in the Render dashboard for all sensitive data. 
