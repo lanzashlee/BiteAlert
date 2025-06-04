@@ -108,6 +108,100 @@ window.restoreCenter = async function(id) {
     }
 };
 
+window.manageServiceHours = async function(centerId) {
+    const center = centers.find(c => c._id === centerId);
+    if (!center) return;
+    $('#serviceHoursModalLabel').text(`Service Hours - ${center.centerName}`);
+    $('#serviceHoursErrorMsg').hide();
+    $('#serviceHoursTable tbody').empty();
+    $('#serviceHoursForm').data('center-id', centerId);
+    // Fetch service hours from API
+    try {
+        const response = await fetch(`/api/centers/${centerId}/service-hours`);
+        const result = await response.json();
+        let serviceHours = Array.isArray(result.serviceHours) ? result.serviceHours : [];
+        if (!serviceHours.length) {
+            // Default: Mon-Fri 08:00-17:00
+            serviceHours = [
+                { day: 'Monday', open: '08:00', close: '17:00' },
+                { day: 'Tuesday', open: '08:00', close: '17:00' },
+                { day: 'Wednesday', open: '08:00', close: '17:00' },
+                { day: 'Thursday', open: '08:00', close: '17:00' },
+                { day: 'Friday', open: '08:00', close: '17:00' }
+            ];
+        }
+        renderServiceHoursRows(serviceHours);
+        $('#serviceHoursModal').modal('show');
+    } catch (err) {
+        $('#serviceHoursErrorMsg').text('Failed to load service hours.').show();
+        $('#serviceHoursModal').modal('show');
+    }
+};
+
+function renderServiceHoursRows(serviceHours) {
+    const tbody = $('#serviceHoursTable tbody');
+    tbody.empty();
+    serviceHours.forEach((row, idx) => {
+        tbody.append(`
+            <tr>
+                <td><input type="text" class="form-control day-input" value="${row.day}" required></td>
+                <td><input type="time" class="form-control open-input" value="${row.open}" required></td>
+                <td><input type="time" class="form-control close-input" value="${row.close}" required></td>
+                <td><button type="button" class="btn btn-danger btn-xs remove-row"><i class="fa fa-trash"></i></button></td>
+            </tr>
+        `);
+    });
+}
+
+$(document).on('click', '#addServiceHourRow', function() {
+    $('#serviceHoursTable tbody').append(`
+        <tr>
+            <td><input type="text" class="form-control day-input" value="" required></td>
+            <td><input type="time" class="form-control open-input" value="08:00" required></td>
+            <td><input type="time" class="form-control close-input" value="17:00" required></td>
+            <td><button type="button" class="btn btn-danger btn-xs remove-row"><i class="fa fa-trash"></i></button></td>
+        </tr>
+    `);
+});
+
+$(document).on('click', '.remove-row', function() {
+    $(this).closest('tr').remove();
+});
+
+$('#serviceHoursForm').on('submit', async function(e) {
+    e.preventDefault();
+    const centerId = $(this).data('center-id');
+    const rows = $('#serviceHoursTable tbody tr');
+    const serviceHours = [];
+    let valid = true;
+    rows.each(function() {
+        const day = $(this).find('.day-input').val().trim();
+        const open = $(this).find('.open-input').val();
+        const close = $(this).find('.close-input').val();
+        if (!day || !open || !close) {
+            valid = false;
+            return false;
+        }
+        serviceHours.push({ day, open, close });
+    });
+    if (!valid || !serviceHours.length) {
+        $('#serviceHoursErrorMsg').text('All fields are required.').show();
+        return;
+    }
+    try {
+        const response = await fetch(`/api/centers/${centerId}/service-hours`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ serviceHours })
+        });
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message);
+        $('#serviceHoursModal').modal('hide');
+    } catch (err) {
+        $('#serviceHoursErrorMsg').text('Failed to save service hours.').show();
+    }
+});
+
 $('#addModal').on('hidden.bs.modal', resetForm);
 
 $('#barangayForm').on('submit', async function(e) {

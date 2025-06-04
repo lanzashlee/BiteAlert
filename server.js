@@ -1847,7 +1847,14 @@ const centerSchema = new mongoose.Schema({
   contactPerson: { type: String, required: true },
   contactNumber: { type: String, required: true },
   isArchived: { type: Boolean, default: false },
-  lastUpdated: { type: Date, default: Date.now }
+  lastUpdated: { type: Date, default: Date.now },
+  serviceHours: [
+    {
+      day: { type: String, required: true }, // e.g., 'Monday'
+      open: { type: String, required: true }, // e.g., '08:00'
+      close: { type: String, required: true } // e.g., '17:00'
+    }
+  ]
 });
 const Center = mongoose.model('Center', centerSchema);
 
@@ -2769,3 +2776,31 @@ function getAuditUserId(user) {
     if (user.role === 'patient' && user.patientID) return user.patientID;
     return user._id;
 }
+
+// Get service hours for a center
+app.get('/api/centers/:id/service-hours', async (req, res) => {
+  try {
+    const center = await Center.findById(req.params.id);
+    if (!center) return res.status(404).json({ success: false, message: 'Center not found' });
+    res.json({ success: true, serviceHours: center.serviceHours || [] });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch service hours', error: err.message });
+  }
+});
+
+// Update service hours for a center
+app.put('/api/centers/:id/service-hours', async (req, res) => {
+  try {
+    const { serviceHours } = req.body;
+    if (!Array.isArray(serviceHours)) return res.status(400).json({ success: false, message: 'Invalid service hours format' });
+    const center = await Center.findByIdAndUpdate(
+      req.params.id,
+      { serviceHours, lastUpdated: new Date() },
+      { new: true }
+    );
+    if (!center) return res.status(404).json({ success: false, message: 'Center not found' });
+    res.json({ success: true, serviceHours: center.serviceHours });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to update service hours', error: err.message });
+  }
+});
