@@ -671,7 +671,6 @@ setInterval(updateSeverityChart, 300000);
     // Fetch and update dashboard card values
     async function updateDashboardCards() {
         const cardIds = ['totalPatientsCard', 'vaccineStocksCard', 'activeCasesCard', 'healthCentersCard'];
-        
         // Show spinners and hide values
         cardIds.forEach(id => {
             const spinner = document.getElementById('spinner-' + id);
@@ -680,18 +679,16 @@ setInterval(updateSeverityChart, 300000);
             if (spinner) spinner.style.display = 'inline-block';
             if (valueText) valueText.style.display = 'none';
         });
-
+        let errorOccurred = false;
         try {
             // Fetch vaccine stocks separately
             const vaccineResponse = await fetch('/api/vaccinestocks');
             const vaccineResult = await vaccineResponse.json();
-            
-            if (vaccineResult.success) {
-                // Calculate total stock across all centers and vaccines
-                const totalStock = vaccineResult.data.reduce((sum, center) => {
+            let totalStock = 0;
+            if (vaccineResult.success && Array.isArray(vaccineResult.data)) {
+                totalStock = vaccineResult.data.reduce((sum, center) => {
                     if (Array.isArray(center.vaccines)) {
                         return sum + center.vaccines.reduce((centerSum, vaccine) => {
-                            // Sum all stockEntries for this vaccine
                             let quantity = 0;
                             if (Array.isArray(vaccine.stockEntries)) {
                                 quantity = vaccine.stockEntries.reduce((s, entry) => {
@@ -707,17 +704,17 @@ setInterval(updateSeverityChart, 300000);
                     }
                     return sum;
                 }, 0);
-
-                // Update vaccine stocks card
-                const vaccineStocksCard = document.getElementById('vaccineStocksCard');
-                if (vaccineStocksCard) {
-                    const valueText = vaccineStocksCard.querySelector('.value-text');
-                    if (valueText) {
-                        valueText.textContent = totalStock.toLocaleString();
-                    }
+            } else {
+                errorOccurred = true;
+            }
+            // Update vaccine stocks card
+            const vaccineStocksCard = document.getElementById('vaccineStocksCard');
+            if (vaccineStocksCard) {
+                const valueText = vaccineStocksCard.querySelector('.value-text');
+                if (valueText) {
+                    valueText.textContent = errorOccurred ? 'N/A' : totalStock.toLocaleString();
                 }
             }
-
             // Fetch all cases directly from bitecases
             let allCases = 0;
             try {
@@ -727,47 +724,39 @@ setInterval(updateSeverityChart, 300000);
                     allCases = bitecasesResult.length;
                 } else if (Array.isArray(bitecasesResult.data)) {
                     allCases = bitecasesResult.data.length;
+                } else {
+                    errorOccurred = true;
                 }
             } catch (err) {
-                console.error('Error fetching all cases from bitecases:', err);
+                errorOccurred = true;
             }
-
             // Fetch other dashboard data
             const filterElem = document.getElementById('timeRange');
             const filter = filterElem ? filterElem.value : 'month';
             const response = await fetch(`/api/dashboard-summary?filter=${filter}`);
             const result = await response.json();
-            
-            if (result.success) {
+            if (result.success && result.data) {
                 const { totalPatients, healthCenters } = result.data;
-                
                 // Update each card with new data
                 const updates = [
                     { id: 'totalPatientsCard', value: totalPatients },
                     { id: 'activeCasesCard', value: allCases },
                     { id: 'healthCentersCard', value: healthCenters }
                 ];
-
                 updates.forEach(({ id, value }) => {
                     const cardElem = document.getElementById(id);
                     if (cardElem) {
                         const valueText = cardElem.querySelector('.value-text');
                         if (valueText) {
-                            valueText.textContent = value.toLocaleString();
+                            valueText.textContent = (typeof value === 'number' && !errorOccurred) ? value.toLocaleString() : 'N/A';
                         }
                     }
                 });
+            } else {
+                errorOccurred = true;
             }
         } catch (error) {
-            console.error('Error updating dashboard cards:', error);
-            // Set default values if there's an error
-            cardIds.forEach(id => {
-                const cardElem = document.getElementById(id);
-                if (cardElem) {
-                    const valueText = cardElem.querySelector('.value-text');
-                    if (valueText) valueText.textContent = '0';
-                }
-            });
+            errorOccurred = true;
         } finally {
             // Hide spinners and show values with a small delay for smooth transition
             setTimeout(() => {
@@ -777,8 +766,10 @@ setInterval(updateSeverityChart, 300000);
                     const valueText = cardElem ? cardElem.querySelector('.value-text') : null;
                     if (spinner) spinner.style.display = 'none';
                     if (valueText) valueText.style.display = 'inline-block';
+                    // If error, show N/A
+                    if (errorOccurred && valueText) valueText.textContent = 'N/A';
                 });
-            }, 300); // Small delay for smooth transition
+            }, 300);
         }
     }
 
@@ -796,13 +787,45 @@ setInterval(updateSeverityChart, 300000);
         try {
             const response = await fetch('/api/patient-growth');
             const result = await response.json();
-            if (result.success) {
+            if (result.success && Array.isArray(result.labels) && Array.isArray(result.data)) {
                 patientsChart.data.labels = result.labels;
                 patientsChart.data.datasets[0].data = result.data;
                 patientsChart.update();
+                // Show a message if no data
+                if (result.data.length === 0) {
+                    const ctx = document.getElementById('patientsChart').getContext('2d');
+                    ctx.save();
+                    ctx.font = '16px Segoe UI, Arial, sans-serif';
+                    ctx.fillStyle = '#888';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('No data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                    ctx.restore();
+                }
+            } else {
+                // If no data, clear chart and show message
+                patientsChart.data.labels = [];
+                patientsChart.data.datasets[0].data = [];
+                patientsChart.update();
+                const ctx = document.getElementById('patientsChart').getContext('2d');
+                ctx.save();
+                ctx.font = '16px Segoe UI, Arial, sans-serif';
+                ctx.fillStyle = '#888';
+                ctx.textAlign = 'center';
+                ctx.fillText('No data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                ctx.restore();
             }
         } catch (error) {
-            console.error('Error updating patient growth:', error);
+            // On error, clear chart and show message
+            patientsChart.data.labels = [];
+            patientsChart.data.datasets[0].data = [];
+            patientsChart.update();
+            const ctx = document.getElementById('patientsChart').getContext('2d');
+            ctx.save();
+            ctx.font = '16px Segoe UI, Arial, sans-serif';
+            ctx.fillStyle = '#888';
+            ctx.textAlign = 'center';
+            ctx.fillText('No data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+            ctx.restore();
         }
     }
     updatePatientGrowth();
