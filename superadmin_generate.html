@@ -43,16 +43,19 @@
                         <h3>Rabies Utilization Report</h3>
                     </div>
                     <div class="report-body">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-primary" id="exportRabiesUtilizationPDF">
-                                <i class="fas fa-file-pdf"></i> Export PDF
-                            </button>
-                            <button type="button" class="btn btn-primary" id="printRabiesUtilizationPDF">
-                                <i class="fas fa-print"></i> Print
-                            </button>
-                        </div>
+                        <form id="rabiesUtilizationReportForm">
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-file-pdf"></i> Export PDF
+                                </button>
+                                <button type="button" class="btn btn-secondary">
+                                    <i class="fas fa-print"></i> Print
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
+
                 <!-- Animal Bite Exposure Report -->
                 <div class="report-card card-fade-in">
                     <div class="report-header">
@@ -60,16 +63,19 @@
                         <h3>Animal Bite Exposure Report</h3>
                     </div>
                     <div class="report-body">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-primary" id="exportAnimalBiteExposurePDF">
-                                <i class="fas fa-file-pdf"></i> Export PDF
-                            </button>
-                            <button type="button" class="btn btn-primary" id="printAnimalBiteExposurePDF">
-                                <i class="fas fa-print"></i> Print
-                            </button>
-                        </div>
+                        <form id="animalBiteExposureReportForm">
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-file-pdf"></i> Export PDF
+                                </button>
+                                <button type="button" class="btn btn-secondary">
+                                    <i class="fas fa-print"></i> Print
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
+
                 <!-- Rabies Exposure Registry -->
                 <div class="report-card card-fade-in">
                     <div class="report-header">
@@ -77,16 +83,19 @@
                         <h3>Rabies Exposure Registry</h3>
                     </div>
                     <div class="report-body">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-primary" id="exportRabiesRegistryPDF">
-                                <i class="fas fa-file-pdf"></i> Export PDF
-                            </button>
-                            <button type="button" class="btn btn-primary" id="printRabiesRegistryPDF">
-                                <i class="fas fa-print"></i> Print
-                            </button>
-                        </div>
+                        <form id="rabiesRegistryReportForm">
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-file-pdf"></i> Export PDF
+                                </button>
+                                <button type="button" class="btn btn-secondary">
+                                    <i class="fas fa-print"></i> Print
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
+
                 <!-- Custom Demographic Report -->
                 <div class="report-card card-fade-in">
                     <div class="report-header">
@@ -95,33 +104,31 @@
                     </div>
                     <div class="report-body">
                         <form id="customDemographicReportForm">
-                            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
-                                <div style="flex:1;">
-                                    <label for="filterSex">Sex</label>
-                                    <select id="filterSex" class="form-control">
-                                        <option value="all">All</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                    </select>
-                                </div>
-                                <div style="flex:1;">
-                                    <label for="filterAge">Age Group</label>
-                                    <select id="filterAge" class="form-control">
-                                        <option value="all">All</option>
-                                        <option value="0-5">0-5</option>
-                                        <option value="6-12">6-12</option>
-                                        <option value="13-18">13-18</option>
-                                        <option value="19-35">19-35</option>
-                                        <option value="36-60">36-60</option>
-                                        <option value="61+">61+</option>
-                                    </select>
-                                </div>
+                            <div class="form-group">
+                                <label for="filterSex">Sex</label>
+                                <select id="filterSex" class="form-control">
+                                    <option value="all">All</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="filterAge">Age Group</label>
+                                <select id="filterAge" class="form-control">
+                                    <option value="all">All</option>
+                                    <option value="0-5">0-5</option>
+                                    <option value="6-12">6-12</option>
+                                    <option value="13-18">13-18</option>
+                                    <option value="19-35">19-35</option>
+                                    <option value="36-60">36-60</option>
+                                    <option value="61+">61+</option>
+                                </select>
                             </div>
                             <div class="btn-group">
-                                <button type="submit" class="btn btn-primary" id="exportCustomDemographicPDF">
+                                <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-file-pdf"></i> Export PDF
                                 </button>
-                                <button type="button" class="btn btn-primary" id="printCustomDemographicPDF">
+                                <button type="button" class="btn btn-secondary">
                                     <i class="fas fa-print"></i> Print
                                 </button>
                             </div>

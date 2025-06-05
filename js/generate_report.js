@@ -4,6 +4,16 @@ const menuToggle = document.querySelector('.menu-toggle');
 const sidebar = document.querySelector('.sidebar');
 const signOutBtn = document.getElementById('signOutBtn');
 
+// Show loading overlay
+function showLoading() {
+    loadingOverlay.style.display = 'flex';
+}
+
+// Hide loading overlay
+function hideLoading() {
+    loadingOverlay.style.display = 'none';
+}
+
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
     animateCards();
@@ -39,9 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Sign out functionality
     if (signOutBtn) {
-        signOutBtn.addEventListener('click', function() {
-            showModal(document.getElementById('signoutModal'));
-        });
+        signOutBtn.addEventListener('click', handleSignOut);
     } else {
         console.error('Sign out button not found');
     }
@@ -63,21 +71,27 @@ document.addEventListener('DOMContentLoaded', function() {
         rabiesRegistryForm.querySelector('.btn-secondary').addEventListener('click', handlePrintRabiesRegistryReport);
     }
     // --- Custom Demographic Report Handler ---
-    document.getElementById('customDemographicReportForm').addEventListener('submit', handleCustomDemographicReport);
-    document.querySelector('#customDemographicReportForm .btn-secondary').addEventListener('click', handlePrintCustomDemographicReport);
+    const customDemographicForm = document.getElementById('customDemographicReportForm');
+    if (customDemographicForm) {
+        customDemographicForm.addEventListener('submit', handleCustomDemographicReport);
+        customDemographicForm.querySelector('.btn-secondary').addEventListener('click', handlePrintCustomDemographicReport);
+    }
 });
 
 // Error Handler
 function handleError(error) {
     console.error('Error:', error);
+    hideLoading();
     alert('An error occurred while generating the report. Please try again.');
 }
 
 // Rabies Registry Report Handler
 async function handleRabiesRegistryReport(e) {
     e.preventDefault();
+    showLoading();
     try {
         const response = await fetch('/api/reports/rabies-registry');
+        if (!response.ok) throw new Error('Failed to fetch rabies registry data');
         const result = await response.json();
         if (!result.success) throw new Error(result.message);
         generateRabiesRegistryPDF(result.data);
@@ -288,110 +302,45 @@ function generateRabiesRegistryPDF(data) {
     doc.setFontSize(10);
     doc.text('Human Rabies', 10, legendY);
     doc.save('rabies-exposure-registry.pdf');
+    hideLoading();
 }
 
 function formatDate(date) {
     if (!date) return '';
-    try {
-        const d = new Date(date);
-        if (isNaN(d)) return '';
-        return d.toLocaleDateString();
-    } catch {
-        return '';
-    }
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
 }
 
 // Sign Out Handler
-async function handleSignOut() {
+function handleSignOut() {
     const signoutModal = document.getElementById('signoutModal');
-    if (signoutModal) {
-        signoutModal.classList.add('active');
-    }
-}
+    const cancelSignout = document.getElementById('cancelSignout');
+    const confirmSignout = document.getElementById('confirmSignout');
 
-// Handle signout confirmation
-document.getElementById('confirmSignout')?.addEventListener('click', async () => {
-    try {
-        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(localStorage.getItem('userData'));
-        
-        // Always fetch the latest account status to ensure we have the correct ID
-        if (currentUser && currentUser.email) {
-            try {
-                const res = await fetch(`/api/account-status/${encodeURIComponent(currentUser.email)}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.success && data.account) {
-                        currentUser = { ...currentUser, ...data.account };
-                    }
-                }
-            } catch (err) {
-                console.warn('Failed to fetch account status for logout:', err);
-            }
-        }
+    signoutModal.style.display = 'flex';
 
-        if (!currentUser) {
-            throw new Error('No active session found');
-        }
+    cancelSignout.onclick = function() {
+        signoutModal.style.display = 'none';
+    };
 
-        // Send logout event to backend for audit trail
-        const logoutData = {
-            role: currentUser.role,
-            firstName: currentUser.firstName,
-            middleName: currentUser.middleName || '',
-            lastName: currentUser.lastName,
-            action: 'Signed out'
-        };
-
-        // Always include the ID if it exists, regardless of format
-        if (currentUser.role === 'admin' && currentUser.adminID) {
-            logoutData.adminID = currentUser.adminID;
-        } else if (currentUser.role === 'superadmin' && currentUser.superAdminID) {
-            logoutData.superAdminID = currentUser.superAdminID;
-        }
-
-        try {
-            await fetch('/api/logout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(logoutData)
-            });
-        } catch (err) {
-            console.warn('Logout API call failed:', err);
-        }
-
-        // Clear user session
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('userData');
-        localStorage.removeItem('token');
+    confirmSignout.onclick = function() {
+        // Clear session/local storage
+        localStorage.clear();
+        sessionStorage.clear();
         
         // Redirect to login page
-        window.location.replace('login.html');
-    } catch (error) {
-        console.error('Error during sign out:', error);
-        alert(error.message || 'Error signing out. Please try again.');
-    } finally {
-        const signoutModal = document.getElementById('signoutModal');
-        if (signoutModal) {
-            signoutModal.classList.remove('active');
-        }
-    }
-});
-
-// Handle signout cancellation
-document.getElementById('cancelSignout')?.addEventListener('click', function() {
-    hideModal(document.getElementById('signoutModal'));
-});
-
-// Close modal when clicking outside overlay
-document.getElementById('signoutModal')?.addEventListener('click', function(e) {
-    if (e.target.classList.contains('signout-modal-overlay')) {
-        hideModal(document.getElementById('signoutModal'));
-    }
-});
+        window.location.href = 'index.html';
+    };
+}
 
 // Handler for Animal Bite Exposure Report
 async function handleAnimalBiteExposureReport(e) {
     e.preventDefault();
+    showLoading();
     try {
         // Fetch bitecases data
         const response = await fetch('/api/bitecases');
@@ -507,11 +456,13 @@ function generateAnimalBiteExposurePDF(data) {
     doc.setFont('helvetica', 'normal');
     doc.text(data.preparedByTitle, 35, y + 6);
     doc.save('animal-bite-exposure-report.pdf');
+    hideLoading();
 }
 
 // Handler for Rabies Utilization Report
 async function handleRabiesUtilizationReport(e) {
     e.preventDefault();
+    showLoading();
     try {
         const response = await fetch('/api/reports/rabies-utilization');
         const result = await response.json();
@@ -572,11 +523,13 @@ function generateRabiesUtilizationPDF(data) {
     doc.setFont('helvetica', 'normal');
     doc.text(data.preparedByTitle, 35, legendY + 6);
     doc.save('rabies-utilization-report.pdf');
+    hideLoading();
 }
 
 // --- Custom Demographic Report Handler ---
 async function handleCustomDemographicReport(e) {
     e.preventDefault();
+    showLoading();
     try {
         // Fetch registry data (reuse rabies registry endpoint)
         const response = await fetch('/api/reports/rabies-registry');
@@ -697,10 +650,12 @@ function generateCustomDemographicPDF(data, sex, ageGroup) {
         tableWidth: 50
     });
     doc.save('custom-demographic-report.pdf');
+    hideLoading();
 }
 
 async function handlePrintCustomDemographicReport(e) {
     e.preventDefault();
+    showLoading();
     try {
         // Fetch registry data (reuse rabies registry endpoint)
         const response = await fetch('/api/reports/rabies-registry');
@@ -797,12 +752,15 @@ function printCustomDemographicReport(data, sex, ageGroup) {
     win.document.write(`<html><head><title>Print Report</title></head><body style='font-family:Poppins,sans-serif;padding:24px;'>${filterText}${table}${sexSummary}${ageSummary}</body></html>`);
     win.document.close();
     setTimeout(() => { win.print(); win.close(); }, 400);
+    hideLoading();
 }
 
 async function handlePrintRabiesUtilizationReport(e) {
     e.preventDefault();
+    showLoading();
     try {
         const response = await fetch('/api/reports/rabies-utilization');
+        if (!response.ok) throw new Error('Failed to fetch rabies utilization data');
         const result = await response.json();
         if (!result.success) throw new Error(result.message);
         const data = result.data;
@@ -832,10 +790,12 @@ function printRabiesUtilizationReport(data) {
     win.document.write(`<html><head><title>Print Report</title></head><body style='font-family:Poppins,sans-serif;padding:24px;'>${html}</body></html>`);
     win.document.close();
     setTimeout(() => { win.print(); win.close(); }, 400);
+    hideLoading();
 }
 
 async function handlePrintAnimalBiteExposureReport(e) {
     e.preventDefault();
+    showLoading();
     try {
         const response = await fetch('/api/bitecases');
         const bitecases = await response.json();
@@ -874,12 +834,15 @@ function printAnimalBiteExposureReport(cases) {
     win.document.write(`<html><head><title>Print Report</title></head><body style='font-family:Poppins,sans-serif;padding:24px;'>${html}</body></html>`);
     win.document.close();
     setTimeout(() => { win.print(); win.close(); }, 400);
+    hideLoading();
 }
 
 async function handlePrintRabiesRegistryReport(e) {
     e.preventDefault();
+    showLoading();
     try {
         const response = await fetch('/api/reports/rabies-registry');
+        if (!response.ok) throw new Error('Failed to fetch rabies registry data');
         const result = await response.json();
         if (!result.success) throw new Error(result.message);
         const data = result.data;
@@ -917,6 +880,7 @@ function printRabiesRegistryReport(data) {
     win.document.write(`<html><head><title>Print Report</title></head><body style='font-family:Poppins,sans-serif;padding:24px;'>${html}</body></html>`);
     win.document.close();
     setTimeout(() => { win.print(); win.close(); }, 400);
+    hideLoading();
 }
 
 // Animate cards on load
@@ -931,16 +895,6 @@ function animateCards() {
             card.style.transform = 'translateY(0) scale(1)';
         }, 120 + i * 120);
     });
-}
-
-// Smooth loading overlay transitions
-function showLoading() {
-    loadingOverlay.classList.add('active');
-    loadingOverlay.setAttribute('aria-busy', 'true');
-}
-function hideLoading() {
-    loadingOverlay.classList.remove('active');
-    loadingOverlay.setAttribute('aria-busy', 'false');
 }
 
 // Enhance modal fade in/out
