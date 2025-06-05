@@ -637,32 +637,44 @@ setInterval(updateSeverityChart, 300000);
     let ws = null;
 
     function connectWebSocket() {
-        ws = new WebSocket(`ws://${window.location.host}`);
+        // Use secure WebSocket (wss://) for HTTPS sites
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}`;
         
-        ws.onopen = function() {
-            console.log('WebSocket connection established');
-        };
-        
-        ws.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            if (data.type === 'newCase') {
-                // Invalidate cache and update data
-                geographicalDataCache = {
-                    data: null,
-                    timestamp: null
-                };
-                updateGeographicalData();
-            }
-        };
-        
-        ws.onclose = function() {
-            console.log('WebSocket connection closed. Reconnecting...');
+        try {
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function() {
+                console.log('WebSocket connection established');
+            };
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if (data.type === 'newCase') {
+                    // Invalidate cache and update data
+                    geographicalDataCache = {
+                        data: null,
+                        timestamp: null
+                    };
+                    updateGeographicalData();
+                }
+            };
+            
+            ws.onclose = function() {
+                console.log('WebSocket connection closed. Reconnecting...');
+                setTimeout(connectWebSocket, 5000);
+            };
+            
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                // Don't try to reconnect immediately on error
+                setTimeout(connectWebSocket, 5000);
+            };
+        } catch (error) {
+            console.error('Failed to create WebSocket connection:', error);
+            // Try to reconnect after a delay
             setTimeout(connectWebSocket, 5000);
-        };
-        
-        ws.onerror = function(error) {
-            console.error('WebSocket error:', error);
-        };
+        }
     }
 
     // Initialize WebSocket connection
