@@ -629,7 +629,7 @@ setInterval(updateSeverityChart, 300000);
         geographicalChart.update();
     }
 
-    // Initial data load and periodic updates
+    // Initial data load and periodic updates (HTTP polling only)
     updateGeographicalData();
     setInterval(updateGeographicalData, 300000); // Update every 5 minutes
 
