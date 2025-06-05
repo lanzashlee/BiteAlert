@@ -680,25 +680,26 @@ setInterval(updateSeverityChart, 300000);
     // Initialize WebSocket connection
     connectWebSocket();
 
-    // Fetch and update dashboard card values
-    async function updateDashboardCards() {
+    // --- DASHBOARD SUMMARY CARDS ---
+    async function updateDashboardSummary() {
         const cardIds = ['totalPatientsCard', 'vaccineStocksCard', 'activeCasesCard', 'healthCentersCard'];
         // Show spinners and hide values
         cardIds.forEach(id => {
             const spinner = document.getElementById('spinner-' + id);
             const cardElem = document.getElementById(id);
             const valueText = cardElem ? cardElem.querySelector('.value-text') : null;
-            if (spinner) spinner.style.display = 'inline-block';
+            if (spinner) spinner.style.display = '';
             if (valueText) valueText.style.display = 'none';
         });
-        let errorOccurred = false;
+
         try {
             // Fetch vaccine stocks separately
             const vaccineResponse = await fetch('/api/vaccinestocks');
             const vaccineResult = await vaccineResponse.json();
-            let totalStock = 0;
-            if (vaccineResult.success && Array.isArray(vaccineResult.data)) {
-                totalStock = vaccineResult.data.reduce((sum, center) => {
+            
+            if (vaccineResult.success) {
+                // Calculate total stock across all centers and vaccines
+                const totalStock = vaccineResult.data.reduce((sum, center) => {
                     if (Array.isArray(center.vaccines)) {
                         return sum + center.vaccines.reduce((centerSum, vaccine) => {
                             let quantity = 0;
@@ -716,17 +717,17 @@ setInterval(updateSeverityChart, 300000);
                     }
                     return sum;
                 }, 0);
-            } else {
-                errorOccurred = true;
-            }
-            // Update vaccine stocks card
-            const vaccineStocksCard = document.getElementById('vaccineStocksCard');
-            if (vaccineStocksCard) {
-                const valueText = vaccineStocksCard.querySelector('.value-text');
-                if (valueText) {
-                    valueText.textContent = errorOccurred ? 'N/A' : totalStock.toLocaleString();
+
+                // Update vaccine stocks card
+                const vaccineStocksCard = document.getElementById('vaccineStocksCard');
+                if (vaccineStocksCard) {
+                    const valueText = vaccineStocksCard.querySelector('.value-text');
+                    if (valueText) {
+                        valueText.textContent = totalStock.toLocaleString();
+                    }
                 }
             }
+
             // Fetch all cases directly from bitecases
             let allCases = 0;
             try {
@@ -736,110 +737,84 @@ setInterval(updateSeverityChart, 300000);
                     allCases = bitecasesResult.length;
                 } else if (Array.isArray(bitecasesResult.data)) {
                     allCases = bitecasesResult.data.length;
-                } else {
-                    errorOccurred = true;
                 }
             } catch (err) {
-                errorOccurred = true;
+                console.error('Error fetching all cases from bitecases:', err);
             }
+
             // Fetch other dashboard data
             const filterElem = document.getElementById('timeRange');
             const filter = filterElem ? filterElem.value : 'month';
             const response = await fetch(`/api/dashboard-summary?filter=${filter}`);
             const result = await response.json();
+            
             if (result.success && result.data) {
                 const { totalPatients, healthCenters } = result.data;
+                
                 // Update each card with new data
                 const updates = [
                     { id: 'totalPatientsCard', value: totalPatients },
                     { id: 'activeCasesCard', value: allCases },
                     { id: 'healthCentersCard', value: healthCenters }
                 ];
+
                 updates.forEach(({ id, value }) => {
                     const cardElem = document.getElementById(id);
                     if (cardElem) {
                         const valueText = cardElem.querySelector('.value-text');
                         if (valueText) {
-                            valueText.textContent = (typeof value === 'number' && !errorOccurred) ? value.toLocaleString() : 'N/A';
+                            valueText.textContent = value.toLocaleString();
                         }
                     }
                 });
-            } else {
-                errorOccurred = true;
             }
         } catch (error) {
-            errorOccurred = true;
+            console.error('Error updating dashboard summary:', error);
+            // Set default values if there's an error
+            cardIds.forEach(id => {
+                const cardElem = document.getElementById(id);
+                if (cardElem) {
+                    const valueText = cardElem.querySelector('.value-text');
+                    if (valueText) valueText.textContent = '0';
+                }
+            });
         } finally {
-            // Hide spinners and show values with a small delay for smooth transition
-            setTimeout(() => {
-                cardIds.forEach(id => {
-                    const spinner = document.getElementById('spinner-' + id);
-                    const cardElem = document.getElementById(id);
-                    const valueText = cardElem ? cardElem.querySelector('.value-text') : null;
-                    if (spinner) spinner.style.display = 'none';
-                    if (valueText) valueText.style.display = 'inline-block';
-                    // If error, show N/A
-                    if (errorOccurred && valueText) valueText.textContent = 'N/A';
-                });
-            }, 300);
+            // Hide spinners and show values
+            cardIds.forEach(id => {
+                const spinner = document.getElementById('spinner-' + id);
+                const cardElem = document.getElementById(id);
+                const valueText = cardElem ? cardElem.querySelector('.value-text') : null;
+                if (spinner) spinner.style.display = 'none';
+                if (valueText) valueText.style.display = '';
+            });
         }
     }
 
-    // Listen for filter changes
-    document.getElementById('timeRange').addEventListener('change', function() {
-        updateDashboardCards();
-        updateCasesPerBarangay();
-    });
-
-    // Call once on load and every 5 minutes
-    updateDashboardCards();
-    setInterval(updateDashboardCards, 300000);
-
+    // Update patient growth chart
     async function updatePatientGrowth() {
         try {
             const response = await fetch('/api/patient-growth');
             const result = await response.json();
-            if (result.success && Array.isArray(result.labels) && Array.isArray(result.data)) {
+            if (result.success) {
                 patientsChart.data.labels = result.labels;
                 patientsChart.data.datasets[0].data = result.data;
                 patientsChart.update();
-                // Show a message if no data
-                if (result.data.length === 0) {
-                    const ctx = document.getElementById('patientsChart').getContext('2d');
-                    ctx.save();
-                    ctx.font = '16px Segoe UI, Arial, sans-serif';
-                    ctx.fillStyle = '#888';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('No data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
-                    ctx.restore();
-                }
-            } else {
-                // If no data, clear chart and show message
-                patientsChart.data.labels = [];
-                patientsChart.data.datasets[0].data = [];
-                patientsChart.update();
-                const ctx = document.getElementById('patientsChart').getContext('2d');
-                ctx.save();
-                ctx.font = '16px Segoe UI, Arial, sans-serif';
-                ctx.fillStyle = '#888';
-                ctx.textAlign = 'center';
-                ctx.fillText('No data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
-                ctx.restore();
             }
         } catch (error) {
-            // On error, clear chart and show message
-            patientsChart.data.labels = [];
-            patientsChart.data.datasets[0].data = [];
-            patientsChart.update();
-            const ctx = document.getElementById('patientsChart').getContext('2d');
-            ctx.save();
-            ctx.font = '16px Segoe UI, Arial, sans-serif';
-            ctx.fillStyle = '#888';
-            ctx.textAlign = 'center';
-            ctx.fillText('No data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
-            ctx.restore();
+            console.error('Error updating patient growth:', error);
         }
     }
+
+    // Call updateDashboardSummary when the page loads and set interval
+    updateDashboardSummary();
+    setInterval(updateDashboardSummary, 300000);
+
+    // Update patient growth chart initially and set interval
     updatePatientGrowth();
     setInterval(updatePatientGrowth, 300000);
+
+    // Listen for filter changes
+    document.getElementById('timeRange').addEventListener('change', function() {
+        updateDashboardSummary();
+    });
 });
