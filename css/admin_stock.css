@@ -1,5 +1,25 @@
 /* admin_stock.css */
 
+html, body {
+    background: #f5f6fa;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.dashboard-container {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.main-content {
+    background: #f5f6fa;
+    min-height: 100vh;
+    padding: 0 2rem 2rem 2rem;
+    margin-top: 0 !important;
+    border-top: none !important;
+}
+
 /* Menu Toggle Button */
 .menu-toggle {
     display: none;
@@ -515,7 +535,7 @@
 .main-content {
     background: #f5f6fa;
     min-height: 100vh;
-    padding: 2rem;
+    padding: 0 2rem 2rem 2rem;
 }
 
 /* Sidebar (reuse from analytics for consistency) */
@@ -723,3 +743,4 @@
 .signout-modal-footer .confirm-btn:hover {
     background: #a83232;
 } 
+

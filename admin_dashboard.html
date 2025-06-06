@@ -6,6 +6,7 @@
     <title>Bite Alert - Administrator Dashboard</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/admin_dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,6 +24,7 @@
                 <li class="active"><a href="admin_dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
                 <li><a href="staff_management.html"><i class="fa-solid fa-users"></i> Staff Account Management</a></li>
                 <li><a href="admin_center.html"><i class="fa-solid fa-building"></i> Center Data Management</a></li>
+                <li><a href="center_hours.html"><i class="fa-solid fa-clock"></i> Center Service Hours Management</a></li>
                 <li><a href="prescriptive_analytics.html"><i class="fa-solid fa-chart-line"></i> Prescriptive Analytics</a></li>
                 <li><a href="generate_report.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
                 <li><a href="admin_stock.html"><i class="fa-solid fa-boxes-stacked"></i> Stock & Inventory</a></li>
@@ -33,7 +35,10 @@
 
         <main class="main-content">
             <div class="content-header">
-                <h2>Administrator Dashboard</h2>
+                <div class="header-left">
+                    <h2>Administrator Dashboard</h2>
+                    <p class="subtitle">Analytics of the system based on real case data</p>
+                </div>
                 <div class="date-filter">
                     <select id="timeRange" class="form-control">
                         <option value="today">Today</option>
@@ -55,6 +60,18 @@
                         <div class="card-value" id="totalPatientsCard">
                             <span class="spinner" id="spinner-totalPatientsCard" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
                             <span class="value-text">2,547</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background: rgba(52, 152, 219, 0.1);">
+                        <i class="fa-solid fa-user-tie" style="color: #3498db;"></i>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">Total Staff</div>
+                        <div class="card-value" id="staffCount">
+                            <span class="spinner" id="spinner-staffCount" style="display:none;"><i class="fa fa-spinner fa-spin"></i></span>
+                            <span class="value-text">0</span>
                         </div>
                     </div>
                 </div>

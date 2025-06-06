@@ -16,32 +16,32 @@ function hideLoading() {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-    // Menu Toggle Functionality
-    if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-            menuToggle.classList.toggle('active');
-        });
+// Menu Toggle Functionality
+if (menuToggle && sidebar) {
+    menuToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+        menuToggle.classList.toggle('active');
+    });
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
-                    sidebar.classList.remove('active');
-                    menuToggle.classList.remove('active');
-                }
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 768) {
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+        if (window.innerWidth <= 768) {
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
                 sidebar.classList.remove('active');
                 menuToggle.classList.remove('active');
             }
-        });
-    }
+        }
+    });
 
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+            menuToggle.classList.remove('active');
+        }
+    });
+    }
+    
     // Sign out functionality
     if (signOutBtn) {
         signOutBtn.addEventListener('click', handleSignOut);
@@ -178,7 +178,7 @@ async function handlePrintAnimalBiteExposureReport(e) {
         const result = await response.json();
         if (!result.success) throw new Error(result.message);
         printAnimalBiteExposureReport(result.data);
-    } catch (error) {
+        } catch (error) {
         handleError(error);
     }
 }
@@ -218,21 +218,29 @@ async function handlePrintCustomDemographicReport(e) {
 function generateRabiesRegistryPDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'landscape' });
-    
-    // Add content to PDF
-    doc.setFontSize(16);
-    doc.text('National Rabies Prevention & Control Program', 148, 12, { align: 'center' });
-    doc.setFontSize(13);
-    doc.text('Rabies Exposure Registry', 148, 20, { align: 'center' });
-    
-    // Add table
+
+    // Header
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text(`NAME OF FACILITY: ${data.facilityName || 'Animal Bite Treatment Center'}`, 14, 16);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.text('RABIES EXPOSURE REGISTRY', 14, 24);
+    doc.setFontSize(10);
+    doc.text(data.monthYear || new Date().toLocaleDateString(), 14, 30);
+
+    // Ensure data is in the correct format
+    const tableData = Array.isArray(data) ? data : (data.table?.body || []);
+    const headers = data.table?.head || ['Reg. No.', 'Date', 'Name', 'Contact', 'Address', 'Age', 'Sex', 'Exposure Date', 'Animal Type', 'Bite Type'];
+
+    // Table
     doc.autoTable({
-        startY: 30,
-        head: [['Reg. No.', 'Date', 'Name', 'Contact', 'Address', 'Age', 'Sex', 'Exposure Date', 'Animal Type', 'Bite Type']],
-        body: data.map(row => [
+        startY: 36,
+        head: [headers],
+        body: tableData.map(row => [
             row.registrationNo || '',
             formatDate(row.registrationDate),
-            `${row.lastName || ''}, ${row.firstName || ''}`,
+            [row.firstName, row.middleName, row.lastName].filter(Boolean).join(' ') || row.name || '',
             row.contactNo || '',
             row.address || '',
             row.age || '',
@@ -241,10 +249,23 @@ function generateRabiesRegistryPDF(data) {
             row.animalType || '',
             row.biteType || ''
         ]),
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [128, 0, 0] },
-        theme: 'grid'
+        styles: { fontSize: 9, cellPadding: 2 },
+        headStyles: { fillColor: [128, 0, 0], textColor: 255, fontStyle: 'bold' },
+        theme: 'grid',
+        margin: { left: 14, right: 14 },
+        tableLineColor: [128, 0, 0],
+        tableLineWidth: 0.3
     });
+
+    // Prepared by
+    const y = doc.lastAutoTable.finalY + 18;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text('Prepared by:', 14, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text(data.preparedBy || '', 35, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.preparedByTitle || '', 35, y + 6);
 
     // Save the PDF
     doc.save('rabies-registry-report.pdf');
@@ -255,18 +276,28 @@ function generateAnimalBiteExposurePDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'landscape' });
     
-    // Add content to PDF
-    doc.setFontSize(16);
-    doc.text('Animal Bite Exposure Report', 148, 12, { align: 'center' });
-    
-    // Add table
+    // Header
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text(`NAME OF FACILITY: ${data.facilityName || 'Animal Bite Treatment Center'}`, 14, 16);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.text('ANIMAL BITE EXPOSURE REPORT', 14, 24);
+    doc.setFontSize(10);
+    doc.text(data.monthYear || new Date().toLocaleDateString(), 14, 30);
+
+    // Ensure data is in the correct format
+    const tableData = Array.isArray(data) ? data : (data.table?.body || []);
+    const headers = data.table?.head || ['Case No.', 'Date', 'Patient Name', 'Age', 'Sex', 'Address', 'Animal Type', 'Bite Site', 'Status'];
+
+    // Table
     doc.autoTable({
-        startY: 20,
-        head: [['Case No.', 'Date', 'Patient Name', 'Age', 'Sex', 'Address', 'Animal Type', 'Bite Site', 'Status']],
-        body: data.map(row => [
+        startY: 36,
+        head: [headers],
+        body: tableData.map(row => [
             row.caseNo || '',
             formatDate(row.date),
-            `${row.lastName || ''}, ${row.firstName || ''}`,
+            row.name || row.patientName || '',
             row.age || '',
             row.sex || '',
             row.address || '',
@@ -274,10 +305,23 @@ function generateAnimalBiteExposurePDF(data) {
             row.biteSite || '',
             row.status || ''
         ]),
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [128, 0, 0] },
-        theme: 'grid'
+        styles: { fontSize: 9, cellPadding: 2 },
+        headStyles: { fillColor: [128, 0, 0], textColor: 255, fontStyle: 'bold' },
+        theme: 'grid',
+        margin: { left: 14, right: 14 },
+        tableLineColor: [128, 0, 0],
+        tableLineWidth: 0.3
     });
+
+    // Prepared by
+    const y = doc.lastAutoTable.finalY + 18;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text('Prepared by:', 14, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text(data.preparedBy || '', 35, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.preparedByTitle || '', 35, y + 6);
 
     // Save the PDF
     doc.save('animal-bite-exposure-report.pdf');
@@ -288,15 +332,25 @@ function generateRabiesUtilizationPDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'landscape' });
     
-    // Add content to PDF
-    doc.setFontSize(16);
-    doc.text('Rabies Vaccine Utilization Report', 148, 12, { align: 'center' });
-    
-    // Add table
+    // Header
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text(`NAME OF FACILITY: ${data.facilityName || 'Animal Bite Treatment Center'}`, 14, 16);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.text('RABIES UTILIZATION REPORT', 14, 24);
+    doc.setFontSize(10);
+    doc.text(data.monthYear || new Date().toLocaleDateString(), 14, 30);
+
+    // Ensure data is in the correct format
+    const tableData = Array.isArray(data) ? data : (data.table?.body || []);
+    const headers = data.table?.head || ['Date', 'Vaccine Type', 'Batch No.', 'Quantity Used', 'Remaining Stock', 'Expiry Date'];
+
+    // Table
     doc.autoTable({
-        startY: 20,
-        head: [['Date', 'Vaccine Type', 'Batch No.', 'Quantity Used', 'Remaining Stock', 'Expiry Date']],
-        body: data.map(row => [
+        startY: 36,
+        head: [headers],
+        body: tableData.map(row => [
             formatDate(row.date),
             row.vaccineType || '',
             row.batchNo || '',
@@ -304,10 +358,23 @@ function generateRabiesUtilizationPDF(data) {
             row.remainingStock || '',
             formatDate(row.expiryDate)
         ]),
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [128, 0, 0] },
-        theme: 'grid'
+        styles: { fontSize: 9, cellPadding: 2 },
+        headStyles: { fillColor: [128, 0, 0], textColor: 255, fontStyle: 'bold' },
+        theme: 'grid',
+        margin: { left: 14, right: 14 },
+        tableLineColor: [128, 0, 0],
+        tableLineWidth: 0.3
     });
+
+    // Prepared by
+    const y = doc.lastAutoTable.finalY + 18;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text('Prepared by:', 14, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text(data.preparedBy || '', 35, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.preparedByTitle || '', 35, y + 6);
 
     // Save the PDF
     doc.save('rabies-utilization-report.pdf');
@@ -318,28 +385,50 @@ function generateCustomDemographicPDF(data, sex, ageGroup) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'landscape' });
     
-    // Add content to PDF
-    doc.setFontSize(16);
-    doc.text('Custom Demographic Report', 148, 12, { align: 'center' });
+    // Header
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
-    doc.text(`Filter: Sex = ${sex}, Age Group = ${ageGroup}`, 148, 20, { align: 'center' });
-    
-    // Add table
+    doc.text(`NAME OF FACILITY: ${data.facilityName || 'Animal Bite Treatment Center'}`, 14, 16);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.text('CUSTOM DEMOGRAPHIC REPORT', 14, 24);
+    doc.setFontSize(10);
+    doc.text(`Filter: Sex = ${sex}, Age Group = ${ageGroup}`, 14, 30);
+    doc.text(data.monthYear || new Date().toLocaleDateString(), 14, 36);
+
+    // Ensure data is in the correct format
+    const tableData = Array.isArray(data) ? data : (data.table?.body || []);
+    const headers = data.table?.head || ['Name', 'Age', 'Sex', 'Address', 'Contact', 'Registration Date'];
+
+    // Table
     doc.autoTable({
-        startY: 30,
-        head: [['Name', 'Age', 'Sex', 'Address', 'Contact', 'Registration Date']],
-        body: data.map(row => [
-            `${row.lastName || ''}, ${row.firstName || ''}`,
+        startY: 42,
+        head: [headers],
+        body: tableData.map(row => [
+            [row.firstName, row.middleName, row.lastName].filter(Boolean).join(' ') || row.name || '',
             row.age || '',
             row.sex || '',
             row.address || '',
             row.contactNo || '',
             formatDate(row.registrationDate)
         ]),
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [128, 0, 0] },
-        theme: 'grid'
+        styles: { fontSize: 9, cellPadding: 2 },
+        headStyles: { fillColor: [128, 0, 0], textColor: 255, fontStyle: 'bold' },
+        theme: 'grid',
+        margin: { left: 14, right: 14 },
+        tableLineColor: [128, 0, 0],
+        tableLineWidth: 0.3
     });
+
+    // Prepared by
+    const y = doc.lastAutoTable.finalY + 18;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text('Prepared by:', 14, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text(data.preparedBy || '', 35, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.preparedByTitle || '', 35, y + 6);
 
     // Save the PDF
     doc.save('demographic-report.pdf');
@@ -348,38 +437,274 @@ function generateCustomDemographicPDF(data, sex, ageGroup) {
 
 // Print Functions
 function printRabiesUtilizationReport(data) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape' });
-    generateRabiesUtilizationPDF(data);
-    doc.autoPrint();
-    window.open(doc.output('bloburl'), '_blank');
+    const win = window.open('', '', 'width=1000,height=700');
+    
+    // Ensure data is in the correct format
+    const tableData = Array.isArray(data) ? data : (data.table?.body || []);
+    const headers = data.table?.head || ['Date', 'Vaccine Type', 'Batch No.', 'Quantity Used', 'Remaining Stock', 'Expiry Date'];
+
+    let html = `
+        <html>
+        <head>
+            <title>Rabies Utilization Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                .header { margin-bottom: 20px; }
+                .title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+                .subtitle { font-size: 14px; margin-bottom: 5px; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #800000; color: white; }
+                .footer { margin-top: 30px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div class="title">NAME OF FACILITY: ${data.facilityName || 'Animal Bite Treatment Center'}</div>
+                <div class="subtitle">RABIES UTILIZATION REPORT</div>
+                <div class="subtitle">${data.monthYear || new Date().toLocaleDateString()}</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        ${headers.map(header => `<th>${header}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableData.map(row => `
+                        <tr>
+                            <td>${formatDate(row.date)}</td>
+                            <td>${row.vaccineType || ''}</td>
+                            <td>${row.batchNo || ''}</td>
+                            <td>${row.quantityUsed || ''}</td>
+                            <td>${row.remainingStock || ''}</td>
+                            <td>${formatDate(row.expiryDate)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <div class="footer">
+                <div>Prepared by: <strong>${data.preparedBy || ''}</strong></div>
+                <div>${data.preparedByTitle || ''}</div>
+            </div>
+        </body>
+        </html>
+    `;
+
+    win.document.write(html);
+    win.document.close();
+    
+    setTimeout(() => {
+        win.print();
+        win.close();
+    }, 500);
+    
     hideLoading();
 }
 
 function printAnimalBiteExposureReport(data) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape' });
-    generateAnimalBiteExposurePDF(data);
-    doc.autoPrint();
-    window.open(doc.output('bloburl'), '_blank');
+    const win = window.open('', '', 'width=1000,height=700');
+    
+    // Ensure data is in the correct format
+    const tableData = Array.isArray(data) ? data : (data.table?.body || []);
+    const headers = data.table?.head || ['Case No.', 'Date', 'Patient Name', 'Age', 'Sex', 'Address', 'Animal Type', 'Bite Site', 'Status'];
+
+    let html = `
+        <html>
+        <head>
+            <title>Animal Bite Exposure Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                .header { margin-bottom: 20px; }
+                .title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+                .subtitle { font-size: 14px; margin-bottom: 5px; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #800000; color: white; }
+                .footer { margin-top: 30px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div class="title">NAME OF FACILITY: ${data.facilityName || 'Animal Bite Treatment Center'}</div>
+                <div class="subtitle">ANIMAL BITE EXPOSURE REPORT</div>
+                <div class="subtitle">${data.monthYear || new Date().toLocaleDateString()}</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        ${headers.map(header => `<th>${header}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableData.map(row => `
+                        <tr>
+                            <td>${row.caseNo || ''}</td>
+                            <td>${formatDate(row.date)}</td>
+                            <td>${row.name || row.patientName || ''}</td>
+                            <td>${row.age || ''}</td>
+                            <td>${row.sex || ''}</td>
+                            <td>${row.address || ''}</td>
+                            <td>${row.animalType || ''}</td>
+                            <td>${row.biteSite || ''}</td>
+                            <td>${row.status || ''}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <div class="footer">
+                <div>Prepared by: <strong>${data.preparedBy || ''}</strong></div>
+                <div>${data.preparedByTitle || ''}</div>
+            </div>
+        </body>
+        </html>
+    `;
+
+    win.document.write(html);
+    win.document.close();
+    
+    setTimeout(() => {
+        win.print();
+        win.close();
+    }, 500);
+    
     hideLoading();
 }
 
 function printRabiesRegistryReport(data) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape' });
-    generateRabiesRegistryPDF(data);
-    doc.autoPrint();
-    window.open(doc.output('bloburl'), '_blank');
+    const win = window.open('', '', 'width=1000,height=700');
+    
+    // Ensure data is in the correct format
+    const tableData = Array.isArray(data) ? data : (data.table?.body || []);
+    const headers = data.table?.head || ['Reg. No.', 'Date', 'Name', 'Contact', 'Address', 'Age', 'Sex', 'Exposure Date', 'Animal Type', 'Bite Type'];
+
+    let html = `
+        <html>
+        <head>
+            <title>Rabies Exposure Registry</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                .header { margin-bottom: 20px; }
+                .title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+                .subtitle { font-size: 14px; margin-bottom: 5px; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #800000; color: white; }
+                .footer { margin-top: 30px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div class="title">NAME OF FACILITY: ${data.facilityName || 'Animal Bite Treatment Center'}</div>
+                <div class="subtitle">RABIES EXPOSURE REGISTRY</div>
+                <div class="subtitle">${data.monthYear || new Date().toLocaleDateString()}</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        ${headers.map(header => `<th>${header}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableData.map(row => `
+                        <tr>
+                            <td>${row.registrationNo || ''}</td>
+                            <td>${formatDate(row.registrationDate)}</td>
+                            <td>${[row.firstName, row.middleName, row.lastName].filter(Boolean).join(' ') || row.name || ''}</td>
+                            <td>${row.contactNo || ''}</td>
+                            <td>${row.address || ''}</td>
+                            <td>${row.age || ''}</td>
+                            <td>${row.sex || ''}</td>
+                            <td>${formatDate(row.exposureDate)}</td>
+                            <td>${row.animalType || ''}</td>
+                            <td>${row.biteType || ''}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <div class="footer">
+                <div>Prepared by: <strong>${data.preparedBy || ''}</strong></div>
+                <div>${data.preparedByTitle || ''}</div>
+            </div>
+        </body>
+        </html>
+    `;
+
+    win.document.write(html);
+    win.document.close();
+    
+    setTimeout(() => {
+        win.print();
+        win.close();
+    }, 500);
+    
     hideLoading();
 }
 
 function printCustomDemographicReport(data, sex, ageGroup) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape' });
-    generateCustomDemographicPDF(data, sex, ageGroup);
-    doc.autoPrint();
-    window.open(doc.output('bloburl'), '_blank');
+    const win = window.open('', '', 'width=1000,height=700');
+    
+    // Ensure data is in the correct format
+    const tableData = Array.isArray(data) ? data : (data.table?.body || []);
+    const headers = data.table?.head || ['Name', 'Age', 'Sex', 'Address', 'Contact', 'Registration Date'];
+
+    let html = `
+        <html>
+        <head>
+            <title>Custom Demographic Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                .header { margin-bottom: 20px; }
+                .title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+                .subtitle { font-size: 14px; margin-bottom: 5px; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #800000; color: white; }
+                .footer { margin-top: 30px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div class="title">NAME OF FACILITY: ${data.facilityName || 'Animal Bite Treatment Center'}</div>
+                <div class="subtitle">CUSTOM DEMOGRAPHIC REPORT</div>
+                <div class="subtitle">Filter: Sex = ${sex}, Age Group = ${ageGroup}</div>
+                <div class="subtitle">${data.monthYear || new Date().toLocaleDateString()}</div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        ${headers.map(header => `<th>${header}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableData.map(row => `
+                        <tr>
+                            <td>${[row.firstName, row.middleName, row.lastName].filter(Boolean).join(' ') || row.name || ''}</td>
+                            <td>${row.age || ''}</td>
+                            <td>${row.sex || ''}</td>
+                            <td>${row.address || ''}</td>
+                            <td>${row.contactNo || ''}</td>
+                            <td>${formatDate(row.registrationDate)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <div class="footer">
+                <div>Prepared by: <strong>${data.preparedBy || ''}</strong></div>
+                <div>${data.preparedByTitle || ''}</div>
+            </div>
+        </body>
+        </html>
+    `;
+
+    win.document.write(html);
+    win.document.close();
+    
+    setTimeout(() => {
+        win.print();
+        win.close();
+    }, 500);
+    
     hideLoading();
 }
 

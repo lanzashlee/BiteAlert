@@ -1,0 +1,320 @@
+/* Modern Table Styles */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 16px 16px 24px 16px;
+    margin-top: 0;
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    margin-bottom: 0;
+    width: 100%;
+    min-width: 700px; /* Reduced min-width for better fit */
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed; /* Fixed table layout for better column control */
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+    color: #2c3e50;
+    font-weight: 600;
+    padding: 16px 12px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* Column width distribution */
+.table thead th:nth-child(1) { width: 15%; } /* Center Name */
+.table thead th:nth-child(2) { width: 15%; } /* Location */
+.table thead th:nth-child(3) { width: 15%; } /* Monday - Friday */
+.table thead th:nth-child(4) { width: 15%; } /* Saturday */
+.table thead th:nth-child(5) { width: 15%; } /* Sunday */
+.table thead th:nth-child(6) { width: 12%; } /* Emergency Service */
+.table thead th:nth-child(7) { width: 13%; } /* Emergency Contact */
+
+.table tbody td {
+    padding: 16px 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.hours-cell {
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.emergency-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.emergency-status.available {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.emergency-status.not-available {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.content-header {
+    background: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 0 2rem 0 !important;
+}
+
+.content-header h2 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+/* Report Card Styles */
+.report-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 16px;
+    margin-top: 0;
+    border: 1px solid #e9ecef;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.report-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+.report-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.report-header i {
+    font-size: 1.75rem;
+    color: #800000;
+}
+
+.report-header h3 {
+    margin: 0;
+    color: #800000;
+    font-weight: 600;
+    font-size: 1.4rem;
+}
+
+.report-body {
+    padding: 24px;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.spinner i {
+    font-size: 2rem;
+    color: #800000;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .table-container {
+        padding: 16px;
+        margin-top: 16px;
+        margin-left: -16px;
+        margin-right: -16px;
+        border-radius: 0;
+        width: calc(100% + 32px);
+    }
+
+    .report-body {
+        padding: 16px 0;
+    }
+
+    .table thead th,
+    .table tbody td {
+        padding: 12px 8px;
+    }
+
+    .content-header h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Animation */
+.card-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* No Data Message Styling */
+.no-data-message {
+    text-align: center;
+    color: #64748b;
+    font-size: 1.2rem;
+    font-weight: 500;
+    padding: 40px 0;
+    background: #f8f9fa;
+    border-radius: 0 0 8px 8px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+#centersList:empty,
+#centersList:empty::before {
+    content: none !important;
+    display: none !important;
+}
+
+.reports-container {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+body, html, .table, .modal-content, .form-control, .btn, .modal-title, .form-group label, th, td {
+  font-family: 'Poppins', Arial, sans-serif !important;
+}
+/* Modal styling */
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  border: 1px solid #e9ecef;
+}
+.modal-title {
+  color: #800000;
+  font-weight: 600;
+}
+.modal-header {
+  border-bottom: 1px solid #e9ecef;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  background: #fff;
+}
+.modal-footer {
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+.modal .btn-primary {
+  background: #800000;
+  border-color: #800000;
+}
+.modal .btn-primary:hover, .modal .btn-primary:focus {
+  background: #800000;
+  border-color: #800000;
+}
+/* Table styling */
+.table {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.table thead th {
+  background: #f8f9fa;
+  color: #800000;
+  font-weight: 600;
+  border-bottom: 2px solid #e9ecef;
+}
+.table-bordered > tbody > tr > td, .table-bordered > thead > tr > th {
+  border-color: #e9ecef;
+}
+.update-btn.btn-primary {
+  background: #800000;
+  border-color: #800000;
+}
+.update-btn.btn-primary:hover, .update-btn.btn-primary:focus {
+  background: #800000;
+  border-color: #800000;
+}
+.form-group label {
+  color: #495057;
+  font-weight: 500;
+}
+
+h1, h2, h3, h4, h5, h6, .modal-title {
+  font-family: 'Poppins', Arial, sans-serif !important;
+  color: #800000;
+  font-weight: 700;
+  text-align: left;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+.content-header h2 {
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+}
+.report-header h3, .modal-title {
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+}
+.header-description, .content-header .subtitle {
+  color: #6c757d;
+  font-size: 1.1rem;
+  font-weight: 400;
+  margin-bottom: 18px;
+  margin-top: -4px;
+  font-family: 'Poppins', Arial, sans-serif !important;
+  text-align: left;
+} 

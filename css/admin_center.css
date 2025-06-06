@@ -13,6 +13,20 @@
     letter-spacing: normal;
 }
 
+.content-header {
+    background: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 0 2rem 0 !important;
+}
+
+.content-header h2 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
 /* Remove icon from header if present */
 .barangay-header i {
     display: none !important;

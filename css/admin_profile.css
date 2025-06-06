@@ -114,7 +114,11 @@ body {
 }
 
 .content-header {
-    margin-bottom: 2rem;
+    background: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 0 2rem 0 !important;
 }
 
 .content-header h2 {

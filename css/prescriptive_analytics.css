@@ -128,25 +128,37 @@ body {
 }
 
 .content-header {
-    margin-bottom: 2rem;
+    background: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 0 2rem 0 !important;
 }
 
 .content-header h2 {
     color: #2c3e50;
     font-size: 1.8rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
 }
 
-.content-header .subtitle {
-    color: #666;
-    font-size: 1rem;
+.date-filter {
+    margin-left: auto;
 }
 
-.content-header .subtitle {
-    color: #666;
-    font-size: 1.1rem;
-    line-height: 1.5;
+.date-filter select {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #333;
+    background-color: white;
+    cursor: pointer;
+}
+
+.date-filter select:focus {
+    outline: none;
+    border-color: #800000;
+    box-shadow: 0 0 0 2px rgba(128, 0, 0, 0.1);
 }
 
 /* Modern Analytics Container */

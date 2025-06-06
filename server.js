@@ -2259,31 +2259,21 @@ app.get('/api/reports/rabies-registry', async (req, res) => {
   try {
     const BiteCase = mongoose.connection.model('BiteCase', new mongoose.Schema({}, { strict: false }), 'bitecases');
     const bitecases = await BiteCase.find({}).sort({ createdAt: 1 });
-    const report = bitecases.map((p, idx) => {
-      let name = '';
-      if (typeof p.lastName !== 'undefined' && typeof p.firstName !== 'undefined') {
-        name = `${p.lastName || ''}, ${p.firstName || ''}${p.middleName ? ' ' + p.middleName : ''}`.trim();
-      } else if (p.patientName) {
-        name = p.patientName;
-      } else {
-        name = '';
-      }
-      return {
+    const report = bitecases.map((p, idx) => ({
         registrationNo: p.registrationNumber || '',
         registrationDate: p.dateRegistered || (p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''),
-        name,
+      name: p.lastName && p.firstName ? `${p.lastName}, ${p.firstName}${p.middleName ? ' ' + p.middleName : ''}`.trim() : (p.patientName || ''),
         contactNo: p.contactNo || '',
         address: p.address || '',
-        dateOfBirth: p.dateOfBirth || '',
         age: p.age || '',
-        sex: p.sex || '',
+      sex: p.sex || p.gender || '',
         exposureDate: p.exposureDate || '',
-        exposurePlace: p.exposurePlace || '',
-        animalType: p.exposureSource || '',
-        biteType: p.exposureType || '',
-        biteSite: '', // Not present in your data
-      };
-    });
+      animalType: p.animalType || p.exposureSource || '',
+      biteType: p.biteType || p.exposureType || '',
+      biteSite: p.biteSite || '',
+      status: p.status || '',
+      createdAt: p.createdAt || '',
+    }));
     res.json({ success: true, data: report });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to generate rabies registry report', error: err.message });
@@ -2514,129 +2504,79 @@ app.get('/api/severity-distribution', async (req, res) => {
 // Animal Bite Exposure Report API
 app.get('/api/reports/animal-bite-exposure', async (req, res) => {
     try {
-        // These values can be dynamic or from query params in the future
-        const facilityName = 'Tibagan Health Center';
-        const lgu = 'San Juan City';
-        const dateSubmitted = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        const now = new Date();
-        const year = now.getFullYear();
-        const quarter = Math.floor(now.getMonth() / 3) + 1;
-        const preparedBy = 'BENNETTA A. SOLISA, RN';
-        const preparedByTitle = 'Rabies Nurse Coordinator';
-
-        // Fetch bite cases for this facility and quarter/year
         const BiteCase = mongoose.connection.model('BiteCase', new mongoose.Schema({}, { strict: false }), 'bitecases');
-        const startQuarter = new Date(year, (quarter - 1) * 3, 1);
-        const endQuarter = new Date(year, quarter * 3, 1);
-        const cases = await BiteCase.find({
-            barangay: { $regex: facilityName, $options: 'i' },
-            createdAt: { $gte: startQuarter, $lt: endQuarter }
-        });
+    const cases = await BiteCase.find({}).sort({ createdAt: 1 });
 
-        // Aggregate data for the table (simplified example)
-        // You can expand this to match the full form structure
-        let male = 0, female = 0, ageBelow15 = 0, ageAbove15 = 0, dog = 0, cat = 0, others = 0;
-        let catI = 0, catII = 0, catIII = 0, tcv = 0, erig = 0, hrig = 0;
-        cases.forEach(c => {
-            if (c.sex === 'M' || c.gender === 'Male') male++;
-            if (c.sex === 'F' || c.gender === 'Female') female++;
-            if (c.age < 15) ageBelow15++;
-            if (c.age >= 15) ageAbove15++;
-            if (c.animalType === 'Dog') dog++;
-            if (c.animalType === 'Cat') cat++;
-            if (c.animalType && !['Dog', 'Cat'].includes(c.animalType)) others++;
-            if (c.exposureCategory === 'I') catI++;
-            if (c.exposureCategory === 'II') catII++;
-            if (c.exposureCategory === 'III') catIII++;
-            if (c.immunization && c.immunization.includes('TCV')) tcv++;
-            if (c.immunization && c.immunization.includes('ERIG')) erig++;
-            if (c.immunization && c.immunization.includes('HRIG')) hrig++;
-        });
-        const table = {
-            head: [
-                'Sex (M)', 'Sex (F)', '< 15', '>= 15', 'Dog', 'Cat', 'Others',
-                'Category I', 'Category II', 'Category III', 'TCV', 'ERIG', 'HRIG', 'Total'
-            ],
-            body: [[
-                male, female, ageBelow15, ageAbove15, dog, cat, others,
-                catI, catII, catIII, tcv, erig, hrig, cases.length
-            ]]
-        };
-        res.json({
-            success: true,
-            data: {
-                facilityName,
-                lgu,
-                dateSubmitted,
-                quarter,
-                year,
-                preparedBy,
-                preparedByTitle,
-                table
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+    const report = cases.map((c, idx) => {
+      // Patient Name: FirstName MiddleName LastName (skip missing parts)
+      let name = [c.firstName, c.middleName, c.lastName].filter(Boolean).join(' ');
+      if (!name && c.patientName) {
+        name = c.patientName;
+      }
+
+      // Address logic
+      let addressParts = [
+        c.houseNo,
+        c.street,
+        c.barangay,
+        c.subdivision,
+        c.city,
+        c.province,
+        c.zipCode
+      ];
+      let address = addressParts.filter(Boolean).join(', ');
+
+      // Bite Site logic
+      let biteSite = c.biteSite || c.exposurePlace || '';
+
+      return {
+        caseNo: c.caseNo || c.registrationNumber || '',
+        date: c.dateRegistered || (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : ''),
+        name,
+        age: c.age || '',
+        sex: c.sex || c.gender || '',
+        address,
+        animalType: c.animalType || c.exposureSource || '',
+        biteSite,
+        status: c.status || '',
+        exposureDate: c.exposureDate || '',
+        createdAt: c.createdAt || '',
+      };
+    });
+
+    res.json({ success: true, data: report });
+  } catch (err) {
+    console.error('Error in /api/reports/animal-bite-exposure:', err);
+    res.status(500).json({ success: false, message: 'Failed to generate animal bite exposure report', error: err.message });
     }
 });
 
 // Rabies Utilization Report API
 app.get('/api/reports/rabies-utilization', async (req, res) => {
     try {
-        // These values can be dynamic or from query params in the future
-        const facilityName = 'Tibagan Health Center';
+        // You can replace this with real data aggregation if needed
         const now = new Date();
         const monthYear = now.toLocaleString('default', { month: 'long', year: 'numeric' });
-        const preparedBy = 'BENNETTA A. SOLISA, RN';
-        const preparedByTitle = 'Rabies Nurse Coordinator';
-        // Table columns as in the sample
         const table = {
-            head: [
-                'DATE',
-                'POST-EXPOSURE PATIENT (2 DOSES/PATIENT)',
-                'BOOSTER PATIENT (1 DOSE/PATIENT)',
-                'TOTAL NO. OF PATIENTS/DAY',
-                'TOTAL NO. OF DOSES GIVEN/DAY',
-                'TOTAL NO. OF USED VIAL/DAY',
-                'ERIG PATIENT/DAY',
-                'USED VIAL/DAY',
-                'TETANUS TOXOID USED VIAL/DAY'
-            ],
-            body: []
+          head: ['Date', 'Vaccine Type', 'Batch No.', 'Quantity Used', 'Remaining Stock', 'Expiry Date'],
+          body: [
+            // Example row
+            [now.toLocaleDateString(), 'Anti-Rabies', 'B123', 10, 90, '2024-12-31'],
+            // ... more rows
+          ]
         };
-        // Generate mock data for each day of the current month
-        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-        for (let d = 1; d <= daysInMonth; d++) {
-            const date = new Date(now.getFullYear(), now.getMonth(), d);
-            table.body.push([
-                date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-                Math.floor(Math.random() * 5), // post-exposure
-                Math.floor(Math.random() * 3), // booster
-                Math.floor(Math.random() * 8), // total patients
-                Math.floor(Math.random() * 10), // total doses
-                Math.floor(Math.random() * 4), // used vials
-                Math.floor(Math.random() * 2), // ERIG
-                Math.floor(Math.random() * 3), // used vial/day
-                Math.floor(Math.random() * 2)  // tetanus toxoid
-            ]);
-        }
-        // Add TOTAL row
-        table.body.push([
-            'TOTAL',
-            ...Array(table.head.length - 1).fill('')
-        ]);
         res.json({
             success: true,
             data: {
-                facilityName,
+            facilityName: 'Tibagan Health Center',
                 monthYear,
                 table,
-                preparedBy,
-                preparedByTitle
+            preparedBy: 'BENNETTA A. SOLISA, RN',
+            preparedByTitle: 'Rabies Nurse Coordinator'
             }
         });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Failed to generate rabies utilization report', error: err.message });
     }
 });
 
@@ -2802,5 +2742,79 @@ app.put('/api/centers/:id/service-hours', async (req, res) => {
     res.json({ success: true, serviceHours: center.serviceHours });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to update service hours', error: err.message });
+  }
+});
+
+// API: Custom Demographic Report
+app.get('/api/reports/demographic', async (req, res) => {
+  try {
+    const { sex = 'all', ageGroup = 'all' } = req.query;
+    const BiteCase = mongoose.connection.model('BiteCase', new mongoose.Schema({}, { strict: false }), 'bitecases');
+    let filter = {};
+    if (sex && sex !== 'all') {
+      filter.$or = [
+        { sex: sex },
+        { gender: sex },
+        { sex: sex.charAt(0) },
+        { gender: sex.charAt(0) }
+      ];
+    }
+    if (ageGroup && ageGroup !== 'all') {
+      let ageCond = {};
+      if (ageGroup === '0-5') ageCond = { $gte: 0, $lte: 5 };
+      else if (ageGroup === '6-12') ageCond = { $gte: 6, $lte: 12 };
+      else if (ageGroup === '13-18') ageCond = { $gte: 13, $lte: 18 };
+      else if (ageGroup === '19-35') ageCond = { $gte: 19, $lte: 35 };
+      else if (ageGroup === '36-60') ageCond = { $gte: 36, $lte: 60 };
+      else if (ageGroup === '61+') ageCond = { $gte: 61 };
+      if (Object.keys(ageCond).length > 0) filter.age = ageCond;
+    }
+    const cases = await BiteCase.find(filter).sort({ createdAt: 1 });
+    const report = cases.map((p, idx) => ({
+      registrationNo: p.registrationNumber || '',
+      registrationDate: p.dateRegistered || (p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''),
+      name: p.lastName && p.firstName ? `${p.lastName}, ${p.firstName}${p.middleName ? ' ' + p.middleName : ''}`.trim() : (p.patientName || ''),
+      sex: p.sex || p.gender || '',
+      age: p.age || '',
+      exposureDate: p.exposureDate || '',
+      animalType: p.animalType || p.exposureSource || '',
+      biteType: p.biteType || p.exposureType || '',
+      biteSite: p.biteSite || '',
+      address: p.address || '',
+      contactNo: p.contactNo || '',
+      status: p.status || '',
+      createdAt: p.createdAt || '',
+    }));
+    res.json({ success: true, data: report });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to generate demographic report', error: err.message });
+  }
+});
+
+// --- General Report (NEW ENDPOINT) ---
+app.get('/api/reports/general', async (req, res) => {
+  try {
+    const BiteCase = mongoose.connection.model('BiteCase', new mongoose.Schema({}, { strict: false }), 'bitecases');
+    const cases = await BiteCase.find({}).sort({ createdAt: 1 });
+    const report = cases.map((c, idx) => ({
+      registrationNo: c.registrationNumber || '',
+      registrationDate: c.dateRegistered || (c.createdAt ? new Date(c.createdAt).toLocaleDateString() : ''),
+      name: c.lastName && c.firstName ? `${c.lastName}, ${c.firstName}${c.middleName ? ' ' + c.middleName : ''}`.trim() : (c.patientName || ''),
+      sex: c.sex || c.gender || '',
+      age: c.age || '',
+      address: c.address || '',
+      contactNo: c.contactNo || '',
+      barangay: c.barangay || '',
+      animalType: c.animalType || c.exposureSource || '',
+      biteType: c.biteType || c.exposureType || '',
+      biteSite: c.biteSite || '',
+      exposureDate: c.exposureDate || '',
+      status: c.status || '',
+      createdAt: c.createdAt || '',
+      // Add any other fields you want to include
+    }));
+    res.json({ success: true, data: report });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to generate general report', error: err.message });
   }
 });

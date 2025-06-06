@@ -682,8 +682,8 @@ setInterval(updateSeverityChart, 300000);
 
     // --- DASHBOARD SUMMARY CARDS ---
     async function updateDashboardSummary() {
-        const cardIds = ['totalPatientsCard', 'vaccineStocksCard', 'activeCasesCard', 'healthCentersCard'];
-        // Show spinners and hide values
+        // Show spinners and hide values for all cards
+        const cardIds = ['totalPatientsCard', 'vaccineStocksCard', 'activeCasesCard', 'healthCentersCard', 'staffCount'];
         cardIds.forEach(id => {
             const spinner = document.getElementById('spinner-' + id);
             const cardElem = document.getElementById(id);
@@ -693,6 +693,26 @@ setInterval(updateSeverityChart, 300000);
         });
 
         try {
+            // Fetch staff count from dashboard-summary
+            let staffCount = 0;
+            try {
+                const response = await fetch('/api/dashboard-summary');
+                const result = await response.json();
+                if (result.success && result.data && typeof result.data.staffCount !== 'undefined') {
+                    staffCount = result.data.staffCount;
+                }
+            } catch (err) {
+                console.error('Error fetching staff count from dashboard-summary:', err);
+            }
+            // Update staff card
+            const staffCard = document.getElementById('staffCount');
+            if (staffCard) {
+                const valueText = staffCard.querySelector('.value-text');
+                if (valueText) {
+                    valueText.textContent = staffCount.toLocaleString();
+                }
+            }
+
             // Fetch vaccine stocks separately
             const vaccineResponse = await fetch('/api/vaccinestocks');
             const vaccineResult = await vaccineResponse.json();
