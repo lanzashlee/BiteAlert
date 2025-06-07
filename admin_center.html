@@ -34,8 +34,8 @@
         </aside>
         <main class="main-content">
             <div class="barangay-section">
-                <h2 class="barangay-header">Barangay Data Management</h2>
-                <p class="barangay-description">Manage and track barangay health centers and their data.</p>
+                <h2 class="barangay-header">Center Data Management</h2>
+                <p class="barangay-description">Manage and track health centers and their data.</p>
                 
                 <div class="button-group">
                     <button class="btn btn-primary" onclick="$('#addModal').modal('show')">
@@ -178,6 +178,24 @@
               <button type="submit" class="btn btn-primary">Save</button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Duplicate Center Modal -->
+    <div class="modal fade" id="duplicateCenterModal" tabindex="-1" role="dialog" aria-labelledby="duplicateCenterModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="duplicateCenterModalLabel">Duplicate Center</h4>
+          </div>
+          <div class="modal-body">
+            <p>A center with this name already exists. Please choose a different name.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+          </div>
         </div>
       </div>
     </div>

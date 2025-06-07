@@ -219,6 +219,14 @@ $('#barangayForm').on('submit', async function(e) {
         $('#formErrorMsg').hide();
     }
 
+    // Check for duplicate center name
+    const duplicate = centers.some(c => c.centerName && c.centerName.toLowerCase() === centerName.toLowerCase() && (!editId || c._id !== editId));
+    if (duplicate) {
+        // Show duplicate modal instead of just error message
+        $('#duplicateCenterModal').modal('show');
+        return;
+    }
+
     const center = { centerName, address, contactPerson, contactNumber };
 
     try {

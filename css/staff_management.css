@@ -1048,3 +1048,43 @@ body {
 .signout-modal-footer .confirm-btn:hover {
     background: #a83232;
 }
+
+.staff-table td .action-btn,
+.action-btn {
+    min-width: 36px;
+    min-height: 36px;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+/* Distinct headers for Inactive and Pending Staff tables */
+.inactive-staff-header, .pending-staff-header {
+    background: #fff5f5;
+    color: #c62828;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 12px 12px 0 0;
+    margin-top: 2.5rem;
+    margin-bottom: 0;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #eee;
+}
+
+.pending-staff-header {
+    background: #fffbe5;
+    color: #b8860b;
+}
+
+/* Add spacing between tables */
+.inactive-staff-table, .pending-staff-table {
+    margin-top: 0;
+    margin-bottom: 2rem;
+}

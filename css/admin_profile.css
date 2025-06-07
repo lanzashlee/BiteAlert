@@ -333,8 +333,9 @@ body {
     }
 }
 
+/* Hide menu-toggle by default, only show on small screens */
 .menu-toggle {
-    display: block;
+    display: none;
     position: fixed;
     top: 1rem;
     left: 1rem;
@@ -358,6 +359,12 @@ body {
     font-size: 1.2rem;
     margin: 0;
     line-height: 1;
+}
+
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
 }
 
 /* Logout Modal Styles */
