@@ -309,9 +309,9 @@ body {
 
 /* Action Buttons */
 .action-btn {
-    min-width: 110px;
-    width: 110px;
-    max-width: 110px;
+    min-width: 210px;
+    width: 210px;
+    max-width: 210px;
     padding: 0.5rem 0;
     text-align: center;
     justify-content: center;
