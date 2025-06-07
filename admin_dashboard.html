@@ -38,7 +38,7 @@
                 <div class="header-left">
                     <h2>Administrator Dashboard</h2>
                     <p class="subtitle">Analytics of the system based on real case data</p>
-                </div>
+            </div>
                 <div class="date-filter">
                     <select id="timeRange" class="form-control">
                         <option value="today">Today</option>
@@ -51,7 +51,7 @@
 
             <!-- Summary Cards -->
             <div class="dashboard-cards">
-                <div class="card">
+                <div class="card" data-tooltip="Total number of patients in the system.">
                     <div class="card-icon" style="background: rgba(128, 0, 0, 0.1);">
                         <i class="fa-solid fa-users" style="color: #800000;"></i>
                     </div>
@@ -63,7 +63,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card">
+                <div class="card" data-tooltip="Total number of staff accounts.">
                     <div class="card-icon" style="background: rgba(52, 152, 219, 0.1);">
                         <i class="fa-solid fa-user-tie" style="color: #3498db;"></i>
                     </div>
@@ -75,7 +75,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card">
+                <div class="card" data-tooltip="Total vaccine doses in stock across all centers.">
                     <div class="card-icon" style="background: rgba(46, 213, 115, 0.1);">
                         <i class="fa-solid fa-syringe" style="color: #2ed573;"></i>
                     </div>
@@ -87,7 +87,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card">
+                <div class="card" data-tooltip="Number of currently active bite cases.">
                     <div class="card-icon" style="background: rgba(255, 71, 87, 0.1);">
                         <i class="fa-solid fa-triangle-exclamation" style="color: #ff4757;"></i>
                     </div>
@@ -99,7 +99,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card">
+                <div class="card" data-tooltip="Number of health centers in the system.">
                     <div class="card-icon" style="background: rgba(255, 171, 67, 0.1);">
                         <i class="fa-solid fa-hospital" style="color: #ffab43;"></i>
                     </div>
@@ -112,6 +112,7 @@
                     </div>
                 </div>
             </div>
+            <div id="dashboardCardTooltip" class="stat-card-tooltip" style="display:none;"></div>
 
             <!-- Charts -->
             <div class="row">

@@ -358,4 +358,67 @@ document.addEventListener('DOMContentLoaded', function() {
             timeout = setTimeout(later, wait);
         };
     }
+
+    // Custom tooltip for stat cards
+    const statCardTooltip = document.getElementById('statCardTooltip');
+    function showStatTooltip(card, title, items) {
+        let html = `<div class='tooltip-title'>${title}</div>`;
+        if (items.length === 0) {
+            html += `<div class='tooltip-empty'>None</div>`;
+        } else {
+            html += `<ul class='tooltip-list'>`;
+            items.forEach(item => {
+                html += `<li>${item}</li>`;
+            });
+            html += `</ul>`;
+        }
+        html += `<div class='tooltip-arrow'></div>`;
+        statCardTooltip.innerHTML = html;
+        statCardTooltip.style.display = 'block';
+        // Position below the card, centered
+        const rect = card.getBoundingClientRect();
+        const scrollY = window.scrollY || window.pageYOffset;
+        statCardTooltip.style.left = (rect.left + rect.width/2 - statCardTooltip.offsetWidth/2) + 'px';
+        statCardTooltip.style.top = (rect.bottom + scrollY + 18) + 'px';
+        // Animate in
+        setTimeout(() => {
+            statCardTooltip.classList.add('show-tooltip');
+            statCardTooltip.style.left = (rect.left + rect.width/2 - statCardTooltip.offsetWidth/2) + 'px';
+            statCardTooltip.style.top = (rect.bottom + scrollY + 18) + 'px';
+        }, 10);
+    }
+    function hideStatTooltip() {
+        statCardTooltip.classList.remove('show-tooltip');
+        setTimeout(() => {
+            statCardTooltip.style.display = 'none';
+        }, 220);
+    }
+    // Attach listeners for each stat card
+    const lowStockCard = document.getElementById('lowStockCard');
+    const outStockCard = document.getElementById('outStockCard');
+    const expiredCard = document.getElementById('expiredCard');
+    if (lowStockCard) {
+        lowStockCard.addEventListener('mouseenter', function() {
+            const items = allItems.filter(item => item.quantity <= 10 && item.quantity > 0)
+                .map(item => `${item.name} (${item.centerName}): <b>${item.quantity}</b>`);
+            showStatTooltip(lowStockCard, 'Low Stock Vaccines', items);
+        });
+        lowStockCard.addEventListener('mouseleave', hideStatTooltip);
+    }
+    if (outStockCard) {
+        outStockCard.addEventListener('mouseenter', function() {
+            const items = allItems.filter(item => item.quantity === 0)
+                .map(item => `${item.name} (${item.centerName})`);
+            showStatTooltip(outStockCard, 'Out of Stock Vaccines', items);
+        });
+        outStockCard.addEventListener('mouseleave', hideStatTooltip);
+    }
+    if (expiredCard) {
+        expiredCard.addEventListener('mouseenter', function() {
+            // If you track expiry, filter here. For now, show placeholder.
+            const items = [];
+            showStatTooltip(expiredCard, 'Expired Vaccines', items);
+        });
+        expiredCard.addEventListener('mouseleave', hideStatTooltip);
+    }
 }); 

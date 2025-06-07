@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock & Inventory Management</title>
     <link rel="stylesheet" href="css/admin_profile.css">
-    <link rel="stylesheet" href="css/superadmin_stock.css">
+    <link rel="stylesheet" href="css/admin_stock.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -19,47 +19,49 @@
 
     <div class="dashboard-container">
         <aside class="sidebar">
-            <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
+            <div class="logo">
+                <h1 class="logo">Bite <span>Alert</span> <i class="fa-solid fa-paw"></i></h1>
+            </div>
             <ul class="menu">
-            <li><a href="dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
-            <li><a href="admin-management.html"><i class="fa-solid fa-user-gear"></i> Administrator Account Management</a></li>
-            <li><a href="audit-trail.html"><i class="fa-solid fa-file-lines"></i> Audit Trail</a></li>
-            <li class="active"><a href="superadmin_stock.html"><i class="fa-solid fa-boxes-stacked"></i> Stock & Inventory</a></li>
-            <li><a href="superadmin_generate.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
-            <li><a href="superadmin_profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+                <li><a href="dashboard.html"><i class="fa-solid fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="admin-management.html"><i class="fa-solid fa-user-gear"></i> Administrator Account Management</a></li>
+                <li><a href="audit-trail.html"><i class="fa-solid fa-file-lines"></i> Audit Trail</a></li>
+                <li class="active"><a href="superadmin_stock.html"><i class="fa-solid fa-boxes-stacked"></i> Stock & Inventory</a></li>
+                <li><a href="superadmin_generate.html"><i class="fa-solid fa-file-alt"></i> Generate Report</a></li>
+                <li><a href="superadmin_profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
             </ul>
             <button class="sign-out" id="signOutBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
         </aside>
-        <main class="main-content">
-            <div class="content-header">
-                <h2>Stock & Inventory Monitoring</h2>
-                <p class="subtitle">Monitor vaccines and medicines inventory for the animal bite center (read-only)</p>
-            </div>
+            
+            <main class="main-content">
+                <div class="content-header">
+                    <h2>Super Administrator Profile</h2>
+                    </div>
 
             <!-- Quick Stats -->
             <div class="quick-stats">
-                <div class="stat-card">
+                <div class="stat-card" id="totalVaccinesCard">
                     <i class="fas fa-syringe"></i>
                     <div class="stat-info">
                         <h3>Total Vaccines</h3>
                         <p id="totalItems">0</p>
                     </div>
                 </div>
-                <div class="stat-card warning">
+                <div class="stat-card warning" id="lowStockCard">
                     <i class="fas fa-exclamation-triangle"></i>
                     <div class="stat-info">
                         <h3>Low Stock</h3>
                         <p id="lowStockItems">0</p>
                     </div>
                 </div>
-                <div class="stat-card danger">
+                <div class="stat-card danger" id="outStockCard">
                     <i class="fas fa-times-circle"></i>
                     <div class="stat-info">
                         <h3>Out of Stock</h3>
                         <p id="outOfStockItems">0</p>
                     </div>
                 </div>
-                <div class="stat-card expired">
+                <div class="stat-card expired" id="expiredCard">
                     <i class="fas fa-calendar-times"></i>
                     <div class="stat-info">
                         <h3>Expired</h3>
@@ -67,6 +69,8 @@
                     </div>
                 </div>
             </div>
+            <!-- Custom tooltip for stat cards -->
+            <div id="statCardTooltip" class="stat-card-tooltip" style="display:none;"></div>
 
             <!-- Search and Filter Section -->
             <div class="search-filter-section">
@@ -77,10 +81,10 @@
               <div class="filter-box">
                 <select id="typeFilter">
                   <option value="">All Types</option>
-                  <option value="ARV">ARV</option>
-                  <option value="TCV">TCV</option>
-                  <option value="ERIG">ERIG</option>
-                  <option value="Booster">Booster</option>
+                  <option value="ARV">Anti-Rabies Vaccine (ARV)</option>
+                  <option value="TCV">Tetanus Vaccine (TCV)</option>
+                  <option value="ERIG">Equine Rabies Immune Globulin (ERIG)</option>
+                  <option value="Booster">Booster Dose</option>
                 </select>
                 <select id="statusFilter">
                   <option value="">All Status</option>
@@ -151,6 +155,6 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script src="js/superadmin_stock.js"></script>
+    <script src="js/admin_stock.js"></script>
 </body>
 </html> 

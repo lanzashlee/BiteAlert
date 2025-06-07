@@ -309,15 +309,26 @@ body {
 
 /* Action Buttons */
 .action-btn {
-    min-width: 210px;
-    width: 210px;
-    max-width: 210px;
-    padding: 0.5rem 0;
+    min-width: 110px !important;
+    width: 110px !important;
+    max-width: 110px !important;
+    padding: 0.5rem 0.5rem !important;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: #fff;
+    border: none;
+    margin-right: 8px;
     text-align: center;
     justify-content: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
 .action-btn:last-child {

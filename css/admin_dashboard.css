@@ -567,3 +567,33 @@ footer {
 .signout-modal-footer .confirm-btn:hover {
     background: #a83232;
 }
+
+.stat-card-tooltip {
+    position: absolute;
+    z-index: 9999;
+    min-width: 240px;
+    max-width: 320px;
+    background: #fff;
+    color: #222;
+    border-radius: 14px;
+    border: 1px solid #ececec;
+    box-shadow: 0 8px 32px rgba(80,80,120,0.18), 0 2px 8px rgba(80,80,120,0.10);
+    padding: 1.2rem 1.5rem 2.2rem 1.5rem;
+    font-size: 1.08rem;
+    line-height: 1.5;
+    text-align: left;
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.22s cubic-bezier(.4,0,.2,1), transform 0.22s cubic-bezier(.4,0,.2,1);
+}
+.stat-card-tooltip.show-tooltip {
+    opacity: 1;
+    transform: translateY(0);
+}
+.stat-card-tooltip .tooltip-title {
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 0.4em;
+    color: #222;
+}

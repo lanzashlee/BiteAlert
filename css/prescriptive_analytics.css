@@ -2026,3 +2026,77 @@ body {
 .signout-modal-footer .confirm-btn:hover {
     background: #a83232;
 }
+
+.stock-number {
+    font-weight: bold;
+    color: #800000;
+    background: #fffbe5;
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-left: 2px;
+}
+
+/* Modern stat card tooltip for analytics */
+.stat-card-tooltip {
+    position: absolute;
+    z-index: 9999;
+    min-width: 240px;
+    max-width: 320px;
+    background: #fff;
+    color: #222;
+    border-radius: 14px;
+    border: 1px solid #ececec;
+    box-shadow: 0 8px 32px rgba(80,80,120,0.18), 0 2px 8px rgba(80,80,120,0.10);
+    padding: 1.2rem 1.5rem 2.2rem 1.5rem;
+    font-size: 1.08rem;
+    line-height: 1.5;
+    text-align: left;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.22s cubic-bezier(.4,0,.2,1), transform 0.22s cubic-bezier(.4,0,.2,1);
+}
+.stat-card-tooltip.show-tooltip {
+    opacity: 1;
+    transform: translateY(0);
+}
+.stat-card-tooltip .tooltip-title {
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-bottom: 0.4em;
+    color: #222;
+}
+.stat-card-tooltip .tooltip-list {
+    margin: 0.2em 0 0.2em 0;
+    padding-left: 1.2em;
+    font-size: 1em;
+}
+.stat-card-tooltip .tooltip-list li {
+    margin-bottom: 0.2em;
+    color: #800000;
+    font-weight: 500;
+    list-style-type: disc;
+    list-style-position: inside;
+}
+.stat-card-tooltip .tooltip-empty {
+    color: #888;
+    font-style: italic;
+    margin: 0.2em 0 0.2em 0;
+}
+.stat-card-tooltip .tooltip-btn {
+    display: inline-block;
+    background: #5b4ef7;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    border-radius: 2em;
+    padding: 0.5em 1.4em;
+    font-size: 1em;
+    margin-top: 1em;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(91,78,247,0.08);
+    transition: background 0.18s;
+}
+.stat-card-tooltip .tooltip-btn:hover {
+    background: #3d2fc7;
+}

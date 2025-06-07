@@ -140,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 ...commonOptions.plugins,
                 title: {
                     display: true,
-                    text: 'Cases per Barangay',
+                    text: 'Cases per Center',
                     padding: {
                         top: 10,
                         bottom: 30
@@ -809,6 +809,48 @@ setInterval(updateSeverityChart, 300000);
             });
         }
     }
+
+    // Tooltip for dashboard cards
+    const dashboardCardTooltip = document.getElementById('dashboardCardTooltip');
+    let tooltipHideTimer = null;
+    document.querySelectorAll('.dashboard-cards .card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            if (tooltipHideTimer) clearTimeout(tooltipHideTimer);
+            const desc = card.getAttribute('data-tooltip') || '';
+            let html = `<div class='tooltip-title'>${desc}</div>`;
+            dashboardCardTooltip.innerHTML = html;
+            dashboardCardTooltip.style.display = 'block';
+            // Position below the card, centered
+            const rect = card.getBoundingClientRect();
+            const scrollY = window.scrollY || window.pageYOffset;
+            dashboardCardTooltip.style.left = (rect.left + rect.width/2 - dashboardCardTooltip.offsetWidth/2) + 'px';
+            dashboardCardTooltip.style.top = (rect.bottom + scrollY + 18) + 'px';
+            setTimeout(() => {
+                dashboardCardTooltip.classList.add('show-tooltip');
+                dashboardCardTooltip.style.left = (rect.left + rect.width/2 - dashboardCardTooltip.offsetWidth/2) + 'px';
+                dashboardCardTooltip.style.top = (rect.bottom + scrollY + 18) + 'px';
+            }, 10);
+        });
+        card.addEventListener('mouseleave', function() {
+            tooltipHideTimer = setTimeout(() => {
+                dashboardCardTooltip.classList.remove('show-tooltip');
+                setTimeout(() => {
+                    dashboardCardTooltip.style.display = 'none';
+                }, 220);
+            }, 80);
+        });
+    });
+    dashboardCardTooltip.addEventListener('mouseenter', function() {
+        if (tooltipHideTimer) clearTimeout(tooltipHideTimer);
+    });
+    dashboardCardTooltip.addEventListener('mouseleave', function() {
+        tooltipHideTimer = setTimeout(() => {
+            dashboardCardTooltip.classList.remove('show-tooltip');
+            setTimeout(() => {
+                dashboardCardTooltip.style.display = 'none';
+            }, 220);
+        }, 80);
+    });
 
     // Update patient growth chart
     async function updatePatientGrowth() {
