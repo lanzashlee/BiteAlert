@@ -16,30 +16,30 @@ function hideLoading() {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-// Menu Toggle Functionality
-if (menuToggle && sidebar) {
-    menuToggle.addEventListener('click', function() {
-        sidebar.classList.toggle('active');
-        menuToggle.classList.toggle('active');
-    });
+    // Menu Toggle Functionality
+    if (menuToggle && sidebar) {
+        menuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+        });
 
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener('click', function(event) {
-        if (window.innerWidth <= 768) {
-            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                }
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
                 sidebar.classList.remove('active');
                 menuToggle.classList.remove('active');
             }
-        }
-    });
-
-    // Handle window resize
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-            sidebar.classList.remove('active');
-            menuToggle.classList.remove('active');
-        }
-    });
+        });
     }
     
     // Sign out functionality
@@ -700,7 +700,7 @@ function printCustomDemographicReport(data, sex, ageGroup) {
     win.document.write(html);
     win.document.close();
     
-    setTimeout(() => {
+        setTimeout(() => {
         win.print();
         win.close();
     }, 500);

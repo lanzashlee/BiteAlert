@@ -89,7 +89,9 @@ function populateAccountsTable(accounts) {
             : `<span class="status-indicator ${account.isActive ? 'active' : 'inactive'}">${account.isActive ? 'Active' : 'Inactive'}</span>`;
         // Use data attributes, no inline onclick
         const actions = account.role.toLowerCase() === 'superadmin'
-            ? '<span class="status-badge">Always Active</span>'
+            ? `<div class="action-buttons">
+                <button class="btn-change-password" data-account-id="${account.id}" data-action="change-password"><i class="fa-solid fa-key"></i> Change Password</button>
+            </div>`
             : `<div class="action-buttons">
                 <button class="btn-activate" data-account-id="${account.id}" data-action="activate" ${account.isActive ? 'style="display:none;"' : ''}><i class="fa-solid fa-check-circle"></i> Activate</button>
                 <button class="btn-deactivate" data-account-id="${account.id}" data-action="deactivate" ${!account.isActive ? 'style="display:none;"' : ''}><i class="fa-solid fa-ban"></i> Deactivate</button>
