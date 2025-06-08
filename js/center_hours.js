@@ -7,24 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
         sidebar.classList.toggle('active');
     });
 
-    // List of all center names
-    const centers = [
-      "Addition Hills", "Balong-Bato", "Batis", "Corazon De Jesus", "Ermitaño", "Halo-halo", "Isabelita",
-      "Kabayanan", "Little Baguio", "Maytunas", "Onse", "Pasadeña", "Pedro Cruz", "Progreso", "Rivera",
-      "Salapan", "San Perfecto", "Santa Lucia", "Tibagan", "West Crame", "Greenhills"
-    ];
-
-    // Default data for each center (with default hours)
-    const defaultCenters = centers.map(name => ({
-      name,
-      location: "",
-      hours: {
-        weekday: { start: "08:00", end: "17:00" },
-        saturday: { start: "09:00", end: "15:00" },
-        sunday: { start: "09:00", end: "12:00" }
-      }
-    }));
-
+    // Database-driven centers data
+    let centersData = [];
     let editingIdx = null;
     const centersList = document.getElementById('centersList');
 
@@ -44,11 +28,20 @@ document.addEventListener('DOMContentLoaded', function() {
       return `${hours}:${minutes}`;
     }
 
+    function fetchCenters() {
+      fetch('/api/center-hours')
+        .then(res => res.json())
+        .then(data => {
+          centersData = data;
+          populateCentersList(centersData);
+        });
+    }
+
     function populateCentersList(centers) {
       centersList.innerHTML = centers.map((center, idx) => `
         <tr>
           <td><strong>${center.name}</strong></td>
-          <td>${center.location}</td>
+          <td>${center.address || ''}</td>
           <td class="hours-cell">${to12Hour(center.hours.weekday.start)} - ${to12Hour(center.hours.weekday.end)}</td>
           <td class="hours-cell">${to12Hour(center.hours.saturday.start)} - ${to12Hour(center.hours.saturday.end)}</td>
           <td class="hours-cell">${to12Hour(center.hours.sunday.start)} - ${to12Hour(center.hours.sunday.end)}</td>
@@ -57,17 +50,17 @@ document.addEventListener('DOMContentLoaded', function() {
       `).join('');
     }
 
-    // Initial load
-    populateCentersList(defaultCenters);
+    // Initial load from DB
+    fetchCenters();
 
     // Handle update button click
     centersList.addEventListener('click', function(e) {
       if (e.target.classList.contains('update-btn')) {
         const idx = e.target.getAttribute('data-idx');
         editingIdx = idx;
-        const center = defaultCenters[idx];
+        const center = centersData[idx];
         document.getElementById('centerName').value = center.name;
-        document.getElementById('centerLocation').value = center.location;
+        document.getElementById('centerLocation').value = center.address || '';
         document.getElementById('weekdayStart').value = to12Hour(center.hours.weekday.start);
         document.getElementById('weekdayEnd').value = to12Hour(center.hours.weekday.end);
         document.getElementById('saturdayStart').value = to12Hour(center.hours.saturday.start);
@@ -83,16 +76,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('editCenterForm').addEventListener('submit', function(e) {
       e.preventDefault();
       if (editingIdx !== null) {
-        const center = defaultCenters[editingIdx];
-        center.location = document.getElementById('centerLocation').value;
+        const center = centersData[editingIdx];
+        center.address = document.getElementById('centerLocation').value;
         center.hours.weekday.start = to24Hour(document.getElementById('weekdayStart').value);
         center.hours.weekday.end = to24Hour(document.getElementById('weekdayEnd').value);
         center.hours.saturday.start = to24Hour(document.getElementById('saturdayStart').value);
         center.hours.saturday.end = to24Hour(document.getElementById('saturdayEnd').value);
         center.hours.sunday.start = to24Hour(document.getElementById('sundayStart').value);
         center.hours.sunday.end = to24Hour(document.getElementById('sundayEnd').value);
-        populateCentersList(defaultCenters);
-        // Save to backend
         fetch('/api/center-hours/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -101,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            console.log('Center hours updated successfully');
+            fetchCenters(); // Refresh the table from DB
           } else {
             console.error('Failed to update center hours:', data.message);
           }

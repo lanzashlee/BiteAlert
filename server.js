@@ -2818,3 +2818,42 @@ app.get('/api/reports/general', async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to generate general report', error: err.message });
   }
 });
+
+// --- Center Hours Model and API ---
+const centerHoursSchema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true },
+  location: { type: String, default: '' },
+  address: { type: String, default: '' }, // Added address field
+  hours: {
+    weekday: { start: String, end: String },
+    saturday: { start: String, end: String },
+    sunday: { start: String, end: String }
+  }
+}, { collection: 'center_hours' });
+
+const CenterHours = mongoose.models.CenterHours || mongoose.model('CenterHours', centerHoursSchema);
+
+// GET all center hours
+app.get('/api/center-hours', async (req, res) => {
+  try {
+    const centers = await CenterHours.find();
+    res.json(centers);
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch center hours', error: err.message });
+  }
+});
+
+// POST update center hours
+app.post('/api/center-hours/update', async (req, res) => {
+  try {
+    const { name, location, hours } = req.body;
+    const updated = await CenterHours.findOneAndUpdate(
+      { name },
+      { location, hours },
+      { new: true, upsert: true }
+    );
+    res.json({ success: true, center: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to update center hours', error: err.message });
+  }
+});

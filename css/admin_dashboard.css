@@ -206,6 +206,7 @@ body {
     gap: 1rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
 }
 
 .card:hover {
@@ -243,9 +244,9 @@ body {
 
 .card-value .spinner {
     display: none;
-    font-size: 1.2em;
-    color: #aaa;
-    margin-right: 0.3em;
+    font-size: 0.5em;
+    color: #152535;
+    margin-right: 0.5em;
     vertical-align: middle;
     animation: spinner-fadein 0.3s;
 }
@@ -263,8 +264,62 @@ body {
 }
 
 .spinner .fa-spinner {
-    color: #800000 !important;
-    font-size: 1.5em;
+    color: #142341 !important;
+    font-size: 2em;
+}
+
+/* Tooltip Styles */
+.card[data-tooltip] {
+    position: relative;
+}
+
+.card[data-tooltip]:before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem 1rem;
+    background: rgba(44, 62, 80, 0.95);
+    color: white;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card[data-tooltip]:after {
+    content: '';
+    position: absolute;
+    bottom: calc(100% - 5px);
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(44, 62, 80, 0.95) transparent transparent transparent;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.card[data-tooltip]:hover:before,
+.card[data-tooltip]:hover:after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Responsive tooltip adjustments */
+@media (max-width: 768px) {
+    .card[data-tooltip]:before {
+        white-space: normal;
+        width: 200px;
+        text-align: center;
+    }
 }
 
 /* Chart Panels */
