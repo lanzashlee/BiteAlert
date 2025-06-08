@@ -110,16 +110,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const signoutModal = document.getElementById('signoutModal');
     const cancelSignout = document.getElementById('cancelSignout');
     const confirmSignout = document.getElementById('confirmSignout');
+    const signoutOverlay = document.querySelector('.signout-modal-overlay');
 
-    signOutBtn.addEventListener('click', () => {
-        signoutModal.style.display = 'flex';
-    });
+    function openSignoutModal() {
+        signoutModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        signoutModal.focus();
+    }
+    function closeSignoutModal() {
+        signoutModal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 
-    cancelSignout.addEventListener('click', () => {
-        signoutModal.style.display = 'none';
-    });
-
+    signOutBtn.addEventListener('click', openSignoutModal);
+    cancelSignout.addEventListener('click', closeSignoutModal);
+    signoutOverlay.addEventListener('click', closeSignoutModal);
     confirmSignout.addEventListener('click', () => {
         window.location.href = 'index.html';
+    });
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (signoutModal.classList.contains('active') && (e.key === 'Escape' || e.keyCode === 27)) {
+            closeSignoutModal();
+        }
     });
 }); 
