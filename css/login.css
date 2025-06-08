@@ -153,13 +153,13 @@ body {
     font-size: clamp(1.1rem, 2.5vw, 1.4rem);
     font-weight: 600;
     margin-bottom: 1rem;
-    color: #fffbe6;
+    color: #fcfcfc;
     text-shadow: 1px 1px 8px #80000088;
 }
 
 .desc {
     font-size: clamp(0.9rem, 1.8vw, 1.08rem);
-    color: #fffbe6;
+    color: #fdfdfd;
     text-shadow: 0 1px 4px #80000055;
     line-height: 1.6;
 }
@@ -170,7 +170,7 @@ body {
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
-    background: #fffbe6;
+    background: #fdfdfd;
     padding: 2rem;
     position: relative;
     min-width: 320px;
