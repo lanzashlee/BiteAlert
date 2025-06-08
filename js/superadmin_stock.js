@@ -194,8 +194,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
             });
-            renderInventoryTable();
+            // Dynamically populate typeFilter options
+            if (typeFilter) {
+                const uniqueTypes = Array.from(new Set(allItems.map(i => i.type).filter(Boolean)));
+                typeFilter.innerHTML = '<option value="">All Types</option>' +
+                    uniqueTypes.map(type => `<option value="${type}">${type}</option>`).join('');
+            }
             updateStatistics();
+            renderInventoryTable(); // Ensure table is rendered after loading
+            console.log('Inventory loaded:', allItems);
         } catch (err) {
             showError('Failed to load vaccine stocks');
             console.error('Error loading vaccine stocks:', err);
@@ -235,7 +242,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const matchesSearch = !searchTerm || 
                 item.name.toLowerCase().includes(searchTerm) ||
                 (item.centerName && item.centerName.toLowerCase().includes(searchTerm));
-            const matchesType = !typeValue || item.type === typeValue;
+            // Make type filter robust: match code or label, case-insensitive
+            const matchesType = !typeValue ||
+                item.type === typeValue ||
+                (item.type && item.type.toLowerCase().includes(typeValue.toLowerCase()));
             let matchesStatus = true;
             if (statusValue === 'low') matchesStatus = item.quantity <= 10 && item.quantity > 0;
             else if (statusValue === 'out') matchesStatus = item.quantity === 0;
@@ -273,12 +283,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleSearch() {
         currentPage = 1;
         renderInventoryTable();
+        console.log('Search/filter applied:', searchInput.value, typeFilter.value, statusFilter.value);
     }
 
     // Handle Filter
     function handleFilter() {
         currentPage = 1;
         renderInventoryTable();
+        console.log('Search/filter applied:', searchInput.value, typeFilter.value, statusFilter.value);
     }
 
     // Handle Sort
@@ -296,22 +308,76 @@ document.addEventListener('DOMContentLoaded', function() {
     // Export Inventory Data
     function exportInventoryData() {
         const filteredItems = filterItems();
-        const csvContent = [
-            ['Center', 'Vaccine Name', 'Type', 'Brand', 'Stock Left'],
-            ...filteredItems.map(item => [
-                item.centerName,
-                item.name,
-                item.type,
-                item.brand,
-                item.quantity
-            ])
-        ].map(row => row.join(',')).join('\n');
+        // Try both possible globals for jsPDF
+        const jsPDF = window.jspdf?.jsPDF || window.jsPDF;
+        if (!jsPDF) {
+            alert('jsPDF library not loaded. Please check your script includes.');
+            return;
+        }
+        const doc = new jsPDF();
+        const columns = ['Center', 'Vaccine Name', 'Type', 'Brand', 'Stock Left'];
+        const rows = filteredItems.map(item => [
+            item.centerName,
+            item.name,
+            item.type,
+            item.brand,
+            item.quantity
+        ]);
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `vaccine_stock_${new Date().toISOString().split('T')[0]}.csv`;
-        link.click();
+        // Load logo and generate PDF
+        const logoUrl = 'sj.png'; // Make sure this path is correct and accessible
+        const img = new window.Image();
+        img.crossOrigin = '';
+        img.onload = function() {
+            // Draw logo centered at the top
+            const imgWidth = 30;
+            const imgHeight = 30;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const x = (pageWidth - imgWidth) / 2;
+            doc.addImage(img, 'PNG', x, 10, imgWidth, imgHeight);
+
+            // Centered title
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.text('Vaccine Inventory Report', pageWidth / 2, 50, { align: 'center' });
+
+            // Centered city name
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(13);
+            doc.text('San Juan City', pageWidth / 2, 58, { align: 'center' });
+
+            // Table
+            doc.autoTable({
+                head: [columns],
+                body: rows,
+                startY: 65,
+                styles: { font: 'poppins', fontSize: 10 },
+                headStyles: { fillColor: [128, 0, 0] },
+                margin: { left: 14, right: 14 }
+            });
+            doc.save(`vaccine_inventory_${new Date().toISOString().split('T')[0]}.pdf`);
+        };
+        img.onerror = function() {
+            alert('Logo image could not be loaded. PDF will be generated without logo.');
+            // Centered title
+            const pageWidth = doc.internal.pageSize.getWidth();
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.text('Vaccine Inventory Report', pageWidth / 2, 30, { align: 'center' });
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(13);
+            doc.text('San Juan City', pageWidth / 2, 38, { align: 'center' });
+            doc.autoTable({
+                head: [columns],
+                body: rows,
+                startY: 45,
+                styles: { font: 'poppins', fontSize: 10 },
+                headStyles: { fillColor: [128, 0, 0] },
+                margin: { left: 14, right: 14 }
+            });
+            doc.save(`vaccine_inventory_${new Date().toISOString().split('T')[0]}.pdf`);
+        };
+        img.src = logoUrl;
     }
 
     // Update Statistics

@@ -36,23 +36,6 @@
                 <p class="subtitle">Actionable vaccine allocation based on real case data</p>
             </div>
 
-            <!-- Search and Filter Section for Analytics -->
-            <div class="search-filter-section" style="margin-bottom: 1.5rem;">
-                <div class="search-box">
-                    <input type="text" id="analyticsSearchInput" placeholder="Search center or vaccine...">
-                    <i class="fas fa-search"></i>
-                </div>
-                <div class="filter-box">
-                    <select id="analyticsVaccineFilter">
-                        <option value="">All Vaccine Types</option>
-                        <option value="ARV">Anti-Rabies Vaccine (ARV)</option>
-                        <option value="TCV">Tetanus Vaccine (TCV)</option>
-                        <option value="ERIG">Equine Rabies Immune Globulin (ERIG)</option>
-                        <option value="Booster">Booster Dose</option>
-                    </select>
-                </div>
-            </div>
-
             <!-- Severity Cards -->
             <div class="severity-cards">
                 <div class="severity-card high">
@@ -82,28 +65,38 @@
             </div>
             <div id="statCardTooltip" class="stat-card-tooltip" style="display:none;"></div>
 
+            <!-- Search and Filter Section for Analytics -->
+            <div class="search-filter-section" style="margin-bottom: 1.5rem;">
+                <div class="search-box">
+                    <input type="text" id="analyticsSearchInput" placeholder="Search center or vaccine...">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <button id="exportAnalyticsPDF" class="btn btn-primary" style="margin-left: 1.5rem;"><i class="fa fa-file-pdf-o"></i> Export PDF</button>
+            </div>
+
             <!-- Detailed Barangay Table -->
             <div class="analytics-card full-width">
-                    <h3><i class="fa-solid fa-table"></i> Center Case Analysis & Recommendations</h3>
-                    <div class="table-responsive">
-                        <table class="barangay-analysis-table">
-                        <thead>
-                            <tr>
-                                <th>Center</th>
-                                <th>Total Cases</th>
-                                <th>Vaccine Type</th>
-                                <th>Current Stock</th>
-                                <th>Required Stock</th>
-                                <th>Priority Level</th>
-                                <th>Recommended Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="barangayAnalysisTable">
-                            <!-- Data will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
+                <h3><i class="fa-solid fa-table"></i> Center Case Analysis & Recommendations</h3>
+                <div class="table-responsive">
+                    <table class="barangay-analysis-table">
+                    <thead>
+                        <tr>
+                            <th>Center</th>
+                            <th>Total Cases</th>
+                            <th>Vaccine Type</th>
+                            <th>Current Stock</th>
+                            <th>Required Stock</th>
+                            <th>Priority Level</th>
+                            <th>Recommended Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="barangayAnalysisTable">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
             </div>
+        </div>
 
             <!-- Full Prescriptive Analytics Transfer Plan -->
             <div class="analytics-card full-width" style="margin-top: 2rem;">
@@ -164,6 +157,8 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="js/prescriptive_analytics.js"></script>
 </body>
 </html>

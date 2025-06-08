@@ -79,11 +79,17 @@ function populateAuditTable(data) {
     });
 }
 
-// Filter Function
+// Add search and filter logic
+const searchInput = document.getElementById('searchInput');
+const dateFromInput = document.getElementById('dateFrom');
+const dateToInput = document.getElementById('dateTo');
+const roleInput = document.getElementById('filterRole');
+
 function filterAuditData() {
-    const dateFrom = document.getElementById('dateFrom').value;
-    const dateTo = document.getElementById('dateTo').value;
-    const role = document.getElementById('filterRole').value;
+    const dateFrom = dateFromInput.value;
+    const dateTo = dateToInput.value;
+    const role = roleInput.value;
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
 
     let filteredData = [...window.currentAuditData];
 
@@ -101,12 +107,53 @@ function filterAuditData() {
 
     if (role) {
         filteredData = filteredData.filter(entry => 
-            entry.role.toLowerCase().includes(role.toLowerCase())
+            entry.role && entry.role.toLowerCase() === role.toLowerCase()
         );
+    }
+
+    if (searchTerm) {
+        filteredData = filteredData.filter(entry => {
+            // Search by ID, name, or action
+            let displayId = '';
+            if (entry.role === 'admin' && entry.adminID) {
+                displayId = entry.adminID;
+            } else if (entry.role === 'superadmin' && entry.superAdminID) {
+                displayId = entry.superAdminID;
+            } else if (entry.patientID) {
+                displayId = entry.patientID;
+            } else if (entry.staffID) {
+                displayId = entry.staffID;
+            }
+            const fullName = [entry.firstName, entry.middleName, entry.lastName].filter(Boolean).join(' ').toLowerCase();
+            return (
+                (displayId && displayId.toLowerCase().includes(searchTerm)) ||
+                fullName.includes(searchTerm) ||
+                (entry.action && entry.action.toLowerCase().includes(searchTerm))
+            );
+        });
     }
 
     populateAuditTable(filteredData);
 }
+
+// Debounce utility
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Attach event listeners for search and filters
+if (searchInput) searchInput.addEventListener('input', debounce(filterAuditData, 300));
+if (dateFromInput) dateFromInput.addEventListener('change', filterAuditData);
+if (dateToInput) dateToInput.addEventListener('change', filterAuditData);
+if (roleInput) roleInput.addEventListener('change', filterAuditData);
 
 // Date Formatting Utility
 function formatDateTime(date) {

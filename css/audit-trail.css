@@ -975,3 +975,23 @@ footer {
 .confirm-btn:hover {
     background-color: #c82333;
 }
+
+.search-box {
+    position: relative;
+    margin-bottom: 1.5rem;
+    max-width: 350px;
+}
+.search-box input {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+}
+.search-box i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}

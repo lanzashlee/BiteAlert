@@ -2554,27 +2554,18 @@ app.get('/api/reports/animal-bite-exposure', async (req, res) => {
 // Rabies Utilization Report API
 app.get('/api/reports/rabies-utilization', async (req, res) => {
     try {
-        // You can replace this with real data aggregation if needed
-        const now = new Date();
-        const monthYear = now.toLocaleString('default', { month: 'long', year: 'numeric' });
-        const table = {
-          head: ['Date', 'Vaccine Type', 'Batch No.', 'Quantity Used', 'Remaining Stock', 'Expiry Date'],
-          body: [
-            // Example row
-            [now.toLocaleDateString(), 'Anti-Rabies', 'B123', 10, 90, '2024-12-31'],
-            // ... more rows
-          ]
-        };
-        res.json({
-            success: true,
-            data: {
-            facilityName: 'Tibagan Health Center',
-                monthYear,
-                table,
-            preparedBy: 'BENNETTA A. SOLISA, RN',
-            preparedByTitle: 'Rabies Nurse Coordinator'
-            }
-        });
+        const BiteCase = mongoose.connection.model('BiteCase', new mongoose.Schema({}, { strict: false }), 'bitecases');
+        const bitecases = await BiteCase.find({});
+        const report = bitecases.map(p => ({
+            dateRegistered: p.dateRegistered,
+            center: p.center || '',
+            firstName: p.firstName || '',
+            middleName: p.middleName || '',
+            lastName: p.lastName || '',
+            brandName: p.brandName || '',
+            genericName: p.genericName || ''
+        }));
+        res.json({ success: true, data: report });
     } catch (err) {
         res.status(500).json({ success: false, message: 'Failed to generate rabies utilization report', error: err.message });
     }

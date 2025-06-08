@@ -43,19 +43,49 @@
                 <div class="report-card card-fade-in">
                     <div class="report-header">
                         <i class="fas fa-syringe"></i>
-                        <h3>Rabies Utilization Report</h3>
+                        <h3>Cases Per Center and Vaccine Used</h3>
                     </div>
                     <div class="report-body">
-                        <form id="rabiesUtilizationReportForm">
-                            <div class="btn-group">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-file-pdf"></i> Export PDF
-                                </button>
-                                <button type="button" class="btn btn-secondary">
-                                    <i class="fas fa-print"></i> Print
-                                </button>
+                        <!-- Rabies Utilization Report Table Section -->
+                        <div class="table-section">
+                            
+                            <div class="table-section-header">
+                                <div class="modern-filter-row">
+                                    <div class="filter-group">
+                                        <label for="rabiesUtilFrom">FROM:</label>
+                                        <input type="date" id="rabiesUtilFrom" class="form-control" placeholder="From">
+                                    </div>
+                                    <div class="filter-group">
+                                        <label for="rabiesUtilTo">TO:</label>
+                                        <input type="date" id="rabiesUtilTo" class="form-control" placeholder="To">
+                                    </div>
+                                    <div class="search-group filter-group">
+                                        <label for="rabiesUtilSearch" style="visibility:hidden;">Search</label>
+                                        <div class="search-input-wrapper">
+                                            <input type="text" id="rabiesUtilSearch" class="form-control table-search" placeholder="Search by name, vaccine, or center...">
+                                        </div>
+                                    </div>
+                                    <div class="export-btn-group">
+                                        <button id="rabiesUtilExportBtn" class="btn btn-info"><i class="fa fa-download"></i> Export PDF</button>
+                                    </div>
+                                </div>
                             </div>
-                        </form>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="rabiesUtilTable">
+                                    <thead>
+                                        <tr>
+                                            <th>DATE</th>
+                                            <th>CENTER</th>
+                                            <th>PATIENT NAME</th>
+                                            <th>VACCINE USED</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -66,22 +96,54 @@
                         <h3>Animal Bite Exposure Report</h3>
                     </div>
                     <div class="report-body">
-                        <form id="animalBiteExposureReportForm">
-                            <div class="btn-group">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-file-pdf"></i> Export PDF
-                                </button>
-                                <button type="button" class="btn btn-secondary">
-                                    <i class="fas fa-print"></i> Print
-                                </button>
+                        <!-- Animal Bite Exposure Report Table Section -->
+                        <div class="table-section">
+                            
+                            <div class="table-section-header">
+                                <div class="modern-filter-row">
+                                    <div class="filter-group">
+                                        <label for="animalBiteFrom">FROM:</label>
+                                        <input type="date" id="animalBiteFrom" class="form-control" placeholder="From">
+                                    </div>
+                                    <div class="filter-group">
+                                        <label for="animalBiteTo">TO:</label>
+                                        <input type="date" id="animalBiteTo" class="form-control" placeholder="To">
+                                    </div>
+                                    <div class="search-group filter-group">
+                                        <label for="animalBiteSearch" style="visibility:hidden;">Search</label>
+                                        <div class="search-input-wrapper">
+                                            <input type="text" id="animalBiteSearch" class="form-control table-search" placeholder="Search by name, animal, or address...">
+                                        </div>
+                                    </div>
+                                    <div class="export-btn-group">
+                                        <button id="animalBiteExportBtn" class="btn btn-info"><i class="fa fa-download"></i> Export PDF</button>
+                                    </div>
+                                </div>
                             </div>
-                
-                        </form>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="animalBiteTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Case No.</th>
+                                            <th>Date</th>
+                                            <th>Patient Name</th>
+                                            <th>Age</th>
+                                            <th>Sex</th>
+                                            <th>Address</th>
+                                            <th>Animal Type</th>
+                                            <th>Bite Site</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                
-                
                 <!-- Custom Demographic Report -->
                 <div class="report-card card-fade-in">
                     <div class="report-header">
@@ -89,36 +151,68 @@
                         <h3>Custom Demographic Report</h3>
                     </div>
                     <div class="report-body">
-                        <form id="customDemographicReportForm">
-                            <div class="form-group">
-                                <label for="filterSex">Sex</label>
-                                <select id="filterSex" class="form-control">
-                                    <option value="all">All</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
+                        <!-- Custom Demographic Report Table Section -->
+                        <div class="table-section">
+                            
+                            <div class="table-section-header">
+                                <div class="modern-filter-row">
+                                    <div class="filter-group">
+                                        <label for="customDemoFrom">FROM:</label>
+                                        <input type="date" id="customDemoFrom" class="form-control" placeholder="From">
+                                    </div>
+                                    <div class="filter-group">
+                                        <label for="customDemoTo">TO:</label>
+                                        <input type="date" id="customDemoTo" class="form-control" placeholder="To">
+                                    </div>
+                                    <div class="filter-group">
+                                        <label for="filterSex">SEX:</label>
+                                        <select id="filterSex" class="form-control">
+                                            <option value="all">All Sex</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                        </select>
+                                    </div>
+                                    <div class="filter-group">
+                                        <label for="filterAge">AGE GROUP:</label>
+                                        <select id="filterAge" class="form-control">
+                                            <option value="all">All Age Groups</option>
+                                            <option value="0-5">0-5</option>
+                                            <option value="6-12">6-12</option>
+                                            <option value="13-18">13-18</option>
+                                            <option value="19-35">19-35</option>
+                                            <option value="36-60">36-60</option>
+                                            <option value="61+">61+</option>
+                                        </select>
+                                    </div>
+                                    <div class="search-group filter-group">
+                                        <label for="customDemoSearch" style="visibility:hidden;">Search</label>
+                                        <div class="search-input-wrapper">
+                                            <input type="text" id="customDemoSearch" class="form-control table-search" placeholder="Search by name, address, or contact...">
+                                        </div>
+                                    </div>
+                                    <div class="export-btn-group">
+                                        <button id="customDemoExportBtn" class="btn btn-info"><i class="fa fa-download"></i> Export PDF</button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="filterAge">Age Group</label>
-                                <select id="filterAge" class="form-control">
-                                    <option value="all">All</option>
-                                    <option value="0-5">0-5</option>
-                                    <option value="6-12">6-12</option>
-                                    <option value="13-18">13-18</option>
-                                    <option value="19-35">19-35</option>
-                                    <option value="36-60">36-60</option>
-                                    <option value="61+">61+</option>
-                                </select>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="customDemoTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Age</th>
+                                            <th>Sex</th>
+                                            <th>Address</th>
+                                            <th>Contact</th>
+                                            <th>Registration Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data will be populated by JS -->
+                                    </tbody>
+                                </table>
                             </div>
-                            <div class="btn-group">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-file-pdf"></i> Export PDF
-                                </button>
-                                <button type="button" class="btn btn-secondary">
-                                    <i class="fas fa-print"></i> Print
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>

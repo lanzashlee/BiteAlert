@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const origUpdateBarangayTable = updateBarangayTable;
     updateBarangayTable = function(analysis) {
         window._analyticsTableData = analysis;
-        origUpdateBarangayTable(analysis);
+        applyAnalyticsFilters();
     };
 
     function applyAnalyticsFilters() {
@@ -182,6 +182,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 220);
         }, 80);
     });
+
+    // Add Export PDF functionality
+    const exportBtn = document.getElementById('exportAnalyticsPDF');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            exportAnalyticsTablePDF();
+        });
+    }
 });
 
 // Show/Hide Loading Overlay
@@ -862,4 +870,62 @@ function generateFullTransferPlan(allCenters) {
     }
 
     return transfers;
+}
+
+function exportAnalyticsTablePDF() {
+    const jsPDF = window.jspdf?.jsPDF || window.jsPDF;
+    if (!jsPDF) {
+        alert('jsPDF library not loaded.');
+        return;
+    }
+    const doc = new jsPDF('landscape');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const logoUrl = 'sj.png';
+    const img = new window.Image();
+    img.crossOrigin = '';
+    img.onload = function() {
+        const imgWidth = 30;
+        const imgHeight = 30;
+        const x = (pageWidth - imgWidth) / 2;
+        doc.addImage(img, 'PNG', x, 10, imgWidth, imgHeight);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text('Center Case Analysis & Recommendations', pageWidth / 2, 50, { align: 'center' });
+        // Table
+        const table = document.querySelector('.barangay-analysis-table');
+        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+        const rows = Array.from(table.querySelectorAll('tbody tr')).map(tr =>
+            Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim())
+        );
+        doc.autoTable({
+            head: [headers],
+            body: rows,
+            startY: 58,
+            styles: { font: 'poppins', fontSize: 10 },
+            headStyles: { fillColor: [128, 0, 0] },
+            margin: { left: 14, right: 14 }
+        });
+        doc.save(`center_case_analysis_${new Date().toISOString().split('T')[0]}.pdf`);
+    };
+    img.onerror = function() {
+        // Fallback: No logo
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text('Center Case Analysis & Recommendations', pageWidth / 2, 30, { align: 'center' });
+        const table = document.querySelector('.barangay-analysis-table');
+        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+        const rows = Array.from(table.querySelectorAll('tbody tr')).map(tr =>
+            Array.from(tr.querySelectorAll('td')).map(td => td.textContent.trim())
+        );
+        doc.autoTable({
+            head: [headers],
+            body: rows,
+            startY: 38,
+            styles: { font: 'poppins', fontSize: 10 },
+            headStyles: { fillColor: [128, 0, 0] },
+            margin: { left: 14, right: 14 }
+        });
+        doc.save(`center_case_analysis_${new Date().toISOString().split('T')[0]}.pdf`);
+    };
+    img.src = logoUrl;
 }

@@ -96,4 +96,29 @@
     background-color: #27ae60;
     border-color: #27ae60;
     color: white;
+}
+
+.update-btn {
+    background-color: #4fc3f7;
+    border-color: #4fc3f7;
+    color: #fff;
+    font-weight: 600;
+    transition: background 0.2s, border 0.2s;
+}
+.update-btn:hover {
+    background-color: #039be5;
+    border-color: #039be5;
+    color: #fff;
+}
+.archive-btn {
+    background-color: #e57373;
+    border-color: #e57373;
+    color: #fff;
+    font-weight: 600;
+    transition: background 0.2s, border 0.2s;
+}
+.archive-btn:hover {
+    background-color: #c62828;
+    border-color: #c62828;
+    color: #fff;
 } 

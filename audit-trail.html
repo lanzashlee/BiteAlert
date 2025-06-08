@@ -37,8 +37,8 @@
             </div>
             <div class="audit-content">
                 <!-- Filters Section -->
-                <div class="audit-filters">
-                    <div class="filter-controls">
+                <div class="audit-filters" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+                    <div class="filter-controls" style="flex: 1 1 350px; min-width: 250px;">
                         <div class="filter-group">
                             <label for="dateFrom">From:</label>
                             <input type="date" id="dateFrom">
@@ -56,6 +56,10 @@
                                 <option value="Patient">Patient</option>
                             </select>
                         </div>
+                    </div>
+                    <div class="search-box" style="min-width: 250px; max-width: 350px; flex: 0 0 350px; align-self: flex-end;">
+                        <input type="text" id="searchInput" placeholder="Search by name, action, or ID...">
+                        <i class="fas fa-search"></i>
                     </div>
                 </div>
 

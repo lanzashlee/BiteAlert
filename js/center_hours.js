@@ -11,6 +11,17 @@ document.addEventListener('DOMContentLoaded', function() {
     let centersData = [];
     let editingIdx = null;
     const centersList = document.getElementById('centersList');
+    const searchInput = document.getElementById('searchInput');
+
+    // Search functionality
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        const filteredCenters = centersData.filter(center => 
+            center.name.toLowerCase().includes(searchTerm) || 
+            (center.address && center.address.toLowerCase().includes(searchTerm))
+        );
+        populateCentersList(filteredCenters);
+    });
 
     function to12Hour(time24) {
       const [hour, minute] = time24.split(':');

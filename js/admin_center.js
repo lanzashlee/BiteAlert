@@ -28,10 +28,10 @@ function renderTable() {
                 <td>${c.contactPerson || ''}</td>
                 <td>${c.contactNumber || ''}</td>
                 <td class="table-actions">
-                    <button class="btn btn-xs btn-info" onclick="editCenter('${c._id}')">
-                        <i class="fa fa-edit"></i> Edit
+                    <button class="btn btn-xs btn-info update-btn" onclick="editCenter('${c._id}')">
+                        <i class="fa fa-edit"></i> Update
                     </button>
-                    <button class="btn btn-xs btn-danger" onclick="archiveCenter('${c._id}')">
+                    <button class="btn btn-xs btn-danger archive-btn" onclick="archiveCenter('${c._id}')">
                         <i class="fa fa-archive"></i> Archive
                     </button>
                 </td>
@@ -206,8 +206,8 @@ $('#addModal').on('hidden.bs.modal', resetForm);
 
 $('#barangayForm').on('submit', async function(e) {
     e.preventDefault();
-    const centerName = $('#centerName').val();
-    const address = $('#centerAddress').val().trim();
+    const centerName = $('#centerName').val().trim();
+    const address = $('#centerAddress').val();
     const contactPerson = $('#contactPerson').val().trim();
     const contactNumber = $('#contactNumber').val().trim();
 
