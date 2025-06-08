@@ -839,6 +839,20 @@ if (rabiesUtilExportBtn) rabiesUtilExportBtn.addEventListener('click', function(
     exportRabiesUtilPDF();
 });
 
+function addCenteredLogoAndTitle(doc, title, yStart = 14) {
+    // Add logo centered
+    const logoImg = new Image();
+    logoImg.src = 'sj.png';
+    try {
+        doc.addImage(logoImg, 'PNG', (doc.internal.pageSize.getWidth() - 28) / 2, yStart, 28, 28);
+    } catch (e) {
+        // If image fails, skip
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.text(title, doc.internal.pageSize.getWidth() / 2, yStart + 36, { align: 'center' });
+}
+
 function exportRabiesUtilPDF() {
     const jsPDF = window.jspdf?.jsPDF || window.jsPDF;
     if (!jsPDF) {
@@ -848,6 +862,7 @@ function exportRabiesUtilPDF() {
     const doc = new jsPDF('landscape');
     const from = rabiesUtilFrom.value ? new Date(rabiesUtilFrom.value) : null;
     const to = rabiesUtilTo.value ? new Date(rabiesUtilTo.value) : null;
+    const search = document.getElementById('rabiesUtilSearch')?.value?.toLowerCase() || '';
     let filtered = rabiesUtilRawData;
     if (from) filtered = filtered.filter(row => {
         const d = row.dateRegistered ? new Date(row.dateRegistered) : null;
@@ -857,19 +872,28 @@ function exportRabiesUtilPDF() {
         const d = row.dateRegistered ? new Date(row.dateRegistered) : null;
         return d && d <= to;
     });
+    if (search) {
+        filtered = filtered.filter(row => {
+            return (
+                (row.dateRegistered && formatDate(row.dateRegistered).toLowerCase().includes(search)) ||
+                (row.center && row.center.toLowerCase().includes(search)) ||
+                ([row.firstName, row.middleName, row.lastName].filter(Boolean).join(' ').toLowerCase().includes(search)) ||
+                (row.brandName && row.brandName.toLowerCase().includes(search)) ||
+                (row.genericName && row.genericName.toLowerCase().includes(search))
+            );
+        });
+    }
     const mapped = aggregateRabiesUtilData(filtered);
     const columns = rabiesUtilColumns.map(col => col.title);
     const rows = mapped.map(row => rabiesUtilColumns.map(col => row[col.key]));
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text('CASES PER CENTER AND VACCINE USED', 14, 14);
+    addCenteredLogoAndTitle(doc, 'CASES PER CENTER AND VACCINE USED');
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
-    doc.text('Date Range: ' + (rabiesUtilFrom.value || '...') + ' to ' + (rabiesUtilTo.value || '...'), 14, 22);
+    doc.text('Date Range: ' + (rabiesUtilFrom.value || '...') + ' to ' + (rabiesUtilTo.value || '...'), doc.internal.pageSize.getWidth() / 2, 54, { align: 'center' });
     doc.autoTable({
         head: [columns],
         body: rows,
-        startY: 28,
+        startY: 60,
         styles: { fontSize: 9, cellPadding: 2 },
         headStyles: { fillColor: [128, 0, 0], textColor: 255, fontStyle: 'bold' },
         theme: 'grid',
@@ -958,25 +982,41 @@ function exportAnimalBitePDF() {
     const columns = ['Case No.', 'Date', 'Patient Name', 'Age', 'Sex', 'Address', 'Animal Type', 'Bite Site', 'Status'];
     const from = animalBiteFrom.value ? new Date(animalBiteFrom.value) : null;
     const to = animalBiteTo.value ? new Date(animalBiteTo.value) : null;
+    const search = document.getElementById('animalBiteSearch')?.value?.toLowerCase() || '';
     let filtered = animalBiteRawData;
     if (from) filtered = filtered.filter(row => row.date && new Date(row.date) >= from);
     if (to) filtered = filtered.filter(row => row.date && new Date(row.date) <= to);
-    const rows = filtered.map(row => [
-        row.caseNo || '',
-        row.date ? formatDate(row.date) : '',
-        row.name || row.patientName || '',
-        row.age || '',
-        row.sex || '',
-        row.address || '',
-        row.animalType || '',
-        row.biteSite || '',
-        row.status || ''
-    ]);
-    doc.text('Animal Bite Exposure Report', 14, 16);
+    if (search) {
+        filtered = filtered.filter(row => {
+            return (
+                (row.caseNo && row.caseNo.toLowerCase().includes(search)) ||
+                (row.date && formatDate(row.date).toLowerCase().includes(search)) ||
+                (row.name && row.name.toLowerCase().includes(search)) ||
+                (row.patientName && row.patientName.toLowerCase().includes(search)) ||
+                (row.age && String(row.age).toLowerCase().includes(search)) ||
+                (row.sex && row.sex.toLowerCase().includes(search)) ||
+                (row.address && row.address.toLowerCase().includes(search)) ||
+                (row.animalType && row.animalType.toLowerCase().includes(search)) ||
+                (row.biteSite && row.biteSite.toLowerCase().includes(search)) ||
+                (row.status && row.status.toLowerCase().includes(search))
+            );
+        });
+    }
+    addCenteredLogoAndTitle(doc, 'ANIMAL BITE EXPOSURE REPORT');
     doc.autoTable({
         head: [columns],
-        body: rows,
-        startY: 22,
+        body: filtered.map(row => [
+            row.caseNo || '',
+            row.date ? formatDate(row.date) : '',
+            row.name || row.patientName || '',
+            row.age || '',
+            row.sex || '',
+            row.address || '',
+            row.animalType || '',
+            row.biteSite || '',
+            row.status || ''
+        ]),
+        startY: 60,
         styles: { font: 'poppins', fontSize: 10 },
         headStyles: { fillColor: [128, 0, 0] },
         margin: { left: 14, right: 14 }
@@ -1078,6 +1118,7 @@ function exportCustomDemoPDF() {
     const to = customDemoTo.value ? new Date(customDemoTo.value) : null;
     const sex = filterSex.value;
     const ageGroup = filterAge.value;
+    const search = document.getElementById('customDemoSearch')?.value?.toLowerCase() || '';
     let filtered = customDemoRawData;
     if (from) filtered = filtered.filter(row => row.registrationDate && new Date(row.registrationDate) >= from);
     if (to) filtered = filtered.filter(row => row.registrationDate && new Date(row.registrationDate) <= to);
@@ -1095,19 +1136,31 @@ function exportCustomDemoPDF() {
             return true;
         });
     }
-    const rows = filtered.map(row => [
-        [row.firstName, row.middleName, row.lastName].filter(Boolean).join(' ') || row.name || '',
-        row.age || '',
-        row.sex || '',
-        row.address || '',
-        row.contactNo || '',
-        row.registrationDate ? formatDate(row.registrationDate) : ''
-    ]);
-    doc.text('Custom Demographic Report', 14, 16);
+    if (search) {
+        filtered = filtered.filter(row => {
+            return (
+                ([row.firstName, row.middleName, row.lastName].filter(Boolean).join(' ').toLowerCase().includes(search)) ||
+                (row.name && row.name.toLowerCase().includes(search)) ||
+                (row.age && String(row.age).toLowerCase().includes(search)) ||
+                (row.sex && row.sex.toLowerCase().includes(search)) ||
+                (row.address && row.address.toLowerCase().includes(search)) ||
+                (row.contactNo && row.contactNo.toLowerCase().includes(search)) ||
+                (row.registrationDate && formatDate(row.registrationDate).toLowerCase().includes(search))
+            );
+        });
+    }
+    addCenteredLogoAndTitle(doc, 'CUSTOM DEMOGRAPHIC REPORT');
     doc.autoTable({
         head: [columns],
-        body: rows,
-        startY: 22,
+        body: filtered.map(row => [
+            [row.firstName, row.middleName, row.lastName].filter(Boolean).join(' ') || row.name || '',
+            row.age || '',
+            row.sex || '',
+            row.address || '',
+            row.contactNo || '',
+            row.registrationDate ? formatDate(row.registrationDate) : ''
+        ]),
+        startY: 60,
         styles: { font: 'poppins', fontSize: 10 },
         headStyles: { fillColor: [128, 0, 0] },
         margin: { left: 14, right: 14 }

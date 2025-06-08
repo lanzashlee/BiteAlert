@@ -92,6 +92,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 row.vaccineType.toLowerCase().includes(searchValue)
             );
         }
+        // Sort by priority: high, medium, low (case-insensitive)
+        filtered = filtered.slice().sort((a, b) => {
+            const priorityOrder = { high: 0, medium: 1, low: 2 };
+            return priorityOrder[(a.priority || '').toLowerCase()] - priorityOrder[(b.priority || '').toLowerCase()];
+        });
         // Render filtered data
         const tbody = document.getElementById('barangayAnalysisTable');
         if (!tbody) return;
@@ -501,8 +506,12 @@ function updateBarangayTable(analysis) {
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    let filteredData = analysis.barangayData;
-    // ... (apply any filters as before)
+    // Sort by priority: high, medium, low (case-insensitive)
+    let filteredData = analysis.barangayData.slice();
+    filteredData.sort((a, b) => {
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+        return priorityOrder[(a.priority || '').toLowerCase()] - priorityOrder[(b.priority || '').toLowerCase()];
+    });
 
     filteredData.forEach(data => {
         const row = document.createElement('tr');

@@ -2848,3 +2848,24 @@ app.post('/api/center-hours/update', async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to update center hours', error: err.message });
   }
 });
+
+// Real-time full name uniqueness check endpoint
+app.get('/api/check-name-exists', async (req, res) => {
+    const { firstName = '', middleName = '', lastName = '' } = req.query;
+    if (!firstName.trim() || !lastName.trim()) {
+        return res.json({ exists: false });
+    }
+    const trimmedFirst = firstName.trim();
+    const trimmedMiddle = (middleName || '').trim();
+    const trimmedLast = lastName.trim();
+    const nameQuery = {
+        firstName: { $regex: `^${trimmedFirst}$`, $options: 'i' },
+        lastName: { $regex: `^${trimmedLast}$`, $options: 'i' },
+        $or: [
+            { $or: [ { middleName: { $exists: false } }, { middleName: '' } ] },
+            { middleName: { $regex: `^${trimmedMiddle}$`, $options: 'i' } }
+        ]
+    };
+    const exists = await Admin.findOne(nameQuery) || await SuperAdmin.findOne(nameQuery);
+    res.json({ exists: !!exists });
+});
