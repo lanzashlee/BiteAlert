@@ -452,6 +452,7 @@ div.logo {
     all: unset;
 }
 
+/* Logout Modal Styles */
 .signout-modal {
     display: none;
     position: fixed;
@@ -553,6 +554,6 @@ div.logo {
 }
 .signout-modal-footer .confirm-btn:hover {
     background: #a83232;
-}
+} 
 
  
