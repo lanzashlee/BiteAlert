@@ -2489,7 +2489,8 @@ app.get('/api/severity-distribution', async (req, res) => {
     try {
         const BiteCase = mongoose.connection.model('BiteCase', new mongoose.Schema({}, { strict: false }), 'bitecases');
         const cases = await BiteCase.find({});
-        const severityMap = { A: 'Mild', B: 'Moderate', C: 'Severe' };
+        // Support both new (I, II, III) and old (A, B, C) values
+        const severityMap = { I: 'Mild', II: 'Moderate', III: 'Severe', A: 'Mild', B: 'Moderate', C: 'Severe' };
         const counts = { Mild: 0, Moderate: 0, Severe: 0 };
         cases.forEach(c => {
             const sev = severityMap[c.exposureCategory];
@@ -2497,7 +2498,7 @@ app.get('/api/severity-distribution', async (req, res) => {
         });
         res.json({ success: true, data: counts });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Failed to fetch severity distribution', error: error.message });
     }
 });
 
