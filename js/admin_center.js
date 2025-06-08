@@ -56,7 +56,7 @@ window.editCenter = function(id) {
     $('#contactPerson').val(c.contactPerson);
     $('#contactNumber').val(c.contactNumber);
     editId = id;
-    $('#addModalLabel').text('Edit Center');
+    $('#addModalLabel').text('Update Center');
     $('#addModal').modal('show');
 };
 
