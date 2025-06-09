@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.querySelector('.sidebar');
     const signOutBtn = document.getElementById('signOutBtn');
     const profileForm = document.getElementById('profileForm');
-    const loadingOverlay = document.getElementById('loadingOverlay');
     const toast = document.getElementById('toast');
     const passwordToggles = document.querySelectorAll('.toggle-password');
     const mainContent = document.querySelector('.main-content');
@@ -32,76 +31,36 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUserProfile();
 
     // Event Listeners
-    if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-            menuToggle.classList.toggle('active');
-            document.querySelector('.dashboard-container').classList.toggle('menu-collapsed');
-        });
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
-                    sidebar.classList.remove('active');
-                    menuToggle.classList.remove('active');
-                    document.querySelector('.dashboard-container').classList.remove('menu-collapsed');
-                }
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('active');
-                menuToggle.classList.remove('active');
-                document.querySelector('.dashboard-container').classList.remove('menu-collapsed');
-            }
-        });
-    }
+    menuToggle?.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+    });
 
     signOutBtn?.addEventListener('click', handleSignOut);
     profileForm?.addEventListener('submit', handleFormSubmit);
-    
-    passwordToggles?.forEach(toggle => {
-        toggle.addEventListener('click', () => {
-            const input = toggle.previousElementSibling;
-            if (input) {
-                const type = input.type === 'password' ? 'text' : 'password';
-                input.type = type;
-                toggle.classList.toggle('fa-eye');
-                toggle.classList.toggle('fa-eye-slash');
-            }
+
+    // Password toggle functionality
+    passwordToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const input = this.previousElementSibling;
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
         });
     });
 
     // Functions
     async function loadUserProfile() {
         try {
-            showLoading();
             const userId = userData.id;
             console.log('Loading profile for user ID:', userId);
             
-            const apiUrl = `http://localhost:3000/api/profile/${userId}`;
-            console.log('Fetching from URL:', apiUrl);
-            
-            const response = await fetch(apiUrl, {
+            const response = await fetch(`/api/profile/${userId}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'
                 }
             });
-
-            const responseText = await response.text();
-            console.log('Raw response:', responseText);
-
-            let profile;
-            try {
-                profile = JSON.parse(responseText);
-            } catch (e) {
-                console.error('Failed to parse response as JSON:', e);
-                throw new Error('Server response was not in JSON format');
-            }
 
             if (!response.ok) {
                 if (response.status === 401) {
@@ -111,9 +70,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.href = 'login.html';
                     return;
                 }
-                throw new Error(profile.message || 'Failed to fetch profile data');
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to fetch profile data');
             }
 
+            const profile = await response.json();
             console.log('Profile data received:', profile);
             
             // Populate form fields
@@ -130,19 +91,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const fullName = `${profile.firstName || ''} ${profile.middleName ? profile.middleName + ' ' : ''}${profile.lastName || ''}`.trim();
             document.getElementById('userFullName').textContent = fullName || 'User';
             document.getElementById('userRole').textContent = profile.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : 'Admin';
-            
-            hideLoading();
         } catch (error) {
             console.error('Error loading profile:', error);
             showError(error.message || 'Failed to load profile data. Please try again.');
-            hideLoading();
         }
     }
 
     async function handleFormSubmit(e) {
         e.preventDefault();
         try {
-            showLoading();
             const formData = {
                 firstName: document.getElementById('firstName').value,
                 middleName: document.getElementById('middleName').value,
@@ -225,8 +182,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error updating profile:', error);
             showError(error.message || 'Failed to update profile');
-        } finally {
-            hideLoading();
         }
     }
 
@@ -277,62 +232,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 logoutData.superAdminID = currentUser.superAdminID;
             }
 
-            try {
-                await fetch('/api/logout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(logoutData)
-                });
-            } catch (err) {
-                console.warn('Logout API call failed:', err);
-            }
+            await fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(logoutData)
+            });
 
-            // Clear user session
-            localStorage.removeItem('currentUser');
+            // Clear local storage and redirect to login
             localStorage.removeItem('userData');
             localStorage.removeItem('token');
-            
-            // Redirect to login page
-            window.location.replace('login.html');
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
         } catch (error) {
-            console.error('Error during sign out:', error);
-            alert(error.message || 'Error signing out. Please try again.');
-        } finally {
-            const signoutModal = document.getElementById('signoutModal');
-            if (signoutModal) {
-                signoutModal.classList.remove('active');
-            }
-        }
-    });
-
-    // Handle signout cancellation
-    document.getElementById('cancelSignout')?.addEventListener('click', () => {
-        const signoutModal = document.getElementById('signoutModal');
-        if (signoutModal) {
-            signoutModal.classList.remove('active');
-        }
-    });
-
-    // Close modal when clicking outside overlay
-    document.getElementById('signoutModal')?.addEventListener('click', (e) => {
-        if (e.target.classList.contains('signout-modal-overlay')) {
-            e.target.closest('.signout-modal').classList.remove('active');
+            console.error('Error during logout:', error);
+            showError('Failed to sign out');
         }
     });
 
     // Utility Functions
-    function showLoading() {
-        if (loadingOverlay) {
-            loadingOverlay.style.display = 'flex';
-        }
-    }
-
-    function hideLoading() {
-        if (loadingOverlay) {
-            loadingOverlay.style.display = 'none';
-        }
-    }
-
     function showSuccess(message) {
         showToast(message, 'success');
     }

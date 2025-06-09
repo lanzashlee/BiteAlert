@@ -252,7 +252,9 @@ body {
 }
 
 .btn-save:hover {
-    background: #660000;
+    background: #6b0000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(128, 0, 0, 0.2);
 }
 
 /* Loading Overlay */
@@ -288,30 +290,58 @@ body {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    background: white;
-    padding: 1rem 2rem;
+    padding: 1rem 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     display: none;
     align-items: center;
     gap: 0.8rem;
     z-index: 1000;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 .toast.success {
-    border-left: 4px solid #2ecc71;
+    border-left: 4px solid #28a745;
 }
 
 .toast.error {
-    border-left: 4px solid #e74c3c;
+    border-left: 4px solid #dc3545;
 }
 
-.success-icon {
-    color: #2ecc71;
+.toast i {
+    font-size: 1.2rem;
 }
 
-.error-icon {
-    color: #e74c3c;
+.toast.success .success-icon {
+    color: #28a745;
+    display: block;
+}
+
+.toast.error .error-icon {
+    color: #dc3545;
+    display: block;
+}
+
+.toast.success .error-icon,
+.toast.error .success-icon {
+    display: none;
+}
+
+.toast-message {
+    color: #2c3e50;
+    font-weight: 500;
 }
 
 /* Responsive Design */
@@ -330,6 +360,59 @@ body {
 
     .menu-toggle {
         display: block;
+    }
+
+    .profile-container {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-card {
+        padding: 1.5rem;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .profile-avatar {
+        width: 60px;
+        height: 60px;
+    }
+
+    .profile-avatar i {
+        font-size: 2rem;
+    }
+
+    .form-group input {
+        padding: 0.6rem;
+    }
+
+    .btn-save {
+        padding: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .content-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .profile-card {
+        padding: 1rem;
+    }
+
+    .form-group label {
+        font-size: 0.9rem;
+    }
+
+    .form-group input {
+        font-size: 0.9rem;
+    }
+
+    .btn-save {
+        font-size: 0.9rem;
     }
 }
 

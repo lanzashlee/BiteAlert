@@ -67,26 +67,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const userId = userData.id;
             console.log('Loading profile for user ID:', userId);
             
-            const apiUrl = `http://localhost:3000/api/profile/${userId}`;
-            console.log('Fetching from URL:', apiUrl);
-            
-            const response = await fetch(apiUrl, {
+            const response = await fetch(`/api/profile/${userId}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     'Accept': 'application/json'
                 }
             });
-
-            const responseText = await response.text();
-            console.log('Raw response:', responseText);
-
-            let profile;
-            try {
-                profile = JSON.parse(responseText);
-            } catch (e) {
-                console.error('Failed to parse response as JSON:', e);
-                throw new Error('Server response was not in JSON format');
-            }
 
             if (!response.ok) {
                 if (response.status === 401) {
@@ -96,9 +82,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.href = 'login.html';
                     return;
                 }
-                throw new Error(profile.message || 'Failed to fetch profile data');
+                const error = await response.json();
+                throw new Error(error.message || 'Failed to fetch profile data');
             }
 
+            const profile = await response.json();
             console.log('Profile data received:', profile);
             
             // Populate form fields

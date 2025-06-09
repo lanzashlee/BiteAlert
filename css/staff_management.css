@@ -272,13 +272,16 @@ body {
 
 /* Status Badge */
 .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
     padding: 0.4rem 0.8rem;
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
 }
 
 .status-badge::before {
@@ -320,6 +323,7 @@ body {
     color: #fff;
     border: none;
     margin-right: 8px;
+    
     text-align: center;
     justify-content: center;
     white-space: nowrap;
